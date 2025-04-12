@@ -2,7 +2,7 @@
 
 manifest_file_version: 1.0.0
 project: mlbb-sam_e51_cnano
-creation_date: 2025-04-11T22:47:42.326-05:00[America/Chicago]
+creation_date: 2025-04-12T13:53:18.527-05:00[America/Chicago]
 operating_system: Mac OS X
 mcc_mode: IDE
 mcc_mode_version: v6.25
@@ -20,3 +20,4 @@ packs: {name: SAME51_DFP, version: 3.8.253}
 modules:
 - {name: csp, type: HARMONY, version: v3.22.2}
 - {name: CMSIS_5, type: HARMONY, version: 5.9.0}
+- {name: shd, type: HARMONY, version: v1.1.0}
