@@ -88,22 +88,26 @@ void CMD_HAL_Tasks( void )
 
 bool CMD_HAL_IO_RxBufferEmpty(void)
 {
-    return !SERCOM5_USART_ReceiverIsReady();
+    return (SERCOM5_USART_ReadCountGet() == 0);
 }
 
 bool CMD_HAL_IO_TxBufferFull(void)
 {
-    return !SERCOM5_USART_TransmitterIsReady();
+    return (SERCOM5_USART_WriteFreeBufferCountGet() == 0);
 }
 
 uint8_t CMD_HAL_IO_Read(void)
 {
-    return (uint8_t)SERCOM5_USART_ReadByte();
+    uint8_t byte;
+
+    (void)SERCOM5_USART_Read( &byte, 1 );
+
+    return byte;
 }
 
 void CMD_HAL_IO_Write(uint8_t txData)
 {
-    SERCOM5_USART_WriteByte((int)txData);
+    (void)SERCOM5_USART_Write( &txData, 1 );
 }
 
 
