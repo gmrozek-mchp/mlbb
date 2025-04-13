@@ -27,6 +27,8 @@
 #include <stdlib.h>                     // Defines EXIT_FAILURE
 #include "definitions.h"                // SYS function prototypes
 
+#include "command/command.h"
+
 
 // *****************************************************************************
 // *****************************************************************************
@@ -39,10 +41,14 @@ int main ( void )
     /* Initialize all modules */
     SYS_Initialize ( NULL );
 
+    CMD_Initialize();
+
     while ( true )
     {
         /* Maintain state machines of all polled MPLAB Harmony modules. */
         SYS_Tasks ( );
+
+        CMD_Task();
     }
 
     /* Execution should not come here during normal operation */
