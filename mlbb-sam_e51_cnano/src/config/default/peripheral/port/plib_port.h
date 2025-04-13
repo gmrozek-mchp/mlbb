@@ -83,6 +83,14 @@
 #define BUTTON_Get()               (((PORT_REGS->GROUP[0].PORT_IN >> 15U)) & 0x01U)
 #define BUTTON_PIN                  PORT_PIN_PA15
 
+/*** Macros for VIRTUAL_COM_TX pin ***/
+#define VIRTUAL_COM_TX_Get()               (((PORT_REGS->GROUP[1].PORT_IN >> 16U)) & 0x01U)
+#define VIRTUAL_COM_TX_PIN                  PORT_PIN_PB16
+
+/*** Macros for VIRTUAL_COM_RX pin ***/
+#define VIRTUAL_COM_RX_Get()               (((PORT_REGS->GROUP[1].PORT_IN >> 17U)) & 0x01U)
+#define VIRTUAL_COM_RX_PIN                  PORT_PIN_PB17
+
 // *****************************************************************************
 /* PORT Group
 
