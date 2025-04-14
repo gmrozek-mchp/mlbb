@@ -306,6 +306,9 @@
           <itemPath>../../extern/FreeRTOS-Kernel/croutine.c</itemPath>
         </logicalFolder>
       </logicalFolder>
+      <logicalFolder name="f2" displayName="freertos" projectFiles="true">
+        <itemPath>../src/freertos/freertos_hooks.c</itemPath>
+      </logicalFolder>
       <itemPath>../src/config/default/pin_configurations.csv</itemPath>
       <itemPath>../src/main.c</itemPath>
     </logicalFolder>
