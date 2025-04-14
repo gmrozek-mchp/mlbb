@@ -48,7 +48,7 @@
 
 #include "command.h"
 
-//#include "system/reset/sys_reset.h"
+#include "system/reset/sys_reset.h"
 
 
 // ******************************************************************
@@ -86,5 +86,5 @@ const uint8_t cmd_command_list_size = (sizeof(cmd_command_list) / sizeof(cmd_com
 
 void ForceReset( void )
 {
-//    SYS_RESET_SoftwareReset();
+    SYS_RESET_SoftwareReset();
 }
