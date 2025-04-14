@@ -27,6 +27,9 @@
 #include <stdlib.h>                     // Defines EXIT_FAILURE
 #include "definitions.h"                // SYS function prototypes
 
+#include "FreeRTOS.h"
+#include "task.h"
+
 #include "command/command.h"
 
 
@@ -43,13 +46,7 @@ int main ( void )
 
     CMD_Initialize();
 
-    while ( true )
-    {
-        /* Maintain state machines of all polled MPLAB Harmony modules. */
-        SYS_Tasks ( );
-
-        CMD_Task();
-    }
+    vTaskStartScheduler();
 
     /* Execution should not come here during normal operation */
 

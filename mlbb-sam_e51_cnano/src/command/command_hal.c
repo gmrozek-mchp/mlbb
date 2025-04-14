@@ -41,16 +41,23 @@
 // Section: Included Files
 // ******************************************************************
 
-#include "peripheral/sercom/usart/plib_sercom5_usart.h"
-//#include "peripheral/tc/plib_tc0.h"
+#include "FreeRTOS.h"
+#include "task.h"
 
+#include "peripheral/sercom/usart/plib_sercom5_usart.h"
+
+#include "command.h"
 #include "command_hal.h"
 
 
 // ******************************************************************
 // Section: Macro Declarations
 // ******************************************************************
-#define CMD_HAL_TIMER_RESOLUTION_mS   1
+#define CMD_HAL_TIMER_RESOLUTION_mS   portTICK_PERIOD_MS
+
+#define CMD_HAL_RTOS_PRIORITY       1
+#define CMD_HAL_RTOS_STACK_SIZE     200
+
 
 // ******************************************************************
 // Section: Data Type Definitions
@@ -60,15 +67,15 @@
 // ******************************************************************
 // Section: Private Variables
 // ******************************************************************
-//static uint16_t timerPeriod_mS = 0;
-//static uint16_t remainingTime_mS = 0;
-//static bool timerExpired = false;
+static TaskHandle_t cmdTaskHandle = NULL;
+static StaticTask_t cmdTaskBuffer;
+static StackType_t cmdTaskStack[ CMD_HAL_RTOS_STACK_SIZE ];
 
 
 // ******************************************************************
 // Section: Private Function Declarations
 // ******************************************************************
-//static void CMD_HAL_TIMER_InterruptHandler(TC_TIMER_STATUS status, uintptr_t context);
+static void CMD_HAL_RTOS_Task( void * pvParameters );
 
 
 // ******************************************************************
@@ -77,8 +84,15 @@
 
 void CMD_HAL_Initialize( void )
 {
-//    TC0_TimerStop();
-//    TC0_TimerCallbackRegister( CMD_HAL_TIMER_InterruptHandler, (uintptr_t)NULL );
+    cmdTaskHandle = xTaskCreateStatic(
+        CMD_HAL_RTOS_Task,        /* Function that implements the task. */
+        "Command",                /* Text name for the task. */
+        CMD_HAL_RTOS_STACK_SIZE,  /* Number of indexes in the stack. */
+        NULL,                     /* Parameter passed into the task. */
+        CMD_HAL_RTOS_PRIORITY,    /* Priority at which the task is created. */
+        cmdTaskStack,             /* Array to use as the task's stack. */
+        &cmdTaskBuffer            /* Variable to hold the task's data structure. */
+    );
 }
 
 void CMD_HAL_Tasks( void )
@@ -111,49 +125,33 @@ void CMD_HAL_IO_Write(uint8_t txData)
 }
 
 
-//void CMD_HAL_TIMER_Start( uint16_t period_ms )
-//{
-//    timerPeriod_mS = period_ms;
-//    remainingTime_mS = period_ms;
-//    timerExpired = false;
-//    TC0_Timer16bitCounterSet(0);
-//    TC0_TimerStart();
-//}
-//
-//void CMD_HAL_TIMER_Stop( void )
-//{
-//    TC0_TimerStop();
-//}
-//
-//bool CMD_HAL_TIMER_IsTimerExpired( void )
-//{
-//    bool returnValue = timerExpired;
-//    
-//    if( returnValue )
-//    {
-//        timerExpired = false;
-//    }
-//    
-//    return returnValue;
-//}
+void CMD_HAL_TIMER_Start( uint16_t period_ms )
+{
+}
+
+void CMD_HAL_TIMER_Stop( void )
+{
+}
+
+bool CMD_HAL_TIMER_IsTimerExpired( void )
+{
+    return false;
+}
 
 
 // ******************************************************************
 // Section: Private Functions
 // ******************************************************************
 
-//static void CMD_HAL_TIMER_InterruptHandler(TC_TIMER_STATUS status, uintptr_t context)
-//{
-//    if( remainingTime_mS >= CMD_HAL_TIMER_RESOLUTION_mS )
-//    {
-//        remainingTime_mS -= CMD_HAL_TIMER_RESOLUTION_mS;
-//    }
-//    else
-//    {
-//        remainingTime_mS += timerPeriod_mS;
-//        timerExpired = true;
-//    }
-//}
+static void CMD_HAL_RTOS_Task( void * pvParameters )
+{
+    (void)pvParameters;
+    
+    while(1)
+    {
+        CMD_Task();
+    }
+}
 
 
 /**

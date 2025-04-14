@@ -16,6 +16,19 @@
 #include "task.h"
 
 
+static StaticTask_t xIdleTaskTCB;
+static StackType_t uxIdleTaskStack[ configMINIMAL_STACK_SIZE ];
+
+void vApplicationGetIdleTaskMemory( StaticTask_t ** ppxIdleTaskTCBBuffer,
+                                    StackType_t ** ppxIdleTaskStackBuffer,
+                                    configSTACK_DEPTH_TYPE * puxIdleTaskStackSize )
+{
+    *ppxIdleTaskTCBBuffer = &xIdleTaskTCB;
+    *ppxIdleTaskStackBuffer = uxIdleTaskStack;
+    *puxIdleTaskStackSize = configMINIMAL_STACK_SIZE;
+}
+
+
 void vApplicationStackOverflowHook( TaskHandle_t xTask, char *pcTaskName )
 {
    ( void ) pcTaskName;
