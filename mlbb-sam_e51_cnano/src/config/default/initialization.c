@@ -140,6 +140,8 @@ void SYS_Initialize ( void* data )
 
 
     BSP_Initialize();
+    SERCOM0_USART_Initialize();
+
     EVSYS_Initialize();
 
     SERCOM5_USART_Initialize();
