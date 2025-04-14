@@ -66,7 +66,7 @@
   Comments:
     CMD_BUFFER_SIZE cannot exceed 256.
 */
-#define CMD_BUFFER_SIZE  64
+#define CMD_BUFFER_SIZE  256
 
 
 /**
