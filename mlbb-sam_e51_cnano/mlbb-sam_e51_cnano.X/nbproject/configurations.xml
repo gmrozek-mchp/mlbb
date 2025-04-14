@@ -4,6 +4,9 @@
     <logicalFolder name="HeaderFiles"
                    displayName="Header Files"
                    projectFiles="true">
+      <logicalFolder name="f3" displayName="ball" projectFiles="true">
+        <itemPath>../src/ball/ar1100.h</itemPath>
+      </logicalFolder>
       <logicalFolder name="command" displayName="command" projectFiles="true">
         <itemPath>../src/command/command_hal.h</itemPath>
         <itemPath>../src/command/command_config.h</itemPath>
@@ -239,6 +242,10 @@
     <logicalFolder name="SourceFiles"
                    displayName="Source Files"
                    projectFiles="true">
+      <logicalFolder name="f3" displayName="ball" projectFiles="true">
+        <itemPath>../src/ball/ar1100.c</itemPath>
+        <itemPath>../src/ball/ar1100_cmd.c</itemPath>
+      </logicalFolder>
       <logicalFolder name="command" displayName="command" projectFiles="true">
         <itemPath>../src/command/command.c</itemPath>
         <itemPath>../src/command/command_hal.c</itemPath>
@@ -319,6 +326,7 @@
     <Elem>../src/command</Elem>
     <Elem>../../extern/FreeRTOS-Kernel</Elem>
     <Elem>../src/freertos</Elem>
+    <Elem>../src/ball</Elem>
   </sourceRootList>
   <projectmakefile>Makefile</projectmakefile>
   <confs>

@@ -12,6 +12,7 @@
                 <sourceRootElem>../src/command</sourceRootElem>
                 <sourceRootElem>../../extern/FreeRTOS-Kernel</sourceRootElem>
                 <sourceRootElem>../src/freertos</sourceRootElem>
+                <sourceRootElem>../src/ball</sourceRootElem>
             </sourceRootList>
             <confList>
                 <confElem>

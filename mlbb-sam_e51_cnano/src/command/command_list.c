@@ -49,7 +49,10 @@
 #include "command.h"
 
 #include "system/reset/sys_reset.h"
+
 #include "bsp/bsp.h"
+
+#include "ball/ar1100.h"
 
 
 // ******************************************************************
@@ -67,13 +70,19 @@ void SetLED(void);
 static const cmd_descriptor_t reset_command = 
 { 
     "reset",
-    ForceReset,
+    ForceReset
 };
 
 static const cmd_descriptor_t led_command = 
 { 
     "led",
-    SetLED,
+    SetLED
+};
+
+static const cmd_descriptor_t touch_command = 
+{ 
+    "touch",
+    AR1100_CMD_Print_TouchData
 };
 
 
@@ -83,8 +92,9 @@ static const cmd_descriptor_t led_command =
 
 const cmd_descriptor_t* const cmd_command_list[] =
 {
+    &touch_command,
     &led_command,
-    &reset_command,
+    &reset_command,    
 };
 const uint8_t cmd_command_list_size = (sizeof(cmd_command_list) / sizeof(cmd_command_list[0]));
 
