@@ -49,6 +49,7 @@
 #include "command.h"
 
 #include "system/reset/sys_reset.h"
+#include "bsp/bsp.h"
 
 
 // ******************************************************************
@@ -56,6 +57,7 @@
 // ******************************************************************
 
 void ForceReset(void);
+void SetLED(void);
 
 
 // ******************************************************************
@@ -68,6 +70,12 @@ static const cmd_descriptor_t reset_command =
     ForceReset,
 };
 
+static const cmd_descriptor_t led_command = 
+{ 
+    "led",
+    SetLED,
+};
+
 
 // ******************************************************************
 // COMMAND LIST
@@ -75,6 +83,7 @@ static const cmd_descriptor_t reset_command =
 
 const cmd_descriptor_t* const cmd_command_list[] =
 {
+    &led_command,
     &reset_command,
 };
 const uint8_t cmd_command_list_size = (sizeof(cmd_command_list) / sizeof(cmd_command_list[0]));
@@ -83,6 +92,24 @@ const uint8_t cmd_command_list_size = (sizeof(cmd_command_list) / sizeof(cmd_com
 // ******************************************************************
 // COMMAND FUNCTION DEFINITIONS
 // ******************************************************************
+
+void SetLED( void )
+{
+    if( CMD_GetArgc() >= 2 )
+    {
+        char state;
+        CMD_GetArgv( 1, &state, 1);
+        
+        if( state == '0' )
+        {
+            BSP_LED_Off();
+        }
+        else
+        {
+            BSP_LED_On();
+        }
+    }
+}
 
 void ForceReset( void )
 {
