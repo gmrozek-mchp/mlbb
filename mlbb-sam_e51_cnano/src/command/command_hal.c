@@ -43,6 +43,7 @@
 
 #include "FreeRTOS.h"
 #include "task.h"
+#include "timers.h"
 
 #include "peripheral/sercom/usart/plib_sercom5_usart.h"
 
@@ -71,11 +72,16 @@ static TaskHandle_t cmdTaskHandle = NULL;
 static StaticTask_t cmdTaskBuffer;
 static StackType_t cmdTaskStack[ CMD_HAL_RTOS_STACK_SIZE ];
 
+static TimerHandle_t cmdTimerHandle = NULL;
+static StaticTimer_t cmdTimerBuffer;
+static bool cmdTimerExpired = false;
+
 
 // ******************************************************************
 // Section: Private Function Declarations
 // ******************************************************************
 static void CMD_HAL_RTOS_Task( void * pvParameters );
+static void CMD_HAL_TIMER_Callback( TimerHandle_t xTimer );
 
 
 // ******************************************************************
@@ -92,6 +98,15 @@ void CMD_HAL_Initialize( void )
         CMD_HAL_RTOS_PRIORITY,    /* Priority at which the task is created. */
         cmdTaskStack,             /* Array to use as the task's stack. */
         &cmdTaskBuffer            /* Variable to hold the task's data structure. */
+    );
+
+    cmdTimerHandle = xTimerCreateStatic(
+        "Command",
+        pdMS_TO_TICKS(1000),
+        pdTRUE,
+        NULL,
+        CMD_HAL_TIMER_Callback,
+        &cmdTimerBuffer
     );
 }
 
@@ -127,15 +142,22 @@ void CMD_HAL_IO_Write(uint8_t txData)
 
 void CMD_HAL_TIMER_Start( uint16_t period_ms )
 {
+    (void)xTimerChangePeriod( cmdTimerHandle, pdMS_TO_TICKS(period_ms), portMAX_DELAY );
+    (void)xTimerStart( cmdTimerHandle, portMAX_DELAY );
 }
 
 void CMD_HAL_TIMER_Stop( void )
 {
+    (void)xTimerStop( cmdTimerHandle, portMAX_DELAY );
 }
 
 bool CMD_HAL_TIMER_IsTimerExpired( void )
 {
-    return false;
+    bool expired = cmdTimerExpired;
+
+    cmdTimerExpired = false;
+    
+    return expired;
 }
 
 
@@ -150,9 +172,17 @@ static void CMD_HAL_RTOS_Task( void * pvParameters )
     while(1)
     {
         CMD_Task();
+        
+        vTaskDelay(10);
     }
 }
 
+static void CMD_HAL_TIMER_Callback( TimerHandle_t xTimer )
+{
+    (void)xTimer;
+    
+    cmdTimerExpired = true;
+}
 
 /**
   End of File

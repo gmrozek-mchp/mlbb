@@ -48,7 +48,7 @@
 #define CMD_ENABLE_ARGS                 1
 #define CMD_ENABLE_HELP                 1
 #define CMD_ENABLE_HISTORY              1
-#define CMD_ENABLE_STREAM               0
+#define CMD_ENABLE_STREAM               1
 #define CMD_ENABLE_PASSWORD             0
 
 
