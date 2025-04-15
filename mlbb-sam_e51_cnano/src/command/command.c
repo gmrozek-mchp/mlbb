@@ -293,6 +293,7 @@ void CMD_PrintHex_U8( uint8_t value, bool block )
 	
 	char hexString[3];
 	char* ptrChar = hexString + sizeof(hexString) - 1;
+    *ptrChar = '\0';
 	
 	*ptrChar = CMD_NULL_CHAR;
 	while( ptrChar > hexString )
@@ -316,6 +317,7 @@ void CMD_PrintHex_U16( uint16_t value, bool block )
 	
 	char hexString[5];
 	char* ptrChar = hexString + sizeof(hexString) - 1;
+    *ptrChar = '\0';
 	
 	*ptrChar = CMD_NULL_CHAR;
 	while( ptrChar > hexString )
@@ -339,6 +341,7 @@ void CMD_PrintHex_U32( uint32_t value, bool block )
     
 	char hexString[9];
 	char* ptrChar = hexString + sizeof(hexString) - 1;
+    *ptrChar = '\0';
 	
 	*ptrChar = CMD_NULL_CHAR;
 	while( ptrChar > hexString )
@@ -362,7 +365,8 @@ void CMD_PrintDecimal_U32( uint32_t value, bool zero_blank, uint8_t width, bool 
 
 	char decimalString[12];
 	char* ptrChar = decimalString + sizeof(decimalString) - 1;
-
+    *ptrChar = '\0';
+    
 	if( (value == 0) && (ptrChar > decimalString) )
 	{
 		ptrChar--;
