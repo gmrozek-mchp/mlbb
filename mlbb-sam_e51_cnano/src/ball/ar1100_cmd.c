@@ -18,10 +18,10 @@ void AR1100_CMD_Print_TouchData( void )
     
     CMD_PrintString( " T: ", true );
     CMD_PrintDecimal_U32( (uint32_t)touch_data.down, 0, 0, true );
-    CMD_PrintString( "X: ", true );
-    CMD_PrintDecimal_U32( touch_data.x, 0, 0, true );
-    CMD_PrintString( " Y: ", true );
-    CMD_PrintDecimal_U32( touch_data.y, 0, 0, true );
+    CMD_PrintString( "X: 0x", true );
+    CMD_PrintHex_U16( touch_data.x, true );
+    CMD_PrintString( " Y: 0x", true );
+    CMD_PrintHex_U16( touch_data.y, true );
     CMD_PrintString( "\r\n", true );
 }
 
