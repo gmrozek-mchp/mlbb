@@ -12,14 +12,15 @@ typedef struct {
     uint16_t y;
 } ar1100_touchdata_t;
 
+typedef void (*ar1100_touch_callback_t)( ar1100_touchdata_t touchData );
+
 
 void AR1100_Initialize( void );
 
+void AR1100_TouchCallback_Register( ar1100_touch_callback_t callback );
+
 ar1100_touchdata_t AR1100_TouchData_Get( void );
 
-bool AR1100_Touch_Down_Get( void );
-uint16_t AR1100_Touch_X_Get( void );
-uint16_t AR1100_Touch_Y_Get( void );
 
 // **************************************************************
 //  TOUCH Command portal functions
