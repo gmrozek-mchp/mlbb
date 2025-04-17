@@ -381,11 +381,21 @@ void CMD_PrintDecimal_U32( uint32_t value, bool zero_blank, uint8_t width, bool 
 	while( ((value > 0) || (width > 0)) && (ptrChar > decimalString) )
 	{
 		ptrChar--;
-		*ptrChar = '0' + (value % 10);
-		if( (*ptrChar == '0') && zero_blank )
+		if( value == 0 )
 		{
-			*ptrChar = ' ';
+            if( zero_blank )
+            {
+    			*ptrChar = ' ';
+            }
+            else
+            {
+    			*ptrChar = '0';
+            }
 		}
+        else
+        {
+    		*ptrChar = '0' + (value % 10);
+        }
 		
 		if( value >= 10 )
 		{
