@@ -23,8 +23,8 @@ Pin Number,Pin ID,Custom Name,Function,Mode, Direction,Latch,Pull Up,Pull Down,D
 26,PB13,,Available,,,,,,NORMAL
 27,PB14,,Available,,,,,,NORMAL
 28,PB15,,Available,,,,,,NORMAL
-29,PA12,,Available,,,,,,NORMAL
-30,PA13,,Available,,,,,,NORMAL
+29,PA12,MIKROBUS1_I2C_SDA,SERCOM2_PAD0,Digital,High Impedance,n/a,No,No,NORMAL
+30,PA13,MIKROBUS1_I2C_SCL,SERCOM2_PAD1,Digital,High Impedance,n/a,No,No,NORMAL
 31,PA14,LED,GPIO,Digital,Out,High,,,NORMAL
 32,PA15,BUTTON,GPIO,Digital,In,n/a,Yes,No,NORMAL
 35,PA16,,Available,,,,,,NORMAL

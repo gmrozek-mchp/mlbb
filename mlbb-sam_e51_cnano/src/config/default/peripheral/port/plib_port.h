@@ -85,6 +85,14 @@
 #define MIKROBUS2_PWM_Get()               (((PORT_REGS->GROUP[0].PORT_IN >> 11U)) & 0x01U)
 #define MIKROBUS2_PWM_PIN                  PORT_PIN_PA11
 
+/*** Macros for MIKROBUS1_I2C_SDA pin ***/
+#define MIKROBUS1_I2C_SDA_Get()               (((PORT_REGS->GROUP[0].PORT_IN >> 12U)) & 0x01U)
+#define MIKROBUS1_I2C_SDA_PIN                  PORT_PIN_PA12
+
+/*** Macros for MIKROBUS1_I2C_SCL pin ***/
+#define MIKROBUS1_I2C_SCL_Get()               (((PORT_REGS->GROUP[0].PORT_IN >> 13U)) & 0x01U)
+#define MIKROBUS1_I2C_SCL_PIN                  PORT_PIN_PA13
+
 /*** Macros for LED pin ***/
 #define LED_Set()               (PORT_REGS->GROUP[0].PORT_OUTSET = ((uint32_t)1U << 14U))
 #define LED_Clear()             (PORT_REGS->GROUP[0].PORT_OUTCLR = ((uint32_t)1U << 14U))
