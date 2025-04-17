@@ -26,7 +26,7 @@ nunchuk_data_t NUNCHUK_Data_Get( void );
 // **************************************************************
 //  TOUCH Command portal functions
 // **************************************************************
-void NUNCHUK_CMD_Print_TouchData( void );
+void NUNCHUK_CMD_Print_Data( void );
 
 
 #endif	/* NUNCHUK_H */

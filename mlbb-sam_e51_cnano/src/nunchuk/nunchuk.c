@@ -60,7 +60,7 @@ void NUNCHUK_DataCallback_Register( nunchuk_data_callback_t callback )
 }
 
 
-nunchuk_data_t NUNCHUK_TouchData_Get( void )
+nunchuk_data_t NUNCHUK_Data_Get( void )
 {
     return nunchuk_data[nunchuk_data_readIndex];
 }

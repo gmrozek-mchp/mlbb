@@ -53,6 +53,7 @@
 #include "bsp/bsp.h"
 
 #include "ball/ar1100.h"
+#include "nunchuk/nunchuk.h"
 
 
 // ******************************************************************
@@ -85,6 +86,12 @@ static const cmd_descriptor_t touch_command =
     AR1100_CMD_Print_TouchData
 };
 
+static const cmd_descriptor_t nunchuk_command = 
+{ 
+    "nunchuk",
+    NUNCHUK_CMD_Print_Data
+};
+
 
 // ******************************************************************
 // COMMAND LIST
@@ -93,6 +100,7 @@ static const cmd_descriptor_t touch_command =
 const cmd_descriptor_t* const cmd_command_list[] =
 {
     &touch_command,
+    &nunchuk_command,
     &led_command,
     &reset_command,    
 };
