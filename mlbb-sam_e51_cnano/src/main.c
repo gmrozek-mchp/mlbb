@@ -33,6 +33,7 @@
 #include "command/command.h"
 
 #include "ball/ar1100.h"
+#include "nunchuk/nunchuk.h"
 
 
 // *****************************************************************************
@@ -49,6 +50,7 @@ int main ( void )
     CMD_Initialize();
 
     AR1100_Initialize();
+    NUNCHUK_Initialize();
     
     vTaskStartScheduler();
 
