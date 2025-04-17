@@ -140,11 +140,13 @@ void SYS_Initialize ( void* data )
 
 
     BSP_Initialize();
-    SERCOM0_USART_Initialize();
-
     EVSYS_Initialize();
 
+    SERCOM0_USART_Initialize();
+
     SERCOM5_USART_Initialize();
+
+    TC1_TimerInitialize();
 
 
     NVIC_Initialize();

@@ -15,7 +15,7 @@ Pin Number,Pin ID,Custom Name,Function,Mode, Direction,Latch,Pull Up,Pull Down,D
 16,PA07,,Available,,,,,,NORMAL
 17,PA08,EXT1_USART_TX,SERCOM0_PAD0,Digital,High Impedance,n/a,No,No,NORMAL
 18,PA09,EXT1_USART_RX,SERCOM0_PAD1,Digital,High Impedance,n/a,No,No,NORMAL
-19,PA10,,Available,,,,,,NORMAL
+19,PA10,MIKROBUS1_PWM,TC1_WO0,Digital,High Impedance,n/a,No,No,NORMAL
 20,PA11,,Available,,,,,,NORMAL
 23,PB10,,Available,,,,,,NORMAL
 24,PB11,,Available,,,,,,NORMAL
