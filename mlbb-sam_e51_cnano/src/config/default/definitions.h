@@ -59,6 +59,7 @@
 #include "peripheral/sercom/usart/plib_sercom5_usart.h"
 #include "peripheral/tc/plib_tc1.h"
 #include "system/reset/sys_reset.h"
+#include "peripheral/tc/plib_tc4.h"
 
 // DOM-IGNORE-BEGIN
 #ifdef __cplusplus  // Provide C++ Compatibility

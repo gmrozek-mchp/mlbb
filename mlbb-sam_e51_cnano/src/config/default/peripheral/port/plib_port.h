@@ -65,6 +65,10 @@
 // *****************************************************************************
 // *****************************************************************************
 
+/*** Macros for MIKROBUS3_PWM pin ***/
+#define MIKROBUS3_PWM_Get()               (((PORT_REGS->GROUP[1].PORT_IN >> 9U)) & 0x01U)
+#define MIKROBUS3_PWM_PIN                  PORT_PIN_PB09
+
 /*** Macros for EXT1_USART_TX pin ***/
 #define EXT1_USART_TX_Get()               (((PORT_REGS->GROUP[0].PORT_IN >> 8U)) & 0x01U)
 #define EXT1_USART_TX_PIN                  PORT_PIN_PA08

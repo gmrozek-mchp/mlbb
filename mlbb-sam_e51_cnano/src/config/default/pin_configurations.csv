@@ -8,7 +8,7 @@ Pin Number,Pin ID,Custom Name,Function,Mode, Direction,Latch,Pull Up,Pull Down,D
 9,PB06,,Available,,,,,,NORMAL
 10,PB07,,Available,,,,,,NORMAL
 11,PB08,,Available,,,,,,NORMAL
-12,PB09,,Available,,,,,,NORMAL
+12,PB09,MIKROBUS3_PWM,TC4_WO1,Digital,High Impedance,n/a,No,No,NORMAL
 13,PA04,,Available,,,,,,NORMAL
 14,PA05,,Available,,,,,,NORMAL
 15,PA06,,Available,,,,,,NORMAL
