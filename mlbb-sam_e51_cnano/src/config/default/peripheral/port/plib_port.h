@@ -77,6 +77,10 @@
 #define MIKROBUS1_PWM_Get()               (((PORT_REGS->GROUP[0].PORT_IN >> 10U)) & 0x01U)
 #define MIKROBUS1_PWM_PIN                  PORT_PIN_PA10
 
+/*** Macros for MIKROBUS2_PWM pin ***/
+#define MIKROBUS2_PWM_Get()               (((PORT_REGS->GROUP[0].PORT_IN >> 11U)) & 0x01U)
+#define MIKROBUS2_PWM_PIN                  PORT_PIN_PA11
+
 /*** Macros for LED pin ***/
 #define LED_Set()               (PORT_REGS->GROUP[0].PORT_OUTSET = ((uint32_t)1U << 14U))
 #define LED_Clear()             (PORT_REGS->GROUP[0].PORT_OUTCLR = ((uint32_t)1U << 14U))
