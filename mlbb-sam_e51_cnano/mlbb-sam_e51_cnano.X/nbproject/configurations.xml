@@ -103,6 +103,9 @@
       <logicalFolder name="f2" displayName="freertos" projectFiles="true">
         <itemPath>../src/freertos/FreeRTOSConfig.h</itemPath>
       </logicalFolder>
+      <logicalFolder name="f4" displayName="nunchuk" projectFiles="true">
+        <itemPath>../src/nunchuk/nunchuk.h</itemPath>
+      </logicalFolder>
       <logicalFolder name="packs" displayName="packs" projectFiles="true">
         <logicalFolder name="ATSAME51J20A_DFP"
                        displayName="ATSAME51J20A_DFP"
@@ -334,6 +337,10 @@
       <logicalFolder name="f2" displayName="freertos" projectFiles="true">
         <itemPath>../src/freertos/freertos_hooks.c</itemPath>
       </logicalFolder>
+      <logicalFolder name="f4" displayName="nunchuk" projectFiles="true">
+        <itemPath>../src/nunchuk/nunchuk.c</itemPath>
+        <itemPath>../src/nunchuk/nunchuk_cmd.c</itemPath>
+      </logicalFolder>
       <itemPath>../src/config/default/pin_configurations.csv</itemPath>
       <itemPath>../src/main.c</itemPath>
     </logicalFolder>
@@ -343,6 +350,7 @@
     <Elem>../../extern/FreeRTOS-Kernel</Elem>
     <Elem>../src/freertos</Elem>
     <Elem>../src/ball</Elem>
+    <Elem>../src/nunchuk</Elem>
   </sourceRootList>
   <projectmakefile>Makefile</projectmakefile>
   <confs>

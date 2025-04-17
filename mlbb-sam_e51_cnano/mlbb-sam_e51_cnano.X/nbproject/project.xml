@@ -13,6 +13,7 @@
                 <sourceRootElem>../../extern/FreeRTOS-Kernel</sourceRootElem>
                 <sourceRootElem>../src/freertos</sourceRootElem>
                 <sourceRootElem>../src/ball</sourceRootElem>
+                <sourceRootElem>../src/nunchuk</sourceRootElem>
             </sourceRootList>
             <confList>
                 <confElem>
