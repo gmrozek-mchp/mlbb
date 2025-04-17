@@ -50,7 +50,7 @@ int main ( void )
     CMD_Initialize();
 
     AR1100_Initialize();
-    NUNCHUK_Initialize();
+//    NUNCHUK_Initialize();
     
     vTaskStartScheduler();
 

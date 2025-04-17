@@ -14,6 +14,14 @@
 
 void NUNCHUK_CMD_Print_Data( void )
 {
+    static bool initialized = false;
+    
+    if( !initialized )
+    {
+        NUNCHUK_Initialize();
+        initialized = true;
+    }
+
     nunchuk_data_t data = NUNCHUK_Data_Get();
     
     CMD_PrintString( "C: ", true );
