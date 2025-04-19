@@ -14,6 +14,8 @@
                 <sourceRootElem>../src/freertos</sourceRootElem>
                 <sourceRootElem>../src/ball</sourceRootElem>
                 <sourceRootElem>../src/nunchuk</sourceRootElem>
+                <sourceRootElem>../../extern/CMSIS-DSP/Include</sourceRootElem>
+                <sourceRootElem>../../extern/CMSIS-DSP/Source</sourceRootElem>
             </sourceRootList>
             <confList>
                 <confElem>
