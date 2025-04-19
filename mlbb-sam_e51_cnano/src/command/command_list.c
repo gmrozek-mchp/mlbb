@@ -54,6 +54,7 @@
 
 #include "ball/ar1100.h"
 #include "nunchuk/nunchuk.h"
+#include "platform/platform.h"
 
 
 // ******************************************************************
@@ -92,6 +93,18 @@ static const cmd_descriptor_t nunchuk_command =
     NUNCHUK_CMD_Print_Data
 };
 
+static const cmd_descriptor_t position_xy_command = 
+{ 
+    "xy",
+    PLATFORM_CMD_Position_XY
+};
+
+static const cmd_descriptor_t position_abc_command = 
+{ 
+    "abc",
+    PLATFORM_CMD_Position_ABC
+};
+
 
 // ******************************************************************
 // COMMAND LIST
@@ -101,6 +114,8 @@ const cmd_descriptor_t* const cmd_command_list[] =
 {
     &touch_command,
     &nunchuk_command,
+    &position_xy_command,
+    &position_abc_command,
     &led_command,
     &reset_command,    
 };
