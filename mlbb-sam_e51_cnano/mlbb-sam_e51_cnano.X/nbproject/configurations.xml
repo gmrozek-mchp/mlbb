@@ -484,6 +484,7 @@
       <C32>
         <property key="additional-warnings" value="true"/>
         <property key="addresss-attribute-use" value="false"/>
+        <property key="appendMe" value=""/>
         <property key="cast-align" value="false"/>
         <property key="code-model" value="default"/>
         <property key="const-model" value="default"/>
@@ -498,7 +499,7 @@
         <property key="exclude-floating-point" value="false"/>
         <property key="expand-pragma-config" value="false"/>
         <property key="extra-include-directories"
-                  value="../../extern/FreeRTOS-Kernel/include;../../extern/FreeRTOS-Kernel/portable/GCC/ARM_CM4F;../src;../src/config/default;../src/freertos;../src/packs/ATSAME51J20A_DFP;../src/packs/CMSIS/;../src/packs/CMSIS/CMSIS/Core/Include;../../extern/CMSIS-DSP/Include;../../extern/CMSIS-DSP/PrivateInclude"/>
+                  value="../../extern/CMSIS-DSP/Include;../../extern/CMSIS-DSP/PrivateInclude;../../extern/FreeRTOS-Kernel/include;../../extern/FreeRTOS-Kernel/portable/GCC/ARM_CM4F;../src;../src/config/default;../src/freertos;../src/packs/ATSAME51J20A_DFP;../src/packs/CMSIS/;../src/packs/CMSIS/CMSIS/Core/Include"/>
         <property key="generate-16-bit-code" value="false"/>
         <property key="generate-micro-compressed-code" value="false"/>
         <property key="isolate-each-function" value="true"/>
@@ -562,6 +563,7 @@
         <property key="additional-options-use-response-files" value="false"/>
         <property key="additional-options-write-sla" value="false"/>
         <property key="allocate-dinit" value="false"/>
+        <property key="appendMe" value=""/>
         <property key="code-dinit" value="false"/>
         <property key="ebase-addr" value=""/>
         <property key="enable-check-sections" value="false"/>
@@ -607,6 +609,7 @@
       <C32CPP>
         <property key="additional-warnings" value="false"/>
         <property key="addresss-attribute-use" value="false"/>
+        <property key="appendMe" value=""/>
         <property key="check-new" value="false"/>
         <property key="eh-specs" value="true"/>
         <property key="enable-app-io" value="false"/>
@@ -635,6 +638,7 @@
         <property key="use-indirect-calls" value="false"/>
       </C32CPP>
       <C32Global>
+        <property key="appendMe" value=""/>
         <property key="combine-sourcefiles" value="false"/>
         <property key="common-include-directories" value=""/>
         <property key="common-macros" value=""/>

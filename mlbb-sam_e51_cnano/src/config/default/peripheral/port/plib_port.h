@@ -65,6 +65,24 @@
 // *****************************************************************************
 // *****************************************************************************
 
+/*** Macros for MIKROBUS1_DIR pin ***/
+#define MIKROBUS1_DIR_Set()               (PORT_REGS->GROUP[0].PORT_OUTSET = ((uint32_t)1U << 2U))
+#define MIKROBUS1_DIR_Clear()             (PORT_REGS->GROUP[0].PORT_OUTCLR = ((uint32_t)1U << 2U))
+#define MIKROBUS1_DIR_Toggle()            (PORT_REGS->GROUP[0].PORT_OUTTGL = ((uint32_t)1U << 2U))
+#define MIKROBUS1_DIR_OutputEnable()      (PORT_REGS->GROUP[0].PORT_DIRSET = ((uint32_t)1U << 2U))
+#define MIKROBUS1_DIR_InputEnable()       (PORT_REGS->GROUP[0].PORT_DIRCLR = ((uint32_t)1U << 2U))
+#define MIKROBUS1_DIR_Get()               (((PORT_REGS->GROUP[0].PORT_IN >> 2U)) & 0x01U)
+#define MIKROBUS1_DIR_PIN                  PORT_PIN_PA02
+
+/*** Macros for MIKROBUS3_DIR pin ***/
+#define MIKROBUS3_DIR_Set()               (PORT_REGS->GROUP[1].PORT_OUTSET = ((uint32_t)1U << 8U))
+#define MIKROBUS3_DIR_Clear()             (PORT_REGS->GROUP[1].PORT_OUTCLR = ((uint32_t)1U << 8U))
+#define MIKROBUS3_DIR_Toggle()            (PORT_REGS->GROUP[1].PORT_OUTTGL = ((uint32_t)1U << 8U))
+#define MIKROBUS3_DIR_OutputEnable()      (PORT_REGS->GROUP[1].PORT_DIRSET = ((uint32_t)1U << 8U))
+#define MIKROBUS3_DIR_InputEnable()       (PORT_REGS->GROUP[1].PORT_DIRCLR = ((uint32_t)1U << 8U))
+#define MIKROBUS3_DIR_Get()               (((PORT_REGS->GROUP[1].PORT_IN >> 8U)) & 0x01U)
+#define MIKROBUS3_DIR_PIN                  PORT_PIN_PB08
+
 /*** Macros for MIKROBUS3_PWM pin ***/
 #define MIKROBUS3_PWM_Get()               (((PORT_REGS->GROUP[1].PORT_IN >> 9U)) & 0x01U)
 #define MIKROBUS3_PWM_PIN                  PORT_PIN_PB09
@@ -118,6 +136,15 @@
 /*** Macros for VIRTUAL_COM_RX pin ***/
 #define VIRTUAL_COM_RX_Get()               (((PORT_REGS->GROUP[1].PORT_IN >> 17U)) & 0x01U)
 #define VIRTUAL_COM_RX_PIN                  PORT_PIN_PB17
+
+/*** Macros for MIKROBUS2_DIR pin ***/
+#define MIKROBUS2_DIR_Set()               (PORT_REGS->GROUP[1].PORT_OUTSET = ((uint32_t)1U << 3U))
+#define MIKROBUS2_DIR_Clear()             (PORT_REGS->GROUP[1].PORT_OUTCLR = ((uint32_t)1U << 3U))
+#define MIKROBUS2_DIR_Toggle()            (PORT_REGS->GROUP[1].PORT_OUTTGL = ((uint32_t)1U << 3U))
+#define MIKROBUS2_DIR_OutputEnable()      (PORT_REGS->GROUP[1].PORT_DIRSET = ((uint32_t)1U << 3U))
+#define MIKROBUS2_DIR_InputEnable()       (PORT_REGS->GROUP[1].PORT_DIRCLR = ((uint32_t)1U << 3U))
+#define MIKROBUS2_DIR_Get()               (((PORT_REGS->GROUP[1].PORT_IN >> 3U)) & 0x01U)
+#define MIKROBUS2_DIR_PIN                  PORT_PIN_PB03
 
 // *****************************************************************************
 /* PORT Group

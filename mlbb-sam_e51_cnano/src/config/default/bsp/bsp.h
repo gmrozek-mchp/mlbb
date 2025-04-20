@@ -64,6 +64,24 @@
 #define SAME51_CURIOSITY_NANO_BASE
 #define BOARD_NAME    "SAME51-CURIOSITY-NANO-BASE"
 
+/*** Macros for MIKROBUS1_DIR output pin ***/ 
+#define BSP_MIKROBUS1_DIR_PIN        PORT_PIN_PA2
+#define BSP_MIKROBUS1_DIR_Get()      ((PORT_REGS->GROUP[0].PORT_IN >> 2U) & 0x01U)
+#define BSP_MIKROBUS1_DIR_Set()      (PORT_REGS->GROUP[0].PORT_OUTSET = ((uint32_t)1U << 2U))
+#define BSP_MIKROBUS1_DIR_Clear()    (PORT_REGS->GROUP[0].PORT_OUTCLR = ((uint32_t)1U << 2U))
+#define BSP_MIKROBUS1_DIR_Toggle()   (PORT_REGS->GROUP[0].PORT_OUTTGL = ((uint32_t)1U << 2U))
+#define BSP_MIKROBUS1_DIR_On()       BSP_MIKROBUS1_DIR_Set()
+#define BSP_MIKROBUS1_DIR_Off()      BSP_MIKROBUS1_DIR_Clear() 
+
+/*** Macros for MIKROBUS3_DIR output pin ***/ 
+#define BSP_MIKROBUS3_DIR_PIN        PORT_PIN_PB8
+#define BSP_MIKROBUS3_DIR_Get()      ((PORT_REGS->GROUP[1].PORT_IN >> 8U) & 0x01U)
+#define BSP_MIKROBUS3_DIR_Set()      (PORT_REGS->GROUP[1].PORT_OUTSET = ((uint32_t)1U << 8U))
+#define BSP_MIKROBUS3_DIR_Clear()    (PORT_REGS->GROUP[1].PORT_OUTCLR = ((uint32_t)1U << 8U))
+#define BSP_MIKROBUS3_DIR_Toggle()   (PORT_REGS->GROUP[1].PORT_OUTTGL = ((uint32_t)1U << 8U))
+#define BSP_MIKROBUS3_DIR_On()       BSP_MIKROBUS3_DIR_Set()
+#define BSP_MIKROBUS3_DIR_Off()      BSP_MIKROBUS3_DIR_Clear() 
+
 /*** Macros for LED output pin ***/ 
 #define BSP_LED_PIN        PORT_PIN_PA14
 #define BSP_LED_Get()      ((PORT_REGS->GROUP[0].PORT_IN >> 14U) & 0x01U)
@@ -72,6 +90,15 @@
 #define BSP_LED_Toggle()   (PORT_REGS->GROUP[0].PORT_OUTTGL = ((uint32_t)1U << 14U))
 #define BSP_LED_On()       BSP_LED_Clear()
 #define BSP_LED_Off()      BSP_LED_Set() 
+
+/*** Macros for MIKROBUS2_DIR output pin ***/ 
+#define BSP_MIKROBUS2_DIR_PIN        PORT_PIN_PB3
+#define BSP_MIKROBUS2_DIR_Get()      ((PORT_REGS->GROUP[1].PORT_IN >> 3U) & 0x01U)
+#define BSP_MIKROBUS2_DIR_Set()      (PORT_REGS->GROUP[1].PORT_OUTSET = ((uint32_t)1U << 3U))
+#define BSP_MIKROBUS2_DIR_Clear()    (PORT_REGS->GROUP[1].PORT_OUTCLR = ((uint32_t)1U << 3U))
+#define BSP_MIKROBUS2_DIR_Toggle()   (PORT_REGS->GROUP[1].PORT_OUTTGL = ((uint32_t)1U << 3U))
+#define BSP_MIKROBUS2_DIR_On()       BSP_MIKROBUS2_DIR_Set()
+#define BSP_MIKROBUS2_DIR_Off()      BSP_MIKROBUS2_DIR_Clear() 
 
 
 /*** Macros for BUTTON input pin ***/ 
