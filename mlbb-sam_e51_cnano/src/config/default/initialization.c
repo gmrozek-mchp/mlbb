@@ -148,9 +148,9 @@ void SYS_Initialize ( void* data )
 
     SERCOM5_USART_Initialize();
 
-    TC1_TimerInitialize();
+    TC1_CompareInitialize();
 
-    TC4_TimerInitialize();
+    TC4_CompareInitialize();
 
 
     NVIC_Initialize();

@@ -45,7 +45,7 @@
 *******************************************************************************/
 // DOM-IGNORE-END
 
-#ifndef PLIB_TC1_H      // Guards against multiple inclusion
+#ifndef PLIB_TC1_H       // Guards against multiple inclusion
 #define PLIB_TC1_H
 
 // *****************************************************************************
@@ -85,32 +85,32 @@
    this interface.
 */
 
-// *****************************************************************************
 
-void TC1_TimerInitialize( void );
+void TC1_CompareInitialize( void );
 
-void TC1_TimerStart( void );
+void TC1_CompareStart( void );
 
-void TC1_TimerStop( void );
+void TC1_CompareStop( void );
 
-uint32_t TC1_TimerFrequencyGet( void );
+uint32_t TC1_CompareFrequencyGet( void );
 
+bool TC1_Compare8bitPeriodSet( uint8_t period );
 
-void TC1_Timer16bitPeriodSet( uint16_t period );
+uint8_t TC1_Compare8bitPeriodGet( void );
 
-uint16_t TC1_Timer16bitPeriodGet( void );
+uint8_t TC1_Compare8bitCounterGet( void );
 
-uint16_t TC1_Timer16bitCounterGet( void );
+void TC1_Compare8bitCounterSet( uint8_t count );
 
-void TC1_Timer16bitCounterSet( uint16_t count );
+bool TC1_Compare8bitMatch0Set( uint8_t compareValue );
 
-
-
-
-void TC1_TimerCallbackRegister( TC_TIMER_CALLBACK callback, uintptr_t context );
+bool TC1_Compare8bitMatch1Set( uint8_t compareValue );
 
 
-void TC1_TimerCommandSet(TC_COMMAND command);
+void TC1_CompareCallbackRegister( TC_COMPARE_CALLBACK callback, uintptr_t context );
+
+
+void TC1_CompareCommandSet(TC_COMMAND command);
 
 
 // DOM-IGNORE-BEGIN
