@@ -8,9 +8,6 @@
 
 #include "arm_math.h"
 
-#include "peripheral/tc/plib_tc1.h"
-#include "peripheral/tc/plib_tc4.h"
-
 
 #define angle_0deg      ((q15_t)0x0000)
 #define angle_30deg     ((q15_t)0x0AAA)
@@ -21,8 +18,9 @@
 #define xcos60(x)   ((x) / 2)
 #define xsin60(x)   (q15_t)(((int32_t)x * 0xDDB3) >> 16)
 
-platform_abc_t position_command_abc;
-platform_abc_t position_actual_abc;
+
+static platform_abc_t position_command_abc;
+static platform_abc_t position_actual_abc;
 
 
 void PLATFORM_Initialize( void )
