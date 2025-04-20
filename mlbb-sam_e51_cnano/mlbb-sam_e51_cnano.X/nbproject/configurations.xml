@@ -291,6 +291,9 @@
       <logicalFolder name="f5" displayName="platform" projectFiles="true">
         <itemPath>../src/platform/platform.h</itemPath>
       </logicalFolder>
+      <logicalFolder name="f6" displayName="servo" projectFiles="true">
+        <itemPath>../src/servo/servo.h</itemPath>
+      </logicalFolder>
     </logicalFolder>
     <logicalFolder name="ExternalFiles"
                    displayName="Important Files"
@@ -415,6 +418,10 @@
         <itemPath>../src/platform/platform_cmd.c</itemPath>
         <itemPath>../src/platform/platform.c</itemPath>
       </logicalFolder>
+      <logicalFolder name="f6" displayName="servo" projectFiles="true">
+        <itemPath>../src/servo/servo.c</itemPath>
+        <itemPath>../src/servo/servo_cmd.c</itemPath>
+      </logicalFolder>
       <itemPath>../src/config/default/pin_configurations.csv</itemPath>
       <itemPath>../src/main.c</itemPath>
     </logicalFolder>
@@ -428,6 +435,7 @@
     <Elem>../src/platform</Elem>
     <Elem>../../extern/CMSIS-DSP/Include</Elem>
     <Elem>../../extern/CMSIS-DSP/Source</Elem>
+    <Elem>../src/servo</Elem>
   </sourceRootList>
   <projectmakefile>Makefile</projectmakefile>
   <confs>

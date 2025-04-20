@@ -17,6 +17,7 @@
                 <sourceRootElem>../src/platform</sourceRootElem>
                 <sourceRootElem>../../extern/CMSIS-DSP/Include</sourceRootElem>
                 <sourceRootElem>../../extern/CMSIS-DSP/Source</sourceRootElem>
+                <sourceRootElem>../src/servo</sourceRootElem>
             </sourceRootList>
             <confList>
                 <confElem>
