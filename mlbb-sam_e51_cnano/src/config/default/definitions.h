@@ -48,8 +48,8 @@
 #include <stdint.h>
 #include <stddef.h>
 #include <stdbool.h>
-#include "bsp/bsp.h"
 #include "peripheral/sercom/i2c_master/plib_sercom2_i2c_master.h"
+#include "bsp/bsp.h"
 #include "peripheral/nvmctrl/plib_nvmctrl.h"
 #include "peripheral/evsys/plib_evsys.h"
 #include "peripheral/sercom/usart/plib_sercom0_usart.h"
@@ -59,8 +59,8 @@
 #include "peripheral/cmcc/plib_cmcc.h"
 #include "peripheral/sercom/usart/plib_sercom5_usart.h"
 #include "peripheral/tc/plib_tc1.h"
-#include "peripheral/tc/plib_tc4.h"
 #include "system/reset/sys_reset.h"
+#include "peripheral/tc/plib_tc4.h"
 
 // DOM-IGNORE-BEGIN
 #ifdef __cplusplus  // Provide C++ Compatibility
