@@ -55,6 +55,7 @@
 #include "ball/ar1100.h"
 #include "nunchuk/nunchuk.h"
 #include "platform/platform.h"
+#include "servo/servo.h"
 
 
 // ******************************************************************
@@ -105,6 +106,24 @@ static const cmd_descriptor_t position_abc_command =
     PLATFORM_CMD_Position_ABC
 };
 
+static const cmd_descriptor_t servo_command_angle = 
+{ 
+    "servo",
+    SERVO_CMD_Position_GetSet_q15angle
+};
+
+static const cmd_descriptor_t servo_command_steps = 
+{ 
+    "servo-steps",
+    SERVO_CMD_Position_GetSet_steps
+};
+
+static const cmd_descriptor_t servo_zero_command = 
+{ 
+    "servo-zero",
+    SERVO_CMD_Position_Zero
+};
+
 
 // ******************************************************************
 // COMMAND LIST
@@ -116,6 +135,9 @@ const cmd_descriptor_t* const cmd_command_list[] =
     &nunchuk_command,
     &position_xy_command,
     &position_abc_command,
+    &servo_command_angle,
+    &servo_command_steps,
+    &servo_zero_command,
     &led_command,
     &reset_command,    
 };

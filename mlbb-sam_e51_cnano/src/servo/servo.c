@@ -17,7 +17,7 @@
 #define SERVO_DRIVE_MICROSTEPS            (8)
 #define SERVO_DRIVE_STEPS_PER_REVOLUTION  (SERVO_MOTOR_STEPS_PER_REVOLUTION * SERVO_DRIVE_MICROSTEPS)
 #define SERVO_DRIVE_ANGLE_PER_STEP_Q15    (INT16_MAX / SERVO_DRIVE_STEPS_PER_REVOLUTION)
-#define SERVO_DRIVE_SPEED_MAX             (8)
+#define SERVO_DRIVE_SPEED_MAX             (4)
 
 #define SERVO_STEP_COMPARE_VALUE    (10)
 
@@ -69,9 +69,9 @@ void SERVO_Initialize( void )
     MIKROBUS3_CS_Set();
             
     TC1_CompareCallbackRegister( SERVO_TC1_CompareCallback, (uintptr_t)NULL );
-    TC4_CompareCallbackRegister( SERVO_TC4_CompareCallback, (uintptr_t)NULL );
-    
     TC1_CompareStart();
+
+    TC4_CompareCallbackRegister( SERVO_TC4_CompareCallback, (uintptr_t)NULL );
     TC4_CompareStart();
 }
 
@@ -126,7 +126,7 @@ void SERVO_Position_Command_Set_q15angle( servo_id_t servo_id, q15_t angle )
     servos[servo_id].command_steps_buffer = (q15_t)(((q31_t)angle * SERVO_DRIVE_STEPS_PER_REVOLUTION) >> 15);
 }
 
-void SERVO_Angle_Zero_Set( servo_id_t servo_id )
+void SERVO_Position_Zero_Set( servo_id_t servo_id )
 {
     if( servo_id >= SERVO_ID_NUM_SERVOS )
     {
@@ -134,7 +134,41 @@ void SERVO_Angle_Zero_Set( servo_id_t servo_id )
     }
     
     servos[servo_id].position_steps = 0;
+    servos[servo_id].command_angle = 0;
+    servos[servo_id].command_steps_buffer = 0;
 }
+
+
+int16_t SERVO_Position_Get_steps( servo_id_t servo_id )
+{
+    if( servo_id >= SERVO_ID_NUM_SERVOS )
+    {
+        return 0;
+    }
+
+    return servos[servo_id].position_steps;
+}
+
+int16_t SERVO_Position_Command_Get_steps( servo_id_t servo_id )
+{
+    if( servo_id >= SERVO_ID_NUM_SERVOS )
+    {
+        return 0;
+    }
+
+    return servos[servo_id].command_steps;
+}
+
+void SERVO_Position_Command_Set_steps( servo_id_t servo_id, int16_t steps )
+{
+    if( servo_id >= SERVO_ID_NUM_SERVOS )
+    {
+        return;
+    }
+
+    servos[servo_id].command_steps_buffer = steps;    
+}
+
 
 static void SERVO_TC1_CompareCallback( TC_COMPARE_STATUS status, uintptr_t context )
 {

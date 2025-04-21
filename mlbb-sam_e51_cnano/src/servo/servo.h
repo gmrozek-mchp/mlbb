@@ -21,11 +21,16 @@ q15_t SERVO_Position_Command_Get_q15angle( servo_id_t servo_id );
 void  SERVO_Position_Command_Set_q15angle( servo_id_t servo_id, q15_t angle );
 void  SERVO_Position_Zero_Set( servo_id_t servo_id );
 
+// Steps functions for development purposes
+int16_t SERVO_Position_Get_steps( servo_id_t servo_id );
+int16_t SERVO_Position_Command_Get_steps( servo_id_t servo_id );
+void    SERVO_Position_Command_Set_steps( servo_id_t servo_id, int16_t steps );
 
 // **************************************************************
 //  TOUCH Command portal functions
 // **************************************************************
-void SERVO_CMD_Position_GetSet( void );
+void SERVO_CMD_Position_GetSet_q15angle( void );
+void SERVO_CMD_Position_GetSet_steps( void );
 void SERVO_CMD_Position_Zero( void );
 
 
