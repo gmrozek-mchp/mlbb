@@ -13,7 +13,7 @@ typedef struct {
     bool button_z;
 } nunchuk_data_t;
 
-typedef void (*nunchuk_data_callback_t)( nunchuk_data_t touchData );
+typedef void (*nunchuk_data_callback_t)( nunchuk_data_t data );
 
 
 void NUNCHUK_Initialize( void );
