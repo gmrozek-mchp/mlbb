@@ -12,12 +12,12 @@
 //  Public functions
 // **************************************************************
 
-void SERVO_CMD_Angle_GetSet( void )
+void SERVO_CMD_Position_GetSet( void )
 {
     
 }
 
-void SERVO_CMD_Angle_Zero( void )
+void SERVO_CMD_Position_Zero( void )
 {
     
 }
