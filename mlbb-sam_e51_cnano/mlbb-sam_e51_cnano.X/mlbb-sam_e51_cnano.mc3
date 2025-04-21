@@ -18145,7 +18145,7 @@
          <value>&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;&lt;tc1&gt;
   &lt;tc1 dnOrder=&quot;0&quot; id=&quot;TC_CTRLA_PRESCALER&quot;&gt;
     &lt;Values dnOrder=&quot;0&quot;&gt;
-      &lt;User dnOrder=&quot;0&quot; value=&quot;6&quot;/&gt;
+      &lt;User dnOrder=&quot;0&quot; value=&quot;5&quot;/&gt;
     &lt;/Values&gt;
   &lt;/tc1&gt;
 &lt;/tc1&gt;
@@ -18174,7 +18174,7 @@
          <value>&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;&lt;tc1&gt;
   &lt;tc1 dnOrder=&quot;0&quot; id=&quot;TC_FREQUENCY&quot;&gt;
     &lt;Values dnOrder=&quot;0&quot;&gt;
-      &lt;Dynamic dnOrder=&quot;0&quot; id=&quot;tc1&quot; value=&quot;234375&quot;/&gt;
+      &lt;Dynamic dnOrder=&quot;0&quot; id=&quot;tc1&quot; value=&quot;937500&quot;/&gt;
     &lt;/Values&gt;
   &lt;/tc1&gt;
 &lt;/tc1&gt;
@@ -18304,7 +18304,7 @@
       &lt;/Long&gt;
     &lt;/Attributes&gt;
     &lt;Values dnOrder=&quot;1&quot;&gt;
-      &lt;Dynamic dnOrder=&quot;0&quot; id=&quot;tc1&quot; value=&quot;233&quot;/&gt;
+      &lt;Dynamic dnOrder=&quot;0&quot; id=&quot;tc1&quot; value=&quot;255&quot;/&gt;
     &lt;/Values&gt;
   &lt;/tc1&gt;
 &lt;/tc1&gt;
@@ -18329,7 +18329,7 @@
   &lt;tc1 dnOrder=&quot;0&quot; id=&quot;TC_TIMER_TIME_MS&quot;&gt;
     &lt;Attributes dnOrder=&quot;0&quot;&gt;
       &lt;Float dnOrder=&quot;0&quot; id=&quot;max&quot;&gt;
-        &lt;Value dnOrder=&quot;0&quot;&gt;1.0922667&lt;/Value&gt;
+        &lt;Value dnOrder=&quot;0&quot;&gt;0.27306667&lt;/Value&gt;
       &lt;/Float&gt;
     &lt;/Attributes&gt;
     &lt;Values dnOrder=&quot;1&quot;/&gt;
@@ -18887,7 +18887,7 @@
          <value>&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;&lt;tc4&gt;
   &lt;tc4 dnOrder=&quot;0&quot; id=&quot;TC_CTRLA_PRESCALER&quot;&gt;
     &lt;Values dnOrder=&quot;0&quot;&gt;
-      &lt;User dnOrder=&quot;0&quot; value=&quot;6&quot;/&gt;
+      &lt;User dnOrder=&quot;0&quot; value=&quot;5&quot;/&gt;
     &lt;/Values&gt;
   &lt;/tc4&gt;
 &lt;/tc4&gt;
@@ -18916,7 +18916,7 @@
          <value>&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;&lt;tc4&gt;
   &lt;tc4 dnOrder=&quot;0&quot; id=&quot;TC_FREQUENCY&quot;&gt;
     &lt;Values dnOrder=&quot;0&quot;&gt;
-      &lt;Dynamic dnOrder=&quot;0&quot; id=&quot;tc4&quot; value=&quot;234375&quot;/&gt;
+      &lt;Dynamic dnOrder=&quot;0&quot; id=&quot;tc4&quot; value=&quot;937500&quot;/&gt;
     &lt;/Values&gt;
   &lt;/tc4&gt;
 &lt;/tc4&gt;
@@ -19046,7 +19046,7 @@
       &lt;/Long&gt;
     &lt;/Attributes&gt;
     &lt;Values dnOrder=&quot;1&quot;&gt;
-      &lt;Dynamic dnOrder=&quot;0&quot; id=&quot;tc4&quot; value=&quot;233&quot;/&gt;
+      &lt;Dynamic dnOrder=&quot;0&quot; id=&quot;tc4&quot; value=&quot;255&quot;/&gt;
     &lt;/Values&gt;
   &lt;/tc4&gt;
 &lt;/tc4&gt;
@@ -19071,7 +19071,7 @@
   &lt;tc4 dnOrder=&quot;0&quot; id=&quot;TC_TIMER_TIME_MS&quot;&gt;
     &lt;Attributes dnOrder=&quot;0&quot;&gt;
       &lt;Float dnOrder=&quot;0&quot; id=&quot;max&quot;&gt;
-        &lt;Value dnOrder=&quot;0&quot;&gt;1.0922667&lt;/Value&gt;
+        &lt;Value dnOrder=&quot;0&quot;&gt;0.27306667&lt;/Value&gt;
       &lt;/Float&gt;
     &lt;/Attributes&gt;
     &lt;Values dnOrder=&quot;1&quot;/&gt;
@@ -19144,7 +19144,7 @@
       </entry>
       <entry>
          <file>../src/config/default/definitions.h</file>
-         <hash>8c7385a9b27f6139303f8ec4637d85eae87d33a24e41be5467678c65949f1efd</hash>
+         <hash>5fcc8b3fad602b674d2759c669495f92eca0e204c6aece5ea544786794c72346</hash>
       </entry>
       <entry>
          <file>../src/config/default/device.h</file>
@@ -19260,7 +19260,7 @@
       </entry>
       <entry>
          <file>../src/config/default/peripheral/tc/plib_tc1.c</file>
-         <hash>a09c5138858795f041137b894e09705740b1c2eaf8f46799fa1eeb93d904f19a</hash>
+         <hash>13f9dc606c4c855efc2e29b0a337667ee91073446dfa2b2e28358ef2f04c53c2</hash>
       </entry>
       <entry>
          <file>../src/config/default/peripheral/tc/plib_tc1.h</file>
@@ -19268,7 +19268,7 @@
       </entry>
       <entry>
          <file>../src/config/default/peripheral/tc/plib_tc4.c</file>
-         <hash>3056933ae9ed6de88e24adb00ac6ded9b7b22ab7dce820605e2a081d7cf23bde</hash>
+         <hash>5b392ecf78287d179ff879f8426d7f092008e6d4eb1d71208cea228cb7c1c425</hash>
       </entry>
       <entry>
          <file>../src/config/default/peripheral/tc/plib_tc4.h</file>
