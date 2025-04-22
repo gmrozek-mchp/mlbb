@@ -55,7 +55,7 @@
 #include "ball/ar1100.h"
 #include "nunchuk/nunchuk.h"
 #include "platform/platform.h"
-#include "servo/servo.h"
+#include "platform/servo/servo.h"
 
 
 // ******************************************************************

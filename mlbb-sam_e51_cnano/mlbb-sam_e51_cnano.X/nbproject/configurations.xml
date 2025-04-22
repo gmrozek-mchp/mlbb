@@ -292,10 +292,10 @@
         </logicalFolder>
       </logicalFolder>
       <logicalFolder name="f5" displayName="platform" projectFiles="true">
+        <logicalFolder name="servo" displayName="servo" projectFiles="true">
+          <itemPath>../src/platform/servo/servo.h</itemPath>
+        </logicalFolder>
         <itemPath>../src/platform/platform.h</itemPath>
-      </logicalFolder>
-      <logicalFolder name="f6" displayName="servo" projectFiles="true">
-        <itemPath>../src/servo/servo.h</itemPath>
       </logicalFolder>
     </logicalFolder>
     <logicalFolder name="ExternalFiles"
@@ -421,12 +421,12 @@
         <itemPath>../src/nunchuk/nunchuk_cmd.c</itemPath>
       </logicalFolder>
       <logicalFolder name="f5" displayName="platform" projectFiles="true">
+        <logicalFolder name="servo" displayName="servo" projectFiles="true">
+          <itemPath>../src/platform/servo/servo.c</itemPath>
+          <itemPath>../src/platform/servo/servo_cmd.c</itemPath>
+        </logicalFolder>
         <itemPath>../src/platform/platform_cmd.c</itemPath>
         <itemPath>../src/platform/platform.c</itemPath>
-      </logicalFolder>
-      <logicalFolder name="f6" displayName="servo" projectFiles="true">
-        <itemPath>../src/servo/servo.c</itemPath>
-        <itemPath>../src/servo/servo_cmd.c</itemPath>
       </logicalFolder>
       <itemPath>../src/config/default/pin_configurations.csv</itemPath>
       <itemPath>../src/main.c</itemPath>
