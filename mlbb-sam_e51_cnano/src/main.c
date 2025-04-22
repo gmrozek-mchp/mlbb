@@ -32,6 +32,8 @@
 
 #include "command/command.h"
 
+#include "driver/driver_i2c.h"
+
 #include "ball/ar1100.h"
 #include "nunchuk/nunchuk.h"
 #include "servo/servo.h"
@@ -48,6 +50,8 @@ int main ( void )
     /* Initialize all modules */
     SYS_Initialize ( NULL );
 
+    DRIVER_I2C_Initialize();
+    
     CMD_Initialize();
 
     AR1100_Initialize();

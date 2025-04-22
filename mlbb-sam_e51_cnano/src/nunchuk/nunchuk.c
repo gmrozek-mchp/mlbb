@@ -12,7 +12,7 @@
 #include "FreeRTOS.h"
 #include "task.h"
 
-#include "peripheral/sercom/i2c_master/plib_sercom2_i2c_master.h"
+#include "driver/driver_i2c.h"
 
 
 // ******************************************************************
@@ -94,37 +94,21 @@ nunchuk_data_t NUNCHUK_Data_Get( void )
 
 static void NUNCHUK_RTOS_Task( void * pvParameters )
 {       
-    SERCOM2_I2C_Write( NUNCHUK_I2C_ADDRESS, (uint8_t*)nunchuk_cmd_init1, sizeof(nunchuk_cmd_init1) );
-    while( SERCOM2_I2C_IsBusy() )
-    {
-        vTaskDelay(1);    
-    }
+    DRIVER_I2C_Write( NUNCHUK_I2C_ADDRESS, (uint8_t*)nunchuk_cmd_init1, sizeof(nunchuk_cmd_init1) );
 
     vTaskDelay(1);    
     
-    SERCOM2_I2C_Write( NUNCHUK_I2C_ADDRESS, (uint8_t*)nunchuk_cmd_init2, sizeof(nunchuk_cmd_init2) );
-    while( SERCOM2_I2C_IsBusy() )
-    {
-        vTaskDelay(1);    
-    }
+    DRIVER_I2C_Write( NUNCHUK_I2C_ADDRESS, (uint8_t*)nunchuk_cmd_init2, sizeof(nunchuk_cmd_init2) );
     
     vTaskDelay(1);    
 
     while(1)
     {
-        SERCOM2_I2C_Write( NUNCHUK_I2C_ADDRESS, (uint8_t*)nunchuk_cmd_read, sizeof(nunchuk_cmd_read) );
-        while( SERCOM2_I2C_IsBusy() )
-        {
-            vTaskDelay(1);    
-        }
+        DRIVER_I2C_Write( NUNCHUK_I2C_ADDRESS, (uint8_t*)nunchuk_cmd_read, sizeof(nunchuk_cmd_read) );
 
         vTaskDelay(1);    
 
-        SERCOM2_I2C_Read( NUNCHUK_I2C_ADDRESS, nunchuk_readBuffer, sizeof(nunchuk_readBuffer) );
-        while( SERCOM2_I2C_IsBusy() )
-        {
-            vTaskDelay(1);    
-        }
+        DRIVER_I2C_Read( NUNCHUK_I2C_ADDRESS, nunchuk_readBuffer, sizeof(nunchuk_readBuffer) );
         
         nunchuk_data.button_c = ((nunchuk_readBuffer[5] & 0x02) == 0);
         nunchuk_data.button_z = ((nunchuk_readBuffer[5] & 0x01) == 0);
