@@ -102,7 +102,9 @@ nunchuk_data_t NUNCHUK_Data_Get( void )
 // ******************************************************************
 
 static void NUNCHUK_RTOS_Task( void * pvParameters )
-{       
+{
+    (void)pvParameters;
+
     DRIVER_I2C_Write( NUNCHUK_I2C_ADDRESS, (uint8_t*)nunchuk_cmd_init1, sizeof(nunchuk_cmd_init1) );
 
     vTaskDelay(1);  // Nunchuk communications need delay between commands

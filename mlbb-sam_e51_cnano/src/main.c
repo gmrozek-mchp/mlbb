@@ -30,9 +30,9 @@
 #include "FreeRTOS.h"
 #include "task.h"
 
-#include "command/command.h"
-
 #include "driver/driver_i2c.h"
+
+#include "command/command.h"
 
 #include "ball/ar1100.h"
 #include "nunchuk/nunchuk.h"
