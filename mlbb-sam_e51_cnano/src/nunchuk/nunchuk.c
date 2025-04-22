@@ -22,6 +22,7 @@
 #define NUNCHUK_I2C_ADDRESS         (0x52)
 #define NUNCHUK_READ_BUFFER_SIZE    (6)
 
+#define NUNCHUK_POWER_UP_DELAY_mS   (100)
 #define NUNCHUK_SCAN_RATE_HZ        (200)
 
 
@@ -54,6 +55,8 @@ static const uint8_t nunchuk_cmd_read[] = { 0x00 };
 // Section: Private Function Declarations
 // ******************************************************************
 static void NUNCHUK_RTOS_Task( void * pvParameters );
+
+static void NUNCHUK_SendConfigSequence( void );
 
 
 // ******************************************************************
@@ -105,14 +108,11 @@ static void NUNCHUK_RTOS_Task( void * pvParameters )
 {
     (void)pvParameters;
 
-    DRIVER_I2C_Write( NUNCHUK_I2C_ADDRESS, (uint8_t*)nunchuk_cmd_init1, sizeof(nunchuk_cmd_init1) );
-
-    vTaskDelay(1);  // Nunchuk communications need delay between commands
+    // Nunchuk needs some time to power up
+    vTaskDelay( pdMS_TO_TICKS(NUNCHUK_POWER_UP_DELAY_mS) );
     
-    DRIVER_I2C_Write( NUNCHUK_I2C_ADDRESS, (uint8_t*)nunchuk_cmd_init2, sizeof(nunchuk_cmd_init2) );
+    NUNCHUK_SendConfigSequence();
     
-    vTaskDelay(1);  // Nunchuk communications need delay between commands
-
     nunchuk_taskLastWakeTime = xTaskGetTickCount();
     
     while(1)
@@ -124,19 +124,38 @@ static void NUNCHUK_RTOS_Task( void * pvParameters )
         DRIVER_I2C_Read( NUNCHUK_I2C_ADDRESS, nunchuk_readBuffer, sizeof(nunchuk_readBuffer) );
 
         taskENTER_CRITICAL();
-                
+
         nunchuk_data.button_c = ((nunchuk_readBuffer[5] & 0x02) == 0);
         nunchuk_data.button_z = ((nunchuk_readBuffer[5] & 0x01) == 0);
         nunchuk_data.joystick_x = nunchuk_readBuffer[0];
         nunchuk_data.joystick_y = nunchuk_readBuffer[1];
 
         taskEXIT_CRITICAL();
-        
+
         if( nunchuk_dataCallback != NULL )
         {
             nunchuk_dataCallback( nunchuk_data );
         }
 
         vTaskDelayUntil( &nunchuk_taskLastWakeTime, configTICK_RATE_HZ / NUNCHUK_SCAN_RATE_HZ );    
+
+        if( (nunchuk_readBuffer[0] == 0xFF) && (nunchuk_readBuffer[1] == 0xFF) )
+        {
+            // Bad data. Try to configure nunchuk again. 
+            NUNCHUK_SendConfigSequence();
+        }
     }
+}
+
+static void NUNCHUK_SendConfigSequence( void )
+{
+//    vTaskDelay(100);  // Nunchuk needs time to start up.
+
+    DRIVER_I2C_Write( NUNCHUK_I2C_ADDRESS, (uint8_t*)nunchuk_cmd_init1, sizeof(nunchuk_cmd_init1) );
+
+    vTaskDelay(1);  // Nunchuk communications need delay between commands
+    
+    DRIVER_I2C_Write( NUNCHUK_I2C_ADDRESS, (uint8_t*)nunchuk_cmd_init2, sizeof(nunchuk_cmd_init2) );
+    
+    vTaskDelay(1);  // Nunchuk communications need delay between commands    
 }
