@@ -82,7 +82,7 @@ void TC1_CompareInitialize( void )
     }
 
     /* Configure counter mode & prescaler */
-    TC1_REGS->COUNT8.TC_CTRLA = TC_CTRLA_MODE_COUNT8 | TC_CTRLA_PRESCALER_DIV64 | TC_CTRLA_PRESCSYNC_PRESC ;
+    TC1_REGS->COUNT8.TC_CTRLA = TC_CTRLA_MODE_COUNT8 | TC_CTRLA_PRESCALER_DIV256 | TC_CTRLA_PRESCSYNC_PRESC ;
 
     /* Configure waveform generation mode */
     TC1_REGS->COUNT8.TC_WAVE = (uint8_t)TC_WAVE_WAVEGEN_NPWM;
@@ -127,7 +127,7 @@ void TC1_CompareStop( void )
 
 uint32_t TC1_CompareFrequencyGet( void )
 {
-    return (uint32_t)(937500UL);
+    return (uint32_t)(234375UL);
 }
 
 void TC1_CompareCommandSet(TC_COMMAND command)

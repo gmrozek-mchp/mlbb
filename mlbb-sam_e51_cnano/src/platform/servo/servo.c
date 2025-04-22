@@ -36,7 +36,7 @@
 #define SERVO_DRIVE_MICROSTEPS            (8)
 #define SERVO_DRIVE_STEPS_PER_REVOLUTION  (SERVO_MOTOR_STEPS_PER_REVOLUTION * SERVO_DRIVE_MICROSTEPS)
 #define SERVO_DRIVE_ANGLE_PER_STEP_Q15    (INT16_MAX / SERVO_DRIVE_STEPS_PER_REVOLUTION)
-#define SERVO_DRIVE_SPEED_MAX             (4)
+#define SERVO_DRIVE_SPEED_MAX             (1)
 
 #define SERVO_STEP_COMPARE_VALUE    (10)
 
@@ -350,11 +350,6 @@ static void SERVO_Drive( servo_id_t servo_id )
             servo->acceleration_delay = 0;
         }
 
-        if( servo->acceleration_delay < 2 )
-        {
-            servo->acceleration_delay = 2;            
-        }
-        
         SERVO_Drive_StepAndDirection( servo_id, (servo->velocity != 0), (servo->velocity >= 0) );
     }
 }
