@@ -346,20 +346,62 @@ static void SERVO_Drive_StepAndDirection( servo_id_t servo_id, bool step, bool d
     {
         case SERVO_ID_A:
         {
-            direction ? MIKROBUS1_DIR_Set() : MIKROBUS1_DIR_Clear();
-            TC1_Compare8bitMatch0Set( step ? SERVO_STEP_COMPARE_VALUE : 0 );
+            if( step )
+            {
+                if( direction )
+                {
+                    MIKROBUS1_DIR_Set();
+                }
+                else
+                {
+                    MIKROBUS1_DIR_Clear();
+                }
+                TC1_Compare8bitMatch0Set( SERVO_STEP_COMPARE_VALUE );
+            }
+            else
+            {
+                TC1_Compare8bitMatch0Set( 0 );                
+            }
             break;
         }
         case SERVO_ID_B:
         {
-            direction ? MIKROBUS2_DIR_Set() : MIKROBUS2_DIR_Clear();
-            TC1_Compare8bitMatch1Set( step ? SERVO_STEP_COMPARE_VALUE : 0 );
+            if( step )
+            {
+                if( direction )
+                {
+                    MIKROBUS2_DIR_Set();
+                }
+                else
+                {
+                    MIKROBUS2_DIR_Clear();
+                }
+                TC1_Compare8bitMatch1Set( SERVO_STEP_COMPARE_VALUE );
+            }
+            else
+            {
+                TC1_Compare8bitMatch1Set( 0 );                
+            }
             break;
         }
         case SERVO_ID_C:
         {
-            direction ? MIKROBUS3_DIR_Set() : MIKROBUS3_DIR_Clear();
-            TC4_Compare8bitMatch1Set( step ? SERVO_STEP_COMPARE_VALUE : 0 );
+            if( step )
+            {
+                if( direction )
+                {
+                    MIKROBUS3_DIR_Set();
+                }
+                else
+                {
+                    MIKROBUS3_DIR_Clear();
+                }
+                TC4_Compare8bitMatch1Set( SERVO_STEP_COMPARE_VALUE );
+            }
+            else
+            {
+                TC4_Compare8bitMatch1Set( 0 );                
+            }
             break;
         }
         default:
