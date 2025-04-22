@@ -36,7 +36,7 @@
 
 #include "ball/ar1100.h"
 #include "nunchuk/nunchuk.h"
-#include "servo/servo.h"
+#include "platform/platform.h"
 
 
 // *****************************************************************************
@@ -58,7 +58,7 @@ int main ( void )
 
     NUNCHUK_Initialize();
 
-    SERVO_Initialize();
+    PLATFORM_Initialize();
     
     vTaskStartScheduler();
 

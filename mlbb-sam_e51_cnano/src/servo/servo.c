@@ -26,6 +26,8 @@
 #define SERVO_RTOS_PRIORITY       (3)
 #define SERVO_RTOS_STACK_SIZE     (configMINIMAL_STACK_SIZE)
 
+#define SERVO_POWER_UP_DELAY_mS   (100)
+
 #define SERVO_STEPPER19_I2C_ADDRESS_A     (0x70)
 #define SERVO_STEPPER19_I2C_ADDRESS_B     (0x71)
 #define SERVO_STEPPER19_I2C_ADDRESS_C     (0x72)
@@ -64,8 +66,17 @@ static StackType_t  servo_taskStack[ SERVO_RTOS_STACK_SIZE ];
 
 static servo_state_t servos[SERVO_ID_NUM_SERVOS];
 
-//static const uint8_t servo_cmd_config[] = { 0x03, 0x00 };
-//static const uint8_t servo_cmd_output[] = { 0x01, 0x03 };
+// All pins of PCA9538A on Stepper 19 Click set to outputs
+static const uint8_t servo_stepper19_cmd_config[] = { 0x03, 0x00 };
+// P0 -> M0 
+// P1 -> M1 --> M1:M0 = 0b11 = 1/8 microstepping
+// P2 -> DEC0
+// P3 -> DEC1 --> DEC1:DEC0 = 0b00 = Smart Tune Dynamic Decay
+// P4 -> TOFF --> TOFF = 0b1 = 16uS
+// P5 -> STEP (Not Connected)
+// P6 -> DIR (Not Connected)
+// P7 -> N/C
+static const uint8_t servo_stepper19_cmd_output[] = { 0x01, 0x13 };
 
 
 // ******************************************************************
@@ -214,20 +225,22 @@ static void SERVO_RTOS_Task( void * pvParameters )
 {
     (void)pvParameters;
     
-//    DRIVER_I2C_Write( SERVO_STEPPER19_I2C_ADDRESS_A, (uint8_t*)servo_cmd_output, sizeof(servo_cmd_output) );
-//    DRIVER_I2C_Write( SERVO_STEPPER19_I2C_ADDRESS_A, (uint8_t*)servo_cmd_config, sizeof(servo_cmd_config) );
+    vTaskDelay( pdMS_TO_TICKS(SERVO_POWER_UP_DELAY_mS) );
+
+    DRIVER_I2C_Write( SERVO_STEPPER19_I2C_ADDRESS_A, (uint8_t*)servo_stepper19_cmd_output, sizeof(servo_stepper19_cmd_output) );
+    DRIVER_I2C_Write( SERVO_STEPPER19_I2C_ADDRESS_A, (uint8_t*)servo_stepper19_cmd_config, sizeof(servo_stepper19_cmd_config) );
 
     MIKROBUS1_RST_Set();
     MIKROBUS1_CS_Set();
             
-//    DRIVER_I2C_Write( SERVO_STEPPER19_I2C_ADDRESS_B, (uint8_t*)servo_cmd_output, sizeof(servo_cmd_output) );
-//    DRIVER_I2C_Write( SERVO_STEPPER19_I2C_ADDRESS_B, (uint8_t*)servo_cmd_config, sizeof(servo_cmd_config) );
+    DRIVER_I2C_Write( SERVO_STEPPER19_I2C_ADDRESS_B, (uint8_t*)servo_stepper19_cmd_output, sizeof(servo_stepper19_cmd_output) );
+    DRIVER_I2C_Write( SERVO_STEPPER19_I2C_ADDRESS_B, (uint8_t*)servo_stepper19_cmd_config, sizeof(servo_stepper19_cmd_config) );
 
     MIKROBUS2_RST_Set();
     MIKROBUS2_CS_Set();
             
-//    DRIVER_I2C_Write( SERVO_STEPPER19_I2C_ADDRESS_C, (uint8_t*)servo_cmd_output, sizeof(servo_cmd_output) );
-//    DRIVER_I2C_Write( SERVO_STEPPER19_I2C_ADDRESS_C, (uint8_t*)servo_cmd_config, sizeof(servo_cmd_config) );
+    DRIVER_I2C_Write( SERVO_STEPPER19_I2C_ADDRESS_C, (uint8_t*)servo_stepper19_cmd_output, sizeof(servo_stepper19_cmd_output) );
+    DRIVER_I2C_Write( SERVO_STEPPER19_I2C_ADDRESS_C, (uint8_t*)servo_stepper19_cmd_config, sizeof(servo_stepper19_cmd_config) );
 
     MIKROBUS3_RST_Set();
     MIKROBUS3_CS_Set();
@@ -238,6 +251,7 @@ static void SERVO_RTOS_Task( void * pvParameters )
     TC4_CompareCallbackRegister( SERVO_TC4_CompareCallback, (uintptr_t)NULL );
     TC4_CompareStart();
     
+    // Servo module is completely interrupt driven. Don't need the task running any more.
     vTaskSuspend( NULL );
 }
 
@@ -336,6 +350,11 @@ static void SERVO_Drive( servo_id_t servo_id )
             servo->acceleration_delay = 0;
         }
 
+        if( servo->acceleration_delay < 2 )
+        {
+            servo->acceleration_delay = 2;            
+        }
+        
         SERVO_Drive_StepAndDirection( servo_id, (servo->velocity != 0), (servo->velocity >= 0) );
     }
 }
