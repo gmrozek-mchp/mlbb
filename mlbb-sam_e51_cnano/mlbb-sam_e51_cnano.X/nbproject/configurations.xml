@@ -4,6 +4,9 @@
     <logicalFolder name="HeaderFiles"
                    displayName="Header Files"
                    projectFiles="true">
+      <logicalFolder name="f6" displayName="balance" projectFiles="true">
+        <itemPath>../src/balance/balance.h</itemPath>
+      </logicalFolder>
       <logicalFolder name="f3" displayName="ball" projectFiles="true">
         <itemPath>../src/ball/ar1100.h</itemPath>
       </logicalFolder>
@@ -316,6 +319,10 @@
     <logicalFolder name="SourceFiles"
                    displayName="Source Files"
                    projectFiles="true">
+      <logicalFolder name="f6" displayName="balance" projectFiles="true">
+        <itemPath>../src/balance/balance.c</itemPath>
+        <itemPath>../src/balance/balance_cmd.c</itemPath>
+      </logicalFolder>
       <logicalFolder name="f3" displayName="ball" projectFiles="true">
         <itemPath>../src/ball/ar1100.c</itemPath>
         <itemPath>../src/ball/ar1100_cmd.c</itemPath>
@@ -443,6 +450,7 @@
     <Elem>../../extern/CMSIS-DSP/Source</Elem>
     <Elem>../src/servo</Elem>
     <Elem>../src/driver</Elem>
+    <Elem>../src/balance</Elem>
   </sourceRootList>
   <projectmakefile>Makefile</projectmakefile>
   <confs>

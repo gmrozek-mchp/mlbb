@@ -24,7 +24,7 @@
 #define PLATFORM_RTOS_PRIORITY       (3)
 #define PLATFORM_RTOS_STACK_SIZE     (configMINIMAL_STACK_SIZE)
 
-#define PLATFORM_POWER_UP_DELAY_mS   (500)
+#define PLATFORM_POWER_UP_DELAY_mS   (100)
 #define PLATFORM_TASK_RATE_HZ        (100)
 
 
@@ -153,15 +153,7 @@ static void PLATFORM_RTOS_Task( void * pvParameters )
     platform_taskLastWakeTime = xTaskGetTickCount();
     
     while(1)
-    {
-        nunchuk_data_t nunchukData = NUNCHUK_Data_Get();
-        platform_xy_t platformXY;
-        
-        platformXY.x = ((q15_t)nunchukData.joystick_x - 127) * 25;
-        platformXY.y = ((q15_t)nunchukData.joystick_y - 127) * 25;
-
-        PLATFORM_Position_XY_Set( platformXY );
-        
+    {        
         vTaskDelayUntil( &platform_taskLastWakeTime, configTICK_RATE_HZ / PLATFORM_TASK_RATE_HZ );    
     }
 }

@@ -19,6 +19,7 @@
                 <sourceRootElem>../../extern/CMSIS-DSP/Source</sourceRootElem>
                 <sourceRootElem>../src/servo</sourceRootElem>
                 <sourceRootElem>../src/driver</sourceRootElem>
+                <sourceRootElem>../src/balance</sourceRootElem>
             </sourceRootList>
             <confList>
                 <confElem>
