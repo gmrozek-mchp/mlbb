@@ -1,6 +1,8 @@
-#include "servo.h"
+// ******************************************************************
+// Section: Included Files
+// ******************************************************************
 
-#include <xc.h>
+#include "servo.h"
 
 #include <limits.h>
 #include <stddef.h>
@@ -8,10 +10,25 @@
 
 #include "arm_math.h"
 
+#include "FreeRTOS.h"
+#include "task.h"
+
 #include "peripheral/port/plib_port.h"
 #include "peripheral/tc/plib_tc1.h"
 #include "peripheral/tc/plib_tc4.h"
 
+#include "driver/driver_i2c.h"
+
+
+// ******************************************************************
+// Section: Macro Declarations
+// ******************************************************************
+#define SERVO_RTOS_PRIORITY       (3)
+#define SERVO_RTOS_STACK_SIZE     (configMINIMAL_STACK_SIZE)
+
+#define SERVO_STEPPER19_I2C_ADDRESS_A     (0x70)
+#define SERVO_STEPPER19_I2C_ADDRESS_B     (0x71)
+#define SERVO_STEPPER19_I2C_ADDRESS_C     (0x72)
 
 #define SERVO_MOTOR_STEPS_PER_REVOLUTION  (200)
 #define SERVO_DRIVE_MICROSTEPS            (8)
@@ -22,6 +39,10 @@
 #define SERVO_STEP_COMPARE_VALUE    (10)
 
 
+
+// ******************************************************************
+// Section: Data Type Definitions
+// ******************************************************************
 typedef struct {
     q15_t command_angle;
     q15_t limit_angle_min;
@@ -33,8 +54,24 @@ typedef struct {
     int16_t acceleration_delay;
 } servo_state_t;
 
+
+// ******************************************************************
+// Section: Private Variables
+// ******************************************************************
+static TaskHandle_t servo_taskHandle = NULL;
+static StaticTask_t servo_taskBuffer;
+static StackType_t  servo_taskStack[ SERVO_RTOS_STACK_SIZE ];
+
 static servo_state_t servos[SERVO_ID_NUM_SERVOS];
 
+//static const uint8_t servo_cmd_config[] = { 0x03, 0x00 };
+//static const uint8_t servo_cmd_output[] = { 0x01, 0x03 };
+
+
+// ******************************************************************
+// Section: Private Function Declarations
+// ******************************************************************
+static void SERVO_RTOS_Task( void * pvParameters );
 
 static void SERVO_TC1_CompareCallback( TC_COMPARE_STATUS status, uintptr_t context );
 static void SERVO_TC4_CompareCallback( TC_COMPARE_STATUS status, uintptr_t context );
@@ -42,6 +79,10 @@ static void SERVO_TC4_CompareCallback( TC_COMPARE_STATUS status, uintptr_t conte
 static void SERVO_Drive( servo_id_t servo_id );
 static void SERVO_Drive_StepAndDirection( servo_id_t servo_id, bool step, bool direction );
 
+
+// ******************************************************************
+// Section: Public Functions
+// ******************************************************************
 
 void SERVO_Initialize( void )
 {
@@ -59,20 +100,15 @@ void SERVO_Initialize( void )
         servos[index].acceleration_delay = 0;
     }
 
-    MIKROBUS1_RST_Set();
-    MIKROBUS1_CS_Set();
-            
-    MIKROBUS2_RST_Set();
-    MIKROBUS2_CS_Set();
-            
-    MIKROBUS3_RST_Set();
-    MIKROBUS3_CS_Set();
-            
-    TC1_CompareCallbackRegister( SERVO_TC1_CompareCallback, (uintptr_t)NULL );
-    TC1_CompareStart();
-
-    TC4_CompareCallbackRegister( SERVO_TC4_CompareCallback, (uintptr_t)NULL );
-    TC4_CompareStart();
+    servo_taskHandle = xTaskCreateStatic(
+        SERVO_RTOS_Task,        /* Function that implements the task. */
+        "Servo",                /* Text name for the task. */
+        SERVO_RTOS_STACK_SIZE,  /* Number of indexes in the stack. */
+        NULL,                     /* Parameter passed into the task. */
+        SERVO_RTOS_PRIORITY,    /* Priority at which the task is created. */
+        servo_taskStack,         /* Array to use as the task's stack. */
+        &servo_taskBuffer        /* Variable to hold the task's data structure. */
+    );
 }
 
 q15_t SERVO_Position_Get_q15angle( servo_id_t servo_id )
@@ -169,6 +205,41 @@ void SERVO_Position_Command_Set_steps( servo_id_t servo_id, int16_t steps )
     servos[servo_id].command_steps_buffer = steps;    
 }
 
+
+// ******************************************************************
+// Section: Private Functions
+// ******************************************************************
+
+static void SERVO_RTOS_Task( void * pvParameters )
+{
+    (void)pvParameters;
+    
+//    DRIVER_I2C_Write( SERVO_STEPPER19_I2C_ADDRESS_A, (uint8_t*)servo_cmd_output, sizeof(servo_cmd_output) );
+//    DRIVER_I2C_Write( SERVO_STEPPER19_I2C_ADDRESS_A, (uint8_t*)servo_cmd_config, sizeof(servo_cmd_config) );
+
+    MIKROBUS1_RST_Set();
+    MIKROBUS1_CS_Set();
+            
+//    DRIVER_I2C_Write( SERVO_STEPPER19_I2C_ADDRESS_B, (uint8_t*)servo_cmd_output, sizeof(servo_cmd_output) );
+//    DRIVER_I2C_Write( SERVO_STEPPER19_I2C_ADDRESS_B, (uint8_t*)servo_cmd_config, sizeof(servo_cmd_config) );
+
+    MIKROBUS2_RST_Set();
+    MIKROBUS2_CS_Set();
+            
+//    DRIVER_I2C_Write( SERVO_STEPPER19_I2C_ADDRESS_C, (uint8_t*)servo_cmd_output, sizeof(servo_cmd_output) );
+//    DRIVER_I2C_Write( SERVO_STEPPER19_I2C_ADDRESS_C, (uint8_t*)servo_cmd_config, sizeof(servo_cmd_config) );
+
+    MIKROBUS3_RST_Set();
+    MIKROBUS3_CS_Set();
+            
+    TC1_CompareCallbackRegister( SERVO_TC1_CompareCallback, (uintptr_t)NULL );
+    TC1_CompareStart();
+
+    TC4_CompareCallbackRegister( SERVO_TC4_CompareCallback, (uintptr_t)NULL );
+    TC4_CompareStart();
+    
+    vTaskSuspend( NULL );
+}
 
 static void SERVO_TC1_CompareCallback( TC_COMPARE_STATUS status, uintptr_t context )
 {
