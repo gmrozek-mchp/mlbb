@@ -16,6 +16,7 @@
 // ******************************************************************
 // Section: Macro Declarations
 // ******************************************************************
+#define DRIVER_SERCOM_TIMEOUT_mS    (100)
 
 
 // ******************************************************************
@@ -26,8 +27,8 @@
 // ******************************************************************
 // Section: Private Variables
 // ******************************************************************
-static SemaphoreHandle_t DRIVER_I2C_Mutex = NULL;
-static StaticSemaphore_t DRIVER_I2C_MutexBuffer;
+static SemaphoreHandle_t DRIVER_I2C_SERCOM_Mutex = NULL;
+static StaticSemaphore_t DRIVER_I2C_SERCOM_MutexBuffer;
 
 static TaskHandle_t DRIVER_I2C_TaskToNotify = NULL;
 
@@ -44,14 +45,14 @@ static void DRIVER_SERCOM_I2C_Callback( uintptr_t context );
 
 void DRIVER_I2C_Initialize( void )
 {
-    DRIVER_I2C_Mutex = xSemaphoreCreateMutexStatic( &DRIVER_I2C_MutexBuffer );
+    DRIVER_I2C_SERCOM_Mutex = xSemaphoreCreateMutexStatic( &DRIVER_I2C_SERCOM_MutexBuffer );
 
     SERCOM2_I2C_CallbackRegister( DRIVER_SERCOM_I2C_Callback, (uintptr_t)NULL );
 }
 
 void DRIVER_I2C_Write(uint16_t address, uint8_t* wrData, uint32_t wrLength)
 {
-    while( xSemaphoreTake(DRIVER_I2C_Mutex, 10) != pdTRUE )
+    while( xSemaphoreTake(DRIVER_I2C_SERCOM_Mutex, pdMS_TO_TICKS(DRIVER_SERCOM_TIMEOUT_mS)) != pdTRUE )
     {
         // Unable to obtain mutex
     }
@@ -60,14 +61,14 @@ void DRIVER_I2C_Write(uint16_t address, uint8_t* wrData, uint32_t wrLength)
     
     DRIVER_I2C_TaskToNotify = xTaskGetCurrentTaskHandle();
     
-    (void)ulTaskNotifyTake( pdTRUE, 10 );        
+    (void)ulTaskNotifyTake( pdTRUE, pdMS_TO_TICKS(DRIVER_SERCOM_TIMEOUT_mS) );        
     
-    xSemaphoreGive( DRIVER_I2C_Mutex );    
+    xSemaphoreGive( DRIVER_I2C_SERCOM_Mutex );    
 }
 
 void DRIVER_I2C_Read(uint16_t address, uint8_t* rdData, uint32_t rdLength)
 {
-    while( xSemaphoreTake(DRIVER_I2C_Mutex, 10) != pdTRUE )
+    while( xSemaphoreTake(DRIVER_I2C_SERCOM_Mutex, pdMS_TO_TICKS(DRIVER_SERCOM_TIMEOUT_mS)) != pdTRUE )
     {
         // Unable to obtain mutex
     }
@@ -76,9 +77,9 @@ void DRIVER_I2C_Read(uint16_t address, uint8_t* rdData, uint32_t rdLength)
     
     DRIVER_I2C_TaskToNotify = xTaskGetCurrentTaskHandle();
     
-    (void)ulTaskNotifyTake( pdTRUE, 10 );        
+    (void)ulTaskNotifyTake( pdTRUE, pdMS_TO_TICKS(DRIVER_SERCOM_TIMEOUT_mS) );
     
-    xSemaphoreGive( DRIVER_I2C_Mutex );
+    xSemaphoreGive( DRIVER_I2C_SERCOM_Mutex );
 }
 
 
