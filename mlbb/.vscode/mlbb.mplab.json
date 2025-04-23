@@ -6,6 +6,7 @@
             "id": "conf1",
             "device": "ATSAME51J20A",
             "imagePath": "./out/mlbb/default.elf",
+            "tool": "PKOB nano",
             "packs": [
                 {
                     "name": "SAME51_DFP",
