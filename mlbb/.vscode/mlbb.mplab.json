@@ -91,7 +91,7 @@
                 "../extern/FreeRTOS-Kernel/portable/GCC/ARM_CM4F/portmacro.h",
                 "../bsp/sam_e51_cnano/src/config/default/ATSAME51J20A.ld",
                 "../bsp/sam_e51_cnano/src/bsp.c",
-                "../bsp/sam_e51_cnano/src/freertos_hooks.c",
+                "../bsp/sam_e51_cnano/src/freertos/freertos_hooks.c",
                 "../bsp/sam_e51_cnano/src/config/default/exceptions.c",
                 "../bsp/sam_e51_cnano/src/config/default/initialization.c",
                 "../bsp/sam_e51_cnano/src/config/default/interrupts.c",
