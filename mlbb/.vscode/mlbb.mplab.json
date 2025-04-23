@@ -2,7 +2,7 @@
     "version": "1.4",
     "configurations": [
         {
-            "name": "default",
+            "name": "sam_e51_cnano",
             "id": "conf1",
             "device": "ATSAME51J20A",
             "imagePath": "./out/mlbb/default.elf",
@@ -18,7 +18,7 @@
                     "version": "6.1.0"
                 }
             ],
-            "fileSet": "default",
+            "fileSet": "sam_e51_cnano",
             "toolchain": "default-XC32"
         }
     ],
@@ -32,7 +32,7 @@
     ],
     "fileSets": [
         {
-            "name": "default",
+            "name": "sam_e51_cnano",
             "files": [
                 {
                     "include": "**/*",
