@@ -65,6 +65,141 @@
 // *****************************************************************************
 // *****************************************************************************
 
+/*** Macros for MIKROBUS1_DIR pin ***/
+#define MIKROBUS1_DIR_Set()               (PORT_REGS->GROUP[0].PORT_OUTSET = ((uint32_t)1U << 2U))
+#define MIKROBUS1_DIR_Clear()             (PORT_REGS->GROUP[0].PORT_OUTCLR = ((uint32_t)1U << 2U))
+#define MIKROBUS1_DIR_Toggle()            (PORT_REGS->GROUP[0].PORT_OUTTGL = ((uint32_t)1U << 2U))
+#define MIKROBUS1_DIR_OutputEnable()      (PORT_REGS->GROUP[0].PORT_DIRSET = ((uint32_t)1U << 2U))
+#define MIKROBUS1_DIR_InputEnable()       (PORT_REGS->GROUP[0].PORT_DIRCLR = ((uint32_t)1U << 2U))
+#define MIKROBUS1_DIR_Get()               (((PORT_REGS->GROUP[0].PORT_IN >> 2U)) & 0x01U)
+#define MIKROBUS1_DIR_PIN                  PORT_PIN_PA02
+
+/*** Macros for MIKROBUS3_CS pin ***/
+#define MIKROBUS3_CS_Set()               (PORT_REGS->GROUP[1].PORT_OUTSET = ((uint32_t)1U << 4U))
+#define MIKROBUS3_CS_Clear()             (PORT_REGS->GROUP[1].PORT_OUTCLR = ((uint32_t)1U << 4U))
+#define MIKROBUS3_CS_Toggle()            (PORT_REGS->GROUP[1].PORT_OUTTGL = ((uint32_t)1U << 4U))
+#define MIKROBUS3_CS_OutputEnable()      (PORT_REGS->GROUP[1].PORT_DIRSET = ((uint32_t)1U << 4U))
+#define MIKROBUS3_CS_InputEnable()       (PORT_REGS->GROUP[1].PORT_DIRCLR = ((uint32_t)1U << 4U))
+#define MIKROBUS3_CS_Get()               (((PORT_REGS->GROUP[1].PORT_IN >> 4U)) & 0x01U)
+#define MIKROBUS3_CS_PIN                  PORT_PIN_PB04
+
+/*** Macros for MIKROBUS2_CS pin ***/
+#define MIKROBUS2_CS_Set()               (PORT_REGS->GROUP[1].PORT_OUTSET = ((uint32_t)1U << 5U))
+#define MIKROBUS2_CS_Clear()             (PORT_REGS->GROUP[1].PORT_OUTCLR = ((uint32_t)1U << 5U))
+#define MIKROBUS2_CS_Toggle()            (PORT_REGS->GROUP[1].PORT_OUTTGL = ((uint32_t)1U << 5U))
+#define MIKROBUS2_CS_OutputEnable()      (PORT_REGS->GROUP[1].PORT_DIRSET = ((uint32_t)1U << 5U))
+#define MIKROBUS2_CS_InputEnable()       (PORT_REGS->GROUP[1].PORT_DIRCLR = ((uint32_t)1U << 5U))
+#define MIKROBUS2_CS_Get()               (((PORT_REGS->GROUP[1].PORT_IN >> 5U)) & 0x01U)
+#define MIKROBUS2_CS_PIN                  PORT_PIN_PB05
+
+/*** Macros for MIKROBUS3_RST pin ***/
+#define MIKROBUS3_RST_Set()               (PORT_REGS->GROUP[1].PORT_OUTSET = ((uint32_t)1U << 6U))
+#define MIKROBUS3_RST_Clear()             (PORT_REGS->GROUP[1].PORT_OUTCLR = ((uint32_t)1U << 6U))
+#define MIKROBUS3_RST_Toggle()            (PORT_REGS->GROUP[1].PORT_OUTTGL = ((uint32_t)1U << 6U))
+#define MIKROBUS3_RST_OutputEnable()      (PORT_REGS->GROUP[1].PORT_DIRSET = ((uint32_t)1U << 6U))
+#define MIKROBUS3_RST_InputEnable()       (PORT_REGS->GROUP[1].PORT_DIRCLR = ((uint32_t)1U << 6U))
+#define MIKROBUS3_RST_Get()               (((PORT_REGS->GROUP[1].PORT_IN >> 6U)) & 0x01U)
+#define MIKROBUS3_RST_PIN                  PORT_PIN_PB06
+
+/*** Macros for MIKROBUS3_DIR pin ***/
+#define MIKROBUS3_DIR_Set()               (PORT_REGS->GROUP[1].PORT_OUTSET = ((uint32_t)1U << 8U))
+#define MIKROBUS3_DIR_Clear()             (PORT_REGS->GROUP[1].PORT_OUTCLR = ((uint32_t)1U << 8U))
+#define MIKROBUS3_DIR_Toggle()            (PORT_REGS->GROUP[1].PORT_OUTTGL = ((uint32_t)1U << 8U))
+#define MIKROBUS3_DIR_OutputEnable()      (PORT_REGS->GROUP[1].PORT_DIRSET = ((uint32_t)1U << 8U))
+#define MIKROBUS3_DIR_InputEnable()       (PORT_REGS->GROUP[1].PORT_DIRCLR = ((uint32_t)1U << 8U))
+#define MIKROBUS3_DIR_Get()               (((PORT_REGS->GROUP[1].PORT_IN >> 8U)) & 0x01U)
+#define MIKROBUS3_DIR_PIN                  PORT_PIN_PB08
+
+/*** Macros for MIKROBUS3_PWM pin ***/
+#define MIKROBUS3_PWM_Get()               (((PORT_REGS->GROUP[1].PORT_IN >> 9U)) & 0x01U)
+#define MIKROBUS3_PWM_PIN                  PORT_PIN_PB09
+
+/*** Macros for MIKROBUS2_RST pin ***/
+#define MIKROBUS2_RST_Set()               (PORT_REGS->GROUP[0].PORT_OUTSET = ((uint32_t)1U << 6U))
+#define MIKROBUS2_RST_Clear()             (PORT_REGS->GROUP[0].PORT_OUTCLR = ((uint32_t)1U << 6U))
+#define MIKROBUS2_RST_Toggle()            (PORT_REGS->GROUP[0].PORT_OUTTGL = ((uint32_t)1U << 6U))
+#define MIKROBUS2_RST_OutputEnable()      (PORT_REGS->GROUP[0].PORT_DIRSET = ((uint32_t)1U << 6U))
+#define MIKROBUS2_RST_InputEnable()       (PORT_REGS->GROUP[0].PORT_DIRCLR = ((uint32_t)1U << 6U))
+#define MIKROBUS2_RST_Get()               (((PORT_REGS->GROUP[0].PORT_IN >> 6U)) & 0x01U)
+#define MIKROBUS2_RST_PIN                  PORT_PIN_PA06
+
+/*** Macros for MIKROBUS1_RST pin ***/
+#define MIKROBUS1_RST_Set()               (PORT_REGS->GROUP[0].PORT_OUTSET = ((uint32_t)1U << 7U))
+#define MIKROBUS1_RST_Clear()             (PORT_REGS->GROUP[0].PORT_OUTCLR = ((uint32_t)1U << 7U))
+#define MIKROBUS1_RST_Toggle()            (PORT_REGS->GROUP[0].PORT_OUTTGL = ((uint32_t)1U << 7U))
+#define MIKROBUS1_RST_OutputEnable()      (PORT_REGS->GROUP[0].PORT_DIRSET = ((uint32_t)1U << 7U))
+#define MIKROBUS1_RST_InputEnable()       (PORT_REGS->GROUP[0].PORT_DIRCLR = ((uint32_t)1U << 7U))
+#define MIKROBUS1_RST_Get()               (((PORT_REGS->GROUP[0].PORT_IN >> 7U)) & 0x01U)
+#define MIKROBUS1_RST_PIN                  PORT_PIN_PA07
+
+/*** Macros for EXT1_USART_TX pin ***/
+#define EXT1_USART_TX_Get()               (((PORT_REGS->GROUP[0].PORT_IN >> 8U)) & 0x01U)
+#define EXT1_USART_TX_PIN                  PORT_PIN_PA08
+
+/*** Macros for EXT1_USART_RX pin ***/
+#define EXT1_USART_RX_Get()               (((PORT_REGS->GROUP[0].PORT_IN >> 9U)) & 0x01U)
+#define EXT1_USART_RX_PIN                  PORT_PIN_PA09
+
+/*** Macros for MIKROBUS1_PWM pin ***/
+#define MIKROBUS1_PWM_Get()               (((PORT_REGS->GROUP[0].PORT_IN >> 10U)) & 0x01U)
+#define MIKROBUS1_PWM_PIN                  PORT_PIN_PA10
+
+/*** Macros for MIKROBUS2_PWM pin ***/
+#define MIKROBUS2_PWM_Get()               (((PORT_REGS->GROUP[0].PORT_IN >> 11U)) & 0x01U)
+#define MIKROBUS2_PWM_PIN                  PORT_PIN_PA11
+
+/*** Macros for EXT1_I2C_SDA pin ***/
+#define EXT1_I2C_SDA_Get()               (((PORT_REGS->GROUP[0].PORT_IN >> 12U)) & 0x01U)
+#define EXT1_I2C_SDA_PIN                  PORT_PIN_PA12
+
+/*** Macros for EXT1_I2C_SCL pin ***/
+#define EXT1_I2C_SCL_Get()               (((PORT_REGS->GROUP[0].PORT_IN >> 13U)) & 0x01U)
+#define EXT1_I2C_SCL_PIN                  PORT_PIN_PA13
+
+/*** Macros for LED pin ***/
+#define LED_Set()               (PORT_REGS->GROUP[0].PORT_OUTSET = ((uint32_t)1U << 14U))
+#define LED_Clear()             (PORT_REGS->GROUP[0].PORT_OUTCLR = ((uint32_t)1U << 14U))
+#define LED_Toggle()            (PORT_REGS->GROUP[0].PORT_OUTTGL = ((uint32_t)1U << 14U))
+#define LED_OutputEnable()      (PORT_REGS->GROUP[0].PORT_DIRSET = ((uint32_t)1U << 14U))
+#define LED_InputEnable()       (PORT_REGS->GROUP[0].PORT_DIRCLR = ((uint32_t)1U << 14U))
+#define LED_Get()               (((PORT_REGS->GROUP[0].PORT_IN >> 14U)) & 0x01U)
+#define LED_PIN                  PORT_PIN_PA14
+
+/*** Macros for BUTTON pin ***/
+#define BUTTON_Set()               (PORT_REGS->GROUP[0].PORT_OUTSET = ((uint32_t)1U << 15U))
+#define BUTTON_Clear()             (PORT_REGS->GROUP[0].PORT_OUTCLR = ((uint32_t)1U << 15U))
+#define BUTTON_Toggle()            (PORT_REGS->GROUP[0].PORT_OUTTGL = ((uint32_t)1U << 15U))
+#define BUTTON_OutputEnable()      (PORT_REGS->GROUP[0].PORT_DIRSET = ((uint32_t)1U << 15U))
+#define BUTTON_InputEnable()       (PORT_REGS->GROUP[0].PORT_DIRCLR = ((uint32_t)1U << 15U))
+#define BUTTON_Get()               (((PORT_REGS->GROUP[0].PORT_IN >> 15U)) & 0x01U)
+#define BUTTON_PIN                  PORT_PIN_PA15
+
+/*** Macros for MIKROBUS1_CS pin ***/
+#define MIKROBUS1_CS_Set()               (PORT_REGS->GROUP[0].PORT_OUTSET = ((uint32_t)1U << 18U))
+#define MIKROBUS1_CS_Clear()             (PORT_REGS->GROUP[0].PORT_OUTCLR = ((uint32_t)1U << 18U))
+#define MIKROBUS1_CS_Toggle()            (PORT_REGS->GROUP[0].PORT_OUTTGL = ((uint32_t)1U << 18U))
+#define MIKROBUS1_CS_OutputEnable()      (PORT_REGS->GROUP[0].PORT_DIRSET = ((uint32_t)1U << 18U))
+#define MIKROBUS1_CS_InputEnable()       (PORT_REGS->GROUP[0].PORT_DIRCLR = ((uint32_t)1U << 18U))
+#define MIKROBUS1_CS_Get()               (((PORT_REGS->GROUP[0].PORT_IN >> 18U)) & 0x01U)
+#define MIKROBUS1_CS_PIN                  PORT_PIN_PA18
+
+/*** Macros for VIRTUAL_COM_TX pin ***/
+#define VIRTUAL_COM_TX_Get()               (((PORT_REGS->GROUP[1].PORT_IN >> 16U)) & 0x01U)
+#define VIRTUAL_COM_TX_PIN                  PORT_PIN_PB16
+
+/*** Macros for VIRTUAL_COM_RX pin ***/
+#define VIRTUAL_COM_RX_Get()               (((PORT_REGS->GROUP[1].PORT_IN >> 17U)) & 0x01U)
+#define VIRTUAL_COM_RX_PIN                  PORT_PIN_PB17
+
+/*** Macros for MIKROBUS2_DIR pin ***/
+#define MIKROBUS2_DIR_Set()               (PORT_REGS->GROUP[1].PORT_OUTSET = ((uint32_t)1U << 3U))
+#define MIKROBUS2_DIR_Clear()             (PORT_REGS->GROUP[1].PORT_OUTCLR = ((uint32_t)1U << 3U))
+#define MIKROBUS2_DIR_Toggle()            (PORT_REGS->GROUP[1].PORT_OUTTGL = ((uint32_t)1U << 3U))
+#define MIKROBUS2_DIR_OutputEnable()      (PORT_REGS->GROUP[1].PORT_DIRSET = ((uint32_t)1U << 3U))
+#define MIKROBUS2_DIR_InputEnable()       (PORT_REGS->GROUP[1].PORT_DIRCLR = ((uint32_t)1U << 3U))
+#define MIKROBUS2_DIR_Get()               (((PORT_REGS->GROUP[1].PORT_IN >> 3U)) & 0x01U)
+#define MIKROBUS2_DIR_PIN                  PORT_PIN_PB03
+
 // *****************************************************************************
 /* PORT Group
 
@@ -305,6 +440,40 @@ typedef enum
 // Section: Generated API based on pin configurations done in Pin Manager
 // *****************************************************************************
 // *****************************************************************************
+// *****************************************************************************
+/* Function:
+    void PORT_Initialize(void)
+
+  Summary:
+    Initializes the PORT Library.
+
+  Description:
+    This function initializes all ports and pins as configured in the
+    MHC Pin Manager.
+
+  Precondition:
+    None.
+
+  Parameters:
+    None.
+
+  Returns:
+    None.
+
+  Example:
+    <code>
+
+    PORT_Initialize();
+
+    </code>
+
+  Remarks:
+    The function should be called once before calling any other PORTS PLIB
+    functions.
+*/
+
+void PORT_Initialize(void);
+
 // *****************************************************************************
 // *****************************************************************************
 // Section: PORT APIs which operates on multiple pins of a group

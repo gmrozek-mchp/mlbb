@@ -53,6 +53,66 @@
 // *****************************************************************************
 // *****************************************************************************
 // *****************************************************************************
+/* Function:
+
+    void PORT_Initialize(void)
+
+  Summary:
+    Initializes the PORT Library.
+
+  Description:
+    This function initializes all ports and pins as configured in the
+    MHC Pin Manager.
+
+  Remarks:
+    Refer plib_port.h file for more information.
+*/
+
+void PORT_Initialize(void)
+{
+   /************************** GROUP 0 Initialization *************************/
+   PORT_REGS->GROUP[0].PORT_DIR = 0x44dc4U;
+   PORT_REGS->GROUP[0].PORT_OUT = 0xc000U;
+   PORT_REGS->GROUP[0].PORT_PINCFG[2] = 0x0U;
+   PORT_REGS->GROUP[0].PORT_PINCFG[6] = 0x0U;
+   PORT_REGS->GROUP[0].PORT_PINCFG[7] = 0x0U;
+   PORT_REGS->GROUP[0].PORT_PINCFG[8] = 0x3U;
+   PORT_REGS->GROUP[0].PORT_PINCFG[9] = 0x1U;
+   PORT_REGS->GROUP[0].PORT_PINCFG[10] = 0x3U;
+   PORT_REGS->GROUP[0].PORT_PINCFG[11] = 0x3U;
+   PORT_REGS->GROUP[0].PORT_PINCFG[12] = 0x1U;
+   PORT_REGS->GROUP[0].PORT_PINCFG[13] = 0x1U;
+   PORT_REGS->GROUP[0].PORT_PINCFG[14] = 0x0U;
+   PORT_REGS->GROUP[0].PORT_PINCFG[15] = 0x6U;
+   PORT_REGS->GROUP[0].PORT_PINCFG[18] = 0x0U;
+
+   PORT_REGS->GROUP[0].PORT_PMUX[1] = 0x0U;
+   PORT_REGS->GROUP[0].PORT_PMUX[3] = 0x0U;
+   PORT_REGS->GROUP[0].PORT_PMUX[4] = 0x22U;
+   PORT_REGS->GROUP[0].PORT_PMUX[5] = 0x44U;
+   PORT_REGS->GROUP[0].PORT_PMUX[6] = 0x22U;
+   PORT_REGS->GROUP[0].PORT_PMUX[7] = 0x0U;
+   PORT_REGS->GROUP[0].PORT_PMUX[9] = 0x0U;
+
+   /************************** GROUP 1 Initialization *************************/
+   PORT_REGS->GROUP[1].PORT_DIR = 0x178U;
+   PORT_REGS->GROUP[1].PORT_PINCFG[3] = 0x0U;
+   PORT_REGS->GROUP[1].PORT_PINCFG[4] = 0x0U;
+   PORT_REGS->GROUP[1].PORT_PINCFG[5] = 0x0U;
+   PORT_REGS->GROUP[1].PORT_PINCFG[6] = 0x0U;
+   PORT_REGS->GROUP[1].PORT_PINCFG[8] = 0x0U;
+   PORT_REGS->GROUP[1].PORT_PINCFG[9] = 0x1U;
+   PORT_REGS->GROUP[1].PORT_PINCFG[16] = 0x1U;
+   PORT_REGS->GROUP[1].PORT_PINCFG[17] = 0x1U;
+
+   PORT_REGS->GROUP[1].PORT_PMUX[1] = 0x0U;
+   PORT_REGS->GROUP[1].PORT_PMUX[2] = 0x0U;
+   PORT_REGS->GROUP[1].PORT_PMUX[3] = 0x0U;
+   PORT_REGS->GROUP[1].PORT_PMUX[4] = 0x40U;
+   PORT_REGS->GROUP[1].PORT_PMUX[8] = 0x22U;
+
+
+}
 // *****************************************************************************
 /* Function:
     uint32_t PORT_GroupRead(PORT_GROUP group)
