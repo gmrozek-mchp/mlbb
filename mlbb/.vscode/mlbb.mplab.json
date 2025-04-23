@@ -1,0 +1,44 @@
+{
+    "version": "1.4",
+    "configurations": [
+        {
+            "name": "default",
+            "id": "conf1",
+            "device": "ATSAME51J20A",
+            "imagePath": "./out/mlbb/default.elf",
+            "packs": [
+                {
+                    "name": "SAME51_DFP",
+                    "vendor": "Microchip",
+                    "version": "3.8.253"
+                },
+                {
+                    "name": "CMSIS",
+                    "vendor": "ARM",
+                    "version": "6.1.0"
+                }
+            ],
+            "fileSet": "default",
+            "toolchain": "default-XC32"
+        }
+    ],
+    "propertyGroups": [
+        {
+            "name": "default-XC32",
+            "type": "toolchain",
+            "provider": "microchip.toolchains:xc32@4.60",
+            "properties": {}
+        }
+    ],
+    "fileSets": [
+        {
+            "name": "default",
+            "files": [
+                {
+                    "include": "**/*",
+                    "exclude": "**/(_build|out|cmake|.vscode)/**/*"
+                }
+            ]
+        }
+    ]
+}

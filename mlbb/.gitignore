@@ -1,0 +1,7 @@
+_build
+cmake
+
+# Large Files
+*.exe
+*.zip
+*.pdf

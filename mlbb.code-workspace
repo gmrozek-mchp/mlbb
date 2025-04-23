@@ -5,6 +5,10 @@
 		},
 		{
 			"path": "extern"
+		},
+		{
+			"name": "mlbb",
+			"path": "mlbb"
 		}
 	]
 }
