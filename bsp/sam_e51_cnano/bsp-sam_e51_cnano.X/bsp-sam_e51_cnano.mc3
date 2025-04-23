@@ -8650,6 +8650,17 @@
          <value>__ROOTVIEW</value>
       </entry>
       <entry>
+         <key class="com.microchip.mcc.core.tokenManager.CustomKey" moduleName="core" name="CoreMainFile"/>
+         <value>&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;&lt;core&gt;
+  &lt;core dnOrder=&quot;0&quot; id=&quot;CoreMainFile&quot;&gt;
+    &lt;Values dnOrder=&quot;0&quot;&gt;
+      &lt;User dnOrder=&quot;0&quot; value=&quot;false&quot;/&gt;
+    &lt;/Values&gt;
+  &lt;/core&gt;
+&lt;/core&gt;
+</value>
+      </entry>
+      <entry>
          <key class="com.microchip.mcc.core.tokenManager.CustomKey" moduleName="core" name="GCLK_ID_23_CHEN"/>
          <value>&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;&lt;core&gt;
   &lt;core dnOrder=&quot;0&quot; id=&quot;GCLK_ID_23_CHEN&quot;&gt;
@@ -8755,6 +8766,19 @@
     &lt;Values dnOrder=&quot;0&quot;&gt;
       &lt;Dynamic dnOrder=&quot;0&quot; id=&quot;core&quot; value=&quot;60000000&quot;/&gt;
     &lt;/Values&gt;
+  &lt;/core&gt;
+&lt;/core&gt;
+</value>
+      </entry>
+      <entry>
+         <key class="com.microchip.mcc.core.tokenManager.CustomKey" moduleName="core" name="MAIN_C"/>
+         <value>&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;&lt;core&gt;
+  &lt;core dnOrder=&quot;0&quot; id=&quot;MAIN_C&quot;&gt;
+    &lt;Attributes dnOrder=&quot;0&quot;&gt;
+      &lt;Boolean dnOrder=&quot;0&quot; id=&quot;enabled&quot;&gt;
+        &lt;Value dnOrder=&quot;0&quot;&gt;false&lt;/Value&gt;
+      &lt;/Boolean&gt;
+    &lt;/Attributes&gt;
   &lt;/core&gt;
 &lt;/core&gt;
 </value>
@@ -18594,7 +18618,7 @@
       </entry>
       <entry>
          <file>../src/config/default/definitions.h</file>
-         <hash>76e7001746ae2a49fa278f8beea509a7cb2f4e8619a8fabb0000a802a1f331db</hash>
+         <hash>46f166884ae363ef801621335c9f212631da27459897bfdddf0044b471a1221b</hash>
       </entry>
       <entry>
          <file>../src/config/default/device.h</file>
@@ -18614,7 +18638,7 @@
       </entry>
       <entry>
          <file>../src/config/default/initialization.c</file>
-         <hash>c37edd0026c1648c9a2bc25cd9daca9cf3fad8199d3ba726ca5df333fe12879b</hash>
+         <hash>0018662fdbd2b4f5a2baf9f3a4adb95cf2494b5ba0894ce90f2137e968cd2942</hash>
       </entry>
       <entry>
          <file>../src/config/default/interrupts.c</file>
@@ -18759,10 +18783,6 @@
       <entry>
          <file>../src/config/default/toolchain_specifics.h</file>
          <hash>6fc0551b0fa3362678b3d7a227386fafa343140d31e4da3ad4af972e61cd0acb</hash>
-      </entry>
-      <entry>
-         <file>../src/main.c</file>
-         <hash>d3c233d419e6304bfacbafc18cc68c0f5c26e365f23b20ea40ccfac458f664c5</hash>
       </entry>
       <entry>
          <file>../src/packs/ATSAME51J20A_DFP/component/ac.h</file>
