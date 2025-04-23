@@ -6,7 +6,7 @@
     Microchip Technology Inc.
 
   File Name:
-    plib_sercom5_i2c.h
+    plib_sercom2_i2c.h
 
   Summary:
     SERCOM I2C PLIB Header file
@@ -41,8 +41,8 @@
 *******************************************************************************/
 // DOM-IGNORE-END
 
-#ifndef PLIB_SERCOM5_I2C_H
-#define PLIB_SERCOM5_I2C_H
+#ifndef PLIB_SERCOM2_I2C_H
+#define PLIB_SERCOM2_I2C_H
 
 // *****************************************************************************
 // *****************************************************************************
@@ -73,26 +73,26 @@
  * this interface.
  */
 
-void SERCOM5_I2C_Initialize(void);
+void SERCOM2_I2C_Initialize(void);
 
-bool SERCOM5_I2C_Read(uint16_t address, uint8_t* rdData, uint32_t rdLength);
+bool SERCOM2_I2C_Read(uint16_t address, uint8_t* rdData, uint32_t rdLength);
 
-bool SERCOM5_I2C_Write(uint16_t address, uint8_t* wrData, uint32_t wrLength);
+bool SERCOM2_I2C_Write(uint16_t address, uint8_t* wrData, uint32_t wrLength);
 
-bool SERCOM5_I2C_WriteRead(uint16_t address, uint8_t* wrData, uint32_t wrLength, uint8_t* rdData, uint32_t rdLength);
+bool SERCOM2_I2C_WriteRead(uint16_t address, uint8_t* wrData, uint32_t wrLength, uint8_t* rdData, uint32_t rdLength);
 
-bool SERCOM5_I2C_IsBusy(void);
+bool SERCOM2_I2C_IsBusy(void);
 
-SERCOM_I2C_ERROR SERCOM5_I2C_ErrorGet(void);
+SERCOM_I2C_ERROR SERCOM2_I2C_ErrorGet(void);
 
-void SERCOM5_I2C_CallbackRegister(SERCOM_I2C_CALLBACK callback, uintptr_t contextHandle);
+void SERCOM2_I2C_CallbackRegister(SERCOM_I2C_CALLBACK callback, uintptr_t contextHandle);
 
-bool SERCOM5_I2C_TransferSetup(SERCOM_I2C_TRANSFER_SETUP* setup, uint32_t srcClkFreq );
+bool SERCOM2_I2C_TransferSetup(SERCOM_I2C_TRANSFER_SETUP* setup, uint32_t srcClkFreq );
 
 
-void SERCOM5_I2C_TransferAbort( void );
+void SERCOM2_I2C_TransferAbort( void );
 
-bool SERCOM5_I2C_BusScan(uint16_t start_addr, uint16_t end_addr, void* pDevicesList, uint8_t* nDevicesFound);
+bool SERCOM2_I2C_BusScan(uint16_t start_addr, uint16_t end_addr, void* pDevicesList, uint8_t* nDevicesFound);
 
 
 // DOM-IGNORE-BEGIN
@@ -101,4 +101,4 @@ bool SERCOM5_I2C_BusScan(uint16_t start_addr, uint16_t end_addr, void* pDevicesL
 #endif
 // DOM-IGNORE-END
 
-#endif /* PLIB_SERCOM5_I2C_H */
+#endif /* PLIB_SERCOM2_I2C_H */
