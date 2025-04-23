@@ -29,6 +29,7 @@
             "provider": "microchip.toolchains:xc32@4.60",
             "properties": {
                 "compiler.extra-include-directories": [
+                    ".",
                     "../bsp/sam_e51_cnano/src",
                     "../bsp/sam_e51_cnano/src/config/default",
                     "../extern/FreeRTOS-Kernel/include",
@@ -119,7 +120,13 @@
                 "../extern/FreeRTOS-Kernel/stream_buffer.c",
                 "../extern/FreeRTOS-Kernel/tasks.c",
                 "../extern/FreeRTOS-Kernel/timers.c",
-                "main.c"
+                "main.c",
+                "command/command.h",
+                "command/command_config.h",
+                "command/command_hal.h",
+                "command/command.c",
+                "command/command_list.c",
+                "../bsp/sam_e51_cnano/src/command/command_hal.c"
             ]
         }
     ]
