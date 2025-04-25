@@ -188,7 +188,7 @@ static cmd_function_t s_previous_command;
 #error "s_cmd_list_size cannot exceed 256"
 #endif
 static cmd_descriptor_t s_cmd_list[CMD_COMMAND_LIST_SIZE];
-static uint8_t s_cmd_list_size;
+static uint8_t s_cmd_list_size = 0;
 
 
 // ******************************************************************
@@ -251,6 +251,8 @@ bool CMD_RegisterCommand( const char* string, cmd_function_t function )
 
     s_cmd_list[s_cmd_list_size].string = string;
     s_cmd_list[s_cmd_list_size].function = function;
+
+    s_cmd_list_size++;
 
     return true;
 }
@@ -568,8 +570,6 @@ uint8_t CMD_GetArgv( uint8_t argv_index,
 
 void CMD_Initialize(void)
 {
-    s_cmd_list_size = 0;
-
     CMD_HAL_Initialize();
 
     CMD_STATE_TRANSITION_STRING(CMD_STATE_INIT, NULL);
