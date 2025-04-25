@@ -86,6 +86,33 @@ typedef void (*cmd_function_t)( void );
 
 /**
   Summary:
+    Register a command with the Command Processor
+
+  Description:
+    This function will register a command string / command function pair with
+      the Command Processor.
+
+  Preconditions:
+    None.
+
+  Parameters:
+    const char* string      - null-terminated string to be output by command processor
+    cmd_function_t function - function to be called in response to command string
+
+  Returns:
+    bool - true on success. otherwise false (command list full or invalid parameter)
+
+  Comments:
+    Command string may not contain the space character as it is used as a delimter by
+      the Command Processor.
+    There is no check for duplicate strings in the command list. Only the first
+      registered instance of a command string will be recognized.
+*/
+bool CMD_RegisterCommand( const char* string, cmd_function_t function );
+
+
+/**
+  Summary:
     Outputs a null-terminated string. 
 
   Description:
@@ -102,7 +129,7 @@ typedef void (*cmd_function_t)( void );
                             for output
 
   Returns:
-    const char* - If non-blocking and output buffer full, pointer to remainder
+    char* - If non-blocking and output buffer full, pointer to remainder
                      of string not yet queued for output.
                   Otherwise, NULL
 
@@ -131,7 +158,7 @@ char* CMD_PrintString( const char* string, bool block );
                        for output
 
   Returns:
-    const uint8_t* - If non-blocking and output buffer full, pointer to remainder
+    uint8_t* - If non-blocking and output buffer full, pointer to remainder
                      of array not yet queued for output.
                   Otherwise, NULL
 
@@ -252,9 +279,6 @@ void CMD_Initialize( void );
       with timing of other processes.
 */
 void CMD_Task( void );
-
-
-bool CMD_RegisterCommand( const char* string, cmd_function_t function );
 
 
 #ifdef __cplusplus  // Provide C++ Compatibility
