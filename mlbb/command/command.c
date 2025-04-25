@@ -568,6 +568,8 @@ uint8_t CMD_GetArgv( uint8_t argv_index,
 
 void CMD_Initialize(void)
 {
+    s_cmd_list_size = 0;
+
     CMD_HAL_Initialize();
 
     CMD_STATE_TRANSITION_STRING(CMD_STATE_INIT, NULL);
@@ -653,7 +655,6 @@ void CMD_Task(void)
 static void Handler_Init(void)
 {
     s_cmd_end_index = 0;
-    s_cmd_list_size = 0;
 
 #if CMD_USE_CIRCUILAR_BUFFER
     for( s_cmd_buffer_full_index=0;
