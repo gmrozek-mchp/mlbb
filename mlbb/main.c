@@ -13,6 +13,7 @@
 #include "task.h"
 
 #include "command/command.h"
+#include "nunchuk/nunchuk.h"
 #include "platform/platform.h"
  
 
@@ -46,6 +47,7 @@ int main()
 
     CMD_Initialize();
 
+    NUNCHUK_Initialize();
     PLATFORM_Initialize();
 
     CMD_RegisterCommand( "led", SetLED );
