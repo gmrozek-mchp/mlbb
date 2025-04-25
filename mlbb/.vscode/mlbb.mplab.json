@@ -29,13 +29,17 @@
             "type": "toolchain",
             "provider": "microchip.toolchains:xc32@4.60",
             "properties": {
+                "compiler.isolate-each-function": true,
                 "compiler.extra-include-directories": [
                     ".",
                     "../bsp/sam_e51_cnano/src",
                     "../bsp/sam_e51_cnano/src/config/default",
                     "../extern/FreeRTOS-Kernel/include",
-                    "../extern/FreeRTOS-Kernel/portable/GCC/ARM_CM4F"
-                ]
+                    "../extern/FreeRTOS-Kernel/portable/GCC/ARM_CM4F",
+                    "../extern/CMSIS-DSP/Include",
+                    "../extern/CMSIS-DSP/PrivateInclude"
+                ],
+                "linker.remove-unused-sections": true
             }
         }
     ],
@@ -48,6 +52,12 @@
                 "command/command_config.h",
                 "command/command_hal.h",
                 "command/command.c",
+                "platform/platform.c",
+                "platform/platform.h",
+                "platform/platform_cmd.c",
+                "platform/servo/servo.c",
+                "platform/servo/servo.h",
+                "platform/servo/servo_cmd.c",
                 "../bsp/sam_e51_cnano/src/config/default/ATSAME51J20A.ld",
                 "../bsp/sam_e51_cnano/src/bsp.h",
                 "../bsp/sam_e51_cnano/src/FreeRTOSConfig.h",
@@ -126,7 +136,7 @@
                 "../extern/FreeRTOS-Kernel/queue.c",
                 "../extern/FreeRTOS-Kernel/stream_buffer.c",
                 "../extern/FreeRTOS-Kernel/tasks.c",
-                "../extern/FreeRTOS-Kernel/timers.c",
+                "../extern/FreeRTOS-Kernel/timers.c"
             ]
         }
     ]

@@ -13,6 +13,7 @@
 #include "task.h"
 
 #include "command/command.h"
+#include "platform/platform.h"
  
 
 void SetLED( void )
@@ -44,6 +45,8 @@ int main()
     BSP_Initialize();
 
     CMD_Initialize();
+
+    PLATFORM_Initialize();
 
     CMD_RegisterCommand( "led", SetLED );
     CMD_RegisterCommand( "reset", ForceReset );
