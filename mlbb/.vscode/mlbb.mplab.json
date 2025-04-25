@@ -126,7 +126,9 @@
                 "command/command_config.h",
                 "command/command_hal.h",
                 "command/command.c",
-                "../bsp/sam_e51_cnano/src/command/command_hal.c"
+                "../bsp/sam_e51_cnano/src/command/command_hal.c",
+                "../bsp/sam_e51_cnano/src/driver/driver_i2c.c",
+                "../bsp/sam_e51_cnano/src/driver/driver_i2c.h"
             ]
         }
     ]
