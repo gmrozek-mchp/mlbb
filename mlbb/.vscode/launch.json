@@ -5,6 +5,20 @@
     "version": "0.2.0",
     "configurations": [
         {
+            "cwd": "${workspaceRoot}",
+            "executable": "./out/mlbb/default.elf",
+            "name": "Launch openocd mlbb: sam_e51_cnano",
+            "request": "launch",
+            "type": "cortex-debug",
+            "servertype": "openocd",
+            "configFiles": [
+                "openocd.cfg"
+            ],
+            "searchDir": [],
+            "runToEntryPoint": "main",
+            "showDevDebugOutput": "none"
+        },
+        {
             "name": "Launch MPLAB project",
             "type": "mplab-core-da",
             "request": "launch",
