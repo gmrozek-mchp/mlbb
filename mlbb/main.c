@@ -13,9 +13,9 @@
 #include "task.h"
 
 #include "command/command.h"
-#include "nunchuk/nunchuk.h"
-#include "platform/platform.h"
- 
+
+#include "balance/balance.h"
+
 
 void SetLED( void )
 {
@@ -47,8 +47,7 @@ int main()
 
     CMD_Initialize();
 
-    NUNCHUK_Initialize();
-    PLATFORM_Initialize();
+    BALANCE_Initialize();
 
     CMD_RegisterCommand( "led", SetLED );
     CMD_RegisterCommand( "reset", ForceReset );

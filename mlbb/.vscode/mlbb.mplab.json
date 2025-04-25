@@ -48,6 +48,9 @@
             "name": "sam_e51_cnano",
             "files": [
                 "main.c",
+                "balance/balance.c",
+                "balance/balance.h",
+                "balance/balance_cmd.c",
                 "command/command.h",
                 "command/command_config.h",
                 "command/command_hal.h",
