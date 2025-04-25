@@ -79,56 +79,10 @@ extern "C" {
 */
 typedef void (*cmd_function_t)( void );
 
-/**
-  Summary:
-    COMMAND Descriptor Structure
-
-  Description:
-    This data structure stores the information for a single unique command
-    process.
-
-  Comments:
-*/
-typedef struct cmd_struct
-{
-    const char* string;
-    cmd_function_t function;
-} cmd_descriptor_t;
-
 
 // ******************************************************************
 //  Section: External Interface Definitions
 // ******************************************************************
-
-/**
-  Summary:
-    Defines a list of commands supported by the command processor.
-
-  Description:
-    This array contains a list of cmd_descriptor_t items defining the list of
-    commands supported by the command processor.
-
-  Comments:
-    This variable must be defined by the user application
-*/
-extern const cmd_descriptor_t* const cmd_command_list[];
-
-
-/**
-  Summary:
-    Count of commands in the cmd_command_list[] array.
-
-  Description:
-    This variable holds the number cmd_descriptor_t items in the 
-    cmd_command_list array
-
-  Comments:
-    This variable must be defined by the user application.
-    This variable must accurately represent the number cmd_descriptor_t items in
-      cmd_command_list[] or it may result in undefined run-time behavior.
-*/
-extern const uint8_t cmd_command_list_size;
-
 
 /**
   Summary:
@@ -298,6 +252,9 @@ void CMD_Initialize( void );
       with timing of other processes.
 */
 void CMD_Task( void );
+
+
+bool CMD_RegisterCommand( const char* string, cmd_function_t function );
 
 
 #ifdef __cplusplus  // Provide C++ Compatibility

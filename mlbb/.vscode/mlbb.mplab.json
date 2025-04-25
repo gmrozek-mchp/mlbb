@@ -126,7 +126,6 @@
                 "command/command_config.h",
                 "command/command_hal.h",
                 "command/command.c",
-                "command/command_list.c",
                 "../bsp/sam_e51_cnano/src/command/command_hal.c"
             ]
         }

@@ -148,6 +148,12 @@ typedef enum
     CMD_STATE_INVALID
 } CMD_MODULE_STATE_t;
 
+typedef struct cmd_struct
+{
+    const char* string;
+    cmd_function_t function;
+} cmd_descriptor_t;
+
 
 // ******************************************************************
 // Section: Private Variables
@@ -177,6 +183,12 @@ static bool s_in_escape;
 #if (CMD_ENABLE_STREAM == 1)
 static cmd_function_t s_previous_command;
 #endif
+
+#if (s_cmd_list_size > 256)
+#error "s_cmd_list_size cannot exceed 256"
+#endif
+static cmd_descriptor_t s_cmd_list[CMD_COMMAND_LIST_SIZE];
+static uint8_t s_cmd_list_size;
 
 
 // ******************************************************************
@@ -229,6 +241,19 @@ static void EnableStream(void);
 // ******************************************************************
 // Section: Public Functions
 // ******************************************************************
+
+bool CMD_RegisterCommand( const char* string, cmd_function_t function )
+{
+    if( (string == NULL) || (function == NULL) || (s_cmd_list_size >= CMD_COMMAND_LIST_SIZE) )
+    {
+        return false;
+    }
+
+    s_cmd_list[s_cmd_list_size].string = string;
+    s_cmd_list[s_cmd_list_size].function = function;
+
+    return true;
+}
 
 char* CMD_PrintString( const char* string, bool block )
 {
@@ -628,6 +653,7 @@ void CMD_Task(void)
 static void Handler_Init(void)
 {
     s_cmd_end_index = 0;
+    s_cmd_list_size = 0;
 
 #if CMD_USE_CIRCUILAR_BUFFER
     for( s_cmd_buffer_full_index=0;
@@ -950,11 +976,11 @@ static void Handler_Execute(void)
 #endif
 
     while( (command == NULL) && 
-           (command_list_index < cmd_command_list_size) )
+           (command_list_index < s_cmd_list_size) )
     {
-        if( CheckCommandMatch(cmd_command_list[command_list_index]->string) )
+        if( CheckCommandMatch(s_cmd_list[command_list_index].string) )
         {
-            command = cmd_command_list[command_list_index]->function;
+            command = s_cmd_list[command_list_index].function;
         }
         else
         {
@@ -1149,10 +1175,10 @@ static void DumpCommandList(void)
 #endif
 
     for( command_list_index = 0; 
-         command_list_index < cmd_command_list_size;
+         command_list_index < s_cmd_list_size;
          command_list_index++ )
     {
-        (void)CMD_PrintString(cmd_command_list[command_list_index]->string, true);
+        (void)CMD_PrintString(s_cmd_list[command_list_index].string, true);
         (void)CMD_PrintString(CMD_LINE_TERMINATOR_STR, true);
     }
     

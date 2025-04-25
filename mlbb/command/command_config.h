@@ -71,6 +71,20 @@
 
 /**
   Summary:
+    Command List size definition.
+
+  Description:
+    This macro defines the maximum number of commands that can be registered
+      with the Command Processor.
+
+  Comments:
+    CMD_COMMAND_LIST_SIZE cannot exceed 256.
+*/
+#define CMD_COMMAND_LIST_SIZE   32
+
+
+/**
+  Summary:
     Command strings for built-in command support
 
   Description:
@@ -88,7 +102,7 @@
 
 /**
   Summary:
-    Interface strings used by Command Processor .
+    Interface strings used by Command Processor.
 
   Description:
     These definitions are the terminal messages used by Command Processor.
