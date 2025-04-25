@@ -1,0 +1,21 @@
+{
+	"folders": [
+		{
+			"path": "."
+		},
+		{
+			"path": "../bsp"
+		},
+		{
+			"path": "../extern/FreeRTOS-Kernel"
+		}
+	],
+	"settings": {
+		"mplab.clangd.arguments": [
+			"--compile-commands-dir=${cwd}Users/greg/projects/microchip/mlbb/mlbb/_build/mlbb/sam_e51_cnano"
+		],
+		"mplab.mplab-importer.ignorePatterns": [
+			"sam_e51_cnano/bsp-sam_e51_cnano.X/nbproject/configurations.xml"
+		]
+	}
+}
