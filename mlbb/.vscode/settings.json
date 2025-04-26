@@ -1,5 +1,0 @@
-{
-    "mplab.clangd.arguments": [
-        "--compile-commands-dir=${cwd}Users/greg/projects/microchip/mlbb/mlbb/_build/mlbb/sam_e51_cnano"
-    ]
-}

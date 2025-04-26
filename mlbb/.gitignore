@@ -1,8 +1,0 @@
-_build
-cmake
-out
-
-# Large Files
-*.exe
-*.zip
-*.pdf
