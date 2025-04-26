@@ -5,7 +5,7 @@
             "name": "sam_e51_cnano",
             "id": "conf1",
             "device": "ATSAME51J20A",
-            "imagePath": "./out/mlbb/default.elf",
+            "imagePath": "./out/mlbb/mlbb-sam_e51_cnano.elf",
             "tool": "PKOB nano",
             "packs": [
                 {
@@ -20,12 +20,12 @@
                 }
             ],
             "fileSet": "sam_e51_cnano",
-            "toolchain": "default-XC32"
+            "toolchain": "sam_e51_cnano-XC32"
         }
     ],
     "propertyGroups": [
         {
-            "name": "default-XC32",
+            "name": "sam_e51_cnano-XC32",
             "type": "toolchain",
             "provider": "microchip.toolchains:xc32@4.60",
             "properties": {

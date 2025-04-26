@@ -6,13 +6,13 @@
     "configurations": [
         {
             "cwd": "${workspaceRoot}",
-            "executable": "./out/mlbb/default.elf",
+            "executable": "./out/mlbb/mlbb-sam_e51_cnano.elf",
             "name": "Launch openocd mlbb: sam_e51_cnano",
             "request": "launch",
             "type": "cortex-debug",
             "servertype": "openocd",
             "configFiles": [
-                "openocd.cfg"
+                "microchip_same51_curiosity_nano.cfg"
             ],
             "searchDir": [],
             "runToEntryPoint": "main",
