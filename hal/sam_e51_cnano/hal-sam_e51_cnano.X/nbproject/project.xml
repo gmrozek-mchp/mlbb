@@ -3,7 +3,7 @@
     <type>com.microchip.mplab.nbide.embedded.makeproject</type>
     <configuration>
         <data xmlns="http://www.netbeans.org/ns/make-project/1">
-            <name>bsp-sam_e51_cnano</name>
+            <name>hal-sam_e51_cnano</name>
             <creation-uuid>baba3c40-823d-42ec-b172-b8f61cde4838</creation-uuid>
             <make-project-type>0</make-project-type>
             <sourceEncoding>ISO-8859-1</sourceEncoding>

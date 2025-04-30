@@ -190,7 +190,7 @@
                    displayName="Important Files"
                    projectFiles="true">
       <itemPath>Makefile</itemPath>
-      <itemPath>bsp-sam_e51_cnano.mc3</itemPath>
+      <itemPath>hal-sam_e51_cnano.mc3</itemPath>
     </logicalFolder>
     <logicalFolder name="LinkerScript"
                    displayName="Linker Files"
