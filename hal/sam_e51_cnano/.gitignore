@@ -27,5 +27,3 @@
 *.exe
 *.zip
 *.pdf
-
-motorbench-log.*.txt.lck

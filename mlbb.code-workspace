@@ -9,8 +9,7 @@
 			"--compile-commands-dir=${cwd}Users/greg/projects/microchip/mlbb/_build/mlbb/sam_e51_cnano"
 		],
 		"mplab.mplab-importer.ignorePatterns": [
-			"mlbb-sam_e51_cnano/mlbb-sam_e51_cnano.X/nbproject/configurations.xml",
-			"bsp/sam_e51_cnano/bsp-sam_e51_cnano.X/nbproject/configurations.xml"
+			"hal/sam_e51_cnano/bsp-sam_e51_cnano.X/nbproject/configurations.xml"
 		]
 	}
 }
