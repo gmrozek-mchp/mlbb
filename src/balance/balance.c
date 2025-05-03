@@ -83,13 +83,16 @@ static void BALANCE_RTOS_Task( void * pvParameters )
     
     while(1)
     {
-        nunchuk_data_t nunchukData = NUNCHUK_Data_Get();
-        platform_xy_t platformXY;
+        nunchuk_data_t nunchukData;
+        q15_t x;
+        q15_t y;
         
-        platformXY.x = ((q15_t)nunchukData.joystick_x) * 25;
-        platformXY.y = ((q15_t)nunchukData.joystick_y) * 25;
+        nunchukData = NUNCHUK_Data_Get();
+        
+        x = (q15_t)nunchukData.joystick_x * 25;
+        y = (q15_t)nunchukData.joystick_y * 25;
 
-        PLATFORM_Position_XY_Set( platformXY );
+        PLATFORM_Position_XY_Set( x, y );
 
         vTaskDelayUntil( &balance_taskLastWakeTime, configTICK_RATE_HZ / BALANCE_TASK_RATE_HZ );    
     }

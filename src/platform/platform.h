@@ -22,10 +22,10 @@ typedef struct {
 void PLATFORM_Initialize( void );
 
 platform_xy_t PLATFORM_Position_XY_Get( void );
-void PLATFORM_Position_XY_Set( platform_xy_t xy  );
+void PLATFORM_Position_XY_Set( q15_t x, q15_t y );
 
 platform_abc_t PLATFORM_Position_ABC_Get( void );
-void PLATFORM_Position_ABC_Set( platform_abc_t abc );
+void PLATFORM_Position_ABC_Set( q15_t a, q15_t b, q15_t c );
 
 
 // **************************************************************

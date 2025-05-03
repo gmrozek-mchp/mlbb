@@ -19,9 +19,7 @@ void PLATFORM_CMD_Position_XY( void )
 
 void PLATFORM_CMD_Position_ABC( void )
 {
-    platform_xy_t xy = {0};
-    
-    PLATFORM_Position_XY_Set( xy );
+
 }
 
 

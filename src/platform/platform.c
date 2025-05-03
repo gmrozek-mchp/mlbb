@@ -95,18 +95,16 @@ platform_xy_t PLATFORM_Position_XY_Get( void )
     return xy;
 }
 
-void PLATFORM_Position_XY_Set( platform_xy_t xy )
+void PLATFORM_Position_XY_Set( q15_t x, q15_t y )
 {
-    platform_abc_t abc;
-
     // calculate ABC command assuming linear actuators
-    abc.a = xy.y;
-    abc.b = xsin60(-xy.x) + xcos60(-xy.y);
-    abc.c = xsin60(xy.x) + xcos60(-xy.y);
+    q15_t a = y;
+    q15_t b = xsin60(-x) + xcos60(-y);
+    q15_t c = xsin60(x) + xcos60(-y);
     
     // TODO: compensate ABC based on non-linear motion of arms
     
-    PLATFORM_Position_ABC_Set(abc);
+    PLATFORM_Position_ABC_Set( a, b, c );
 }
 
 platform_abc_t PLATFORM_Position_ABC_Get( void )
@@ -114,22 +112,24 @@ platform_abc_t PLATFORM_Position_ABC_Get( void )
     return platform_position_actual_abc;
 }
 
-void PLATFORM_Position_ABC_Set( platform_abc_t abc )
+void PLATFORM_Position_ABC_Set( q15_t a, q15_t b, q15_t c )
 {
 //    q31_t offset;
     
     // offset ABC command such that platform center remains at fixed height
-//    offset = (abc.a + abc.b + abc.c) / 3;    
-//    abc.a += offset;
-//    abc.b += offset;
-//    abc.c += offset;
+//    offset = (a + b + c) / 3;    
+//    a += offset;
+//    b += offset;
+//    c += offset;
     
     // TODO: Need controlled access to command. Disable interrupts?
-    platform_position_command_abc = abc;
+    platform_position_command_abc.a = a;
+    platform_position_command_abc.b = b;
+    platform_position_command_abc.c = c;
     
-    SERVO_Position_Command_Set_q15angle( SERVO_ID_A, abc.a );
-    SERVO_Position_Command_Set_q15angle( SERVO_ID_B, abc.b );
-    SERVO_Position_Command_Set_q15angle( SERVO_ID_C, abc.c );
+    SERVO_Position_Command_Set_q15angle( SERVO_ID_A, a );
+    SERVO_Position_Command_Set_q15angle( SERVO_ID_B, b );
+    SERVO_Position_Command_Set_q15angle( SERVO_ID_C, c );
 }
 
 
