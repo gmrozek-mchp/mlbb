@@ -78,7 +78,7 @@ static void BALANCE_RTOS_Task( void * pvParameters )
     vTaskDelay( pdMS_TO_TICKS(BALANCE_POWER_UP_DELAY_mS) );
 
     NUNCHUK_Zero_Set();
-    
+
     balance_taskLastWakeTime = xTaskGetTickCount();
     
     while(1)
@@ -86,8 +86,8 @@ static void BALANCE_RTOS_Task( void * pvParameters )
         nunchuk_data_t nunchukData = NUNCHUK_Data_Get();
         platform_xy_t platformXY;
         
-        platformXY.x = ((q15_t)nunchukData.joystick_x - 127) * 25;
-        platformXY.y = ((q15_t)nunchukData.joystick_y - 127) * 25;
+        platformXY.x = ((q15_t)nunchukData.joystick_x) * 25;
+        platformXY.y = ((q15_t)nunchukData.joystick_y) * 25;
 
         PLATFORM_Position_XY_Set( platformXY );
 
