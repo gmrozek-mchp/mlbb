@@ -77,6 +77,8 @@ static void BALANCE_RTOS_Task( void * pvParameters )
     
     vTaskDelay( pdMS_TO_TICKS(BALANCE_POWER_UP_DELAY_mS) );
 
+    NUNCHUK_Zero_Set();
+    
     balance_taskLastWakeTime = xTaskGetTickCount();
     
     while(1)
