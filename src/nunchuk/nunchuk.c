@@ -44,7 +44,9 @@ static TickType_t nunchuk_taskLastWakeTime;
 
 static uint8_t nunchuk_readBuffer[NUNCHUK_READ_BUFFER_SIZE];
 
-static nunchuk_data_t nunchuk_data;
+static nunchuk_data_t nunchuk_data_raw;
+static int16_t nunchuk_joystick_x_zero;
+static int16_t nunchuk_joystick_y_zero;
 
 static nunchuk_data_callback_t nunchuk_dataCallback = NULL;
 
@@ -67,10 +69,13 @@ static void NUNCHUK_SendConfigSequence( void );
 
 void NUNCHUK_Initialize( void )
 {
-    nunchuk_data.button_c = false;
-    nunchuk_data.button_z = false;
-    nunchuk_data.joystick_x = 0;
-    nunchuk_data.joystick_y = 0;
+    nunchuk_data_raw.button_c = false;
+    nunchuk_data_raw.button_z = false;
+    nunchuk_data_raw.joystick_x = 0;
+    nunchuk_data_raw.joystick_y = 0;
+
+    nunchuk_joystick_x_zero = 0;
+    nunchuk_joystick_y_zero = 0;
     
     CMD_RegisterCommand( "nunchuk", NUNCHUK_CMD_Print_Data );
 
@@ -96,11 +101,24 @@ nunchuk_data_t NUNCHUK_Data_Get( void )
     
     taskENTER_CRITICAL();
     
-    returnValue = nunchuk_data;
+    returnValue.button_c = nunchuk_data_raw.button_c;
+    returnValue.button_z = nunchuk_data_raw.button_z;
+    returnValue.joystick_x = nunchuk_data_raw.joystick_x - nunchuk_joystick_x_zero;
+    returnValue.joystick_y = nunchuk_data_raw.joystick_y - nunchuk_joystick_y_zero;
     
     taskEXIT_CRITICAL();
 
     return returnValue;
+}
+
+void NUNCHUK_Zero_Set( void )
+{
+    taskENTER_CRITICAL();
+    
+    nunchuk_joystick_x_zero = nunchuk_data_raw.joystick_x;
+    nunchuk_joystick_x_zero = nunchuk_data_raw.joystick_y;
+
+    taskEXIT_CRITICAL();
 }
 
 
@@ -129,15 +147,22 @@ static void NUNCHUK_RTOS_Task( void * pvParameters )
 
         taskENTER_CRITICAL();
 
-        nunchuk_data.button_c = ((nunchuk_readBuffer[5] & 0x02) == 0);
-        nunchuk_data.button_z = ((nunchuk_readBuffer[5] & 0x01) == 0);
-        nunchuk_data.joystick_x = nunchuk_readBuffer[0];
-        nunchuk_data.joystick_y = nunchuk_readBuffer[1];
+        nunchuk_data_raw.button_c = ((nunchuk_readBuffer[5] & 0x02) == 0);
+        nunchuk_data_raw.button_z = ((nunchuk_readBuffer[5] & 0x01) == 0);
+        nunchuk_data_raw.joystick_x = nunchuk_readBuffer[0];
+        nunchuk_data_raw.joystick_y = nunchuk_readBuffer[1];
 
         taskEXIT_CRITICAL();
 
         if( nunchuk_dataCallback != NULL )
         {
+            nunchuk_data_t nunchuk_data;
+
+            nunchuk_data.button_c = nunchuk_data_raw.button_c;
+            nunchuk_data.button_z = nunchuk_data_raw.button_z;
+            nunchuk_data.joystick_x = nunchuk_data_raw.joystick_x - nunchuk_joystick_x_zero;
+            nunchuk_data.joystick_y = nunchuk_data_raw.joystick_y - nunchuk_joystick_y_zero;
+        
             nunchuk_dataCallback( nunchuk_data );
         }
 

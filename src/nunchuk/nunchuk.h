@@ -7,8 +7,8 @@
 
 
 typedef struct {
-    uint16_t joystick_x;
-    uint16_t joystick_y;
+    int16_t joystick_x;
+    int16_t joystick_y;
     bool button_c;
     bool button_z;
 } nunchuk_data_t;
@@ -21,6 +21,8 @@ void NUNCHUK_Initialize( void );
 void NUNCHUK_DataCallback_Register( nunchuk_data_callback_t callback );
 
 nunchuk_data_t NUNCHUK_Data_Get( void );
+
+void NUNCHUK_Zero_Set( void );
 
 
 // **************************************************************
