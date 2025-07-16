@@ -30,7 +30,7 @@ data:
     - children:
       - attributes:
           id: dfp
-          x: '400'
+          x: '382'
           y: '20'
         type: ElementPosition
       type: ElementPositions

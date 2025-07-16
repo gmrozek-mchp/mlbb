@@ -30,8 +30,8 @@ data:
     - children:
       - attributes:
           id: tc0
-          x: '331'
-          y: '105'
+          x: '356'
+          y: '104'
         type: ElementPosition
       type: ElementPositions
     type: ComponentGraph

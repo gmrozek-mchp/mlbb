@@ -30,8 +30,8 @@ data:
     - children:
       - attributes:
           id: cmsis
-          x: '600'
-          y: '20'
+          x: '561'
+          y: '19'
         type: ElementPosition
       type: ElementPositions
     type: ComponentGraph
