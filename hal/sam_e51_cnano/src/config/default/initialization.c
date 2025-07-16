@@ -141,9 +141,9 @@ void SYS_Initialize ( void* data )
 
     SERCOM2_I2C_Initialize();
 
-    SERCOM0_USART_Initialize();
-
     EVSYS_Initialize();
+
+    SERCOM0_USART_Initialize();
 
     SERCOM5_USART_Initialize();
 

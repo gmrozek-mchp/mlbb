@@ -166,31 +166,35 @@
           </logicalFolder>
           <itemPath>../src/packs/ATSAME51J20A_DFP/same51j20a.h</itemPath>
         </logicalFolder>
-        <logicalFolder name="CMSIS" displayName="CMSIS" projectFiles="true">
-          <logicalFolder name="CMSIS" displayName="CMSIS" projectFiles="true">
-            <logicalFolder name="Core" displayName="Core" projectFiles="true">
-              <logicalFolder name="Include" displayName="Include" projectFiles="true">
-                <itemPath>../src/packs/CMSIS/CMSIS/Core/Include/cmsis_iccarm.h</itemPath>
-                <itemPath>../src/packs/CMSIS/CMSIS/Core/Include/cmsis_armcc.h</itemPath>
-                <itemPath>../src/packs/CMSIS/CMSIS/Core/Include/mpu_armv7.h</itemPath>
-                <itemPath>../src/packs/CMSIS/CMSIS/Core/Include/cachel1_armv7.h</itemPath>
-                <itemPath>../src/packs/CMSIS/CMSIS/Core/Include/cmsis_armclang_ltm.h</itemPath>
-                <itemPath>../src/packs/CMSIS/CMSIS/Core/Include/cmsis_version.h</itemPath>
-                <itemPath>../src/packs/CMSIS/CMSIS/Core/Include/cmsis_compiler.h</itemPath>
-                <itemPath>../src/packs/CMSIS/CMSIS/Core/Include/cmsis_gcc.h</itemPath>
-                <itemPath>../src/packs/CMSIS/CMSIS/Core/Include/cmsis_armclang.h</itemPath>
-                <itemPath>../src/packs/CMSIS/CMSIS/Core/Include/core_cm4.h</itemPath>
-              </logicalFolder>
-            </logicalFolder>
-          </logicalFolder>
-        </logicalFolder>
       </logicalFolder>
     </logicalFolder>
     <logicalFolder name="ExternalFiles"
                    displayName="Important Files"
                    projectFiles="true">
+      <logicalFolder name="hal-sam_e51_cnano_default"
+                     displayName="hal-sam_e51_cnano_default"
+                     projectFiles="true">
+        <logicalFolder name="components" displayName="components" projectFiles="true">
+          <itemPath>hal-sam_e51_cnano_default/components/cmsis.yml</itemPath>
+          <itemPath>hal-sam_e51_cnano_default/components/HarmonyCore.yml</itemPath>
+          <itemPath>hal-sam_e51_cnano_default/components/sercom0.yml</itemPath>
+          <itemPath>hal-sam_e51_cnano_default/components/tc1.yml</itemPath>
+          <itemPath>hal-sam_e51_cnano_default/components/evsys.yml</itemPath>
+          <itemPath>hal-sam_e51_cnano_default/components/core.yml</itemPath>
+          <itemPath>hal-sam_e51_cnano_default/components/sercom2.yml</itemPath>
+          <itemPath>hal-sam_e51_cnano_default/components/dfp.yml</itemPath>
+          <itemPath>hal-sam_e51_cnano_default/components/tc4.yml</itemPath>
+          <itemPath>hal-sam_e51_cnano_default/components/tc0.yml</itemPath>
+          <itemPath>hal-sam_e51_cnano_default/components/sercom5.yml</itemPath>
+          <itemPath>hal-sam_e51_cnano_default/components/nvmctrl.yml</itemPath>
+        </logicalFolder>
+        <itemPath>hal-sam_e51_cnano_default/mcc-config.mc4</itemPath>
+      </logicalFolder>
       <itemPath>Makefile</itemPath>
-      <itemPath>hal-sam_e51_cnano.mc3</itemPath>
+    </logicalFolder>
+    <logicalFolder name="LibraryFiles"
+                   displayName="LibraryFiles"
+                   projectFiles="true">
     </logicalFolder>
     <logicalFolder name="LinkerScript"
                    displayName="Linker Files"
