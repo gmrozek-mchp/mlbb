@@ -58,7 +58,6 @@
 #include "peripheral/cmcc/plib_cmcc.h"
 #include "peripheral/sercom/usart/plib_sercom5_usart.h"
 #include "peripheral/tc/plib_tc1.h"
-#include "peripheral/tc/plib_tc0.h"
 #include "peripheral/tc/plib_tc4.h"
 #include "system/reset/sys_reset.h"
 

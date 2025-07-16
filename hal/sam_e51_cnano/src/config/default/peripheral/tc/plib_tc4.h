@@ -107,7 +107,8 @@ bool TC4_Compare8bitMatch0Set( uint8_t compareValue );
 bool TC4_Compare8bitMatch1Set( uint8_t compareValue );
 
 
-TC_COMPARE_STATUS TC4_CompareStatusGet( void );
+void TC4_CompareCallbackRegister( TC_COMPARE_CALLBACK callback, uintptr_t context );
+
 
 void TC4_CompareCommandSet(TC_COMMAND command);
 

@@ -62,6 +62,7 @@
 // *****************************************************************************
 // *****************************************************************************
 
+static volatile TC_COMPARE_CALLBACK_OBJ TC1_CallbackObject;
 
 // *****************************************************************************
 // *****************************************************************************
@@ -81,21 +82,22 @@ void TC1_CompareInitialize( void )
     }
 
     /* Configure counter mode & prescaler */
-    TC1_REGS->COUNT8.TC_CTRLA = TC_CTRLA_MODE_COUNT8 | TC_CTRLA_PRESCALER_DIV8 | TC_CTRLA_PRESCSYNC_PRESC ;
+    TC1_REGS->COUNT8.TC_CTRLA = TC_CTRLA_MODE_COUNT8 | TC_CTRLA_PRESCALER_DIV256 | TC_CTRLA_PRESCSYNC_PRESC ;
 
     /* Configure waveform generation mode */
     TC1_REGS->COUNT8.TC_WAVE = (uint8_t)TC_WAVE_WAVEGEN_NPWM;
 
-    /* Configure timer one shot mode & direction */
-    TC1_REGS->COUNT8.TC_CTRLBSET = (uint8_t)(TC_CTRLBSET_ONESHOT_Msk);
 
-    TC1_REGS->COUNT8.TC_PER = 149U;
-    TC1_REGS->COUNT8.TC_CC[0] = 75U;
-    TC1_REGS->COUNT8.TC_CC[1] = 75U;
+    TC1_REGS->COUNT8.TC_PER = 116U;
+    TC1_REGS->COUNT8.TC_CC[0] = 0U;
+    TC1_REGS->COUNT8.TC_CC[1] = 0U;
 
     /* Clear all interrupt flags */
     TC1_REGS->COUNT8.TC_INTFLAG = (uint8_t)TC_INTFLAG_Msk;
 
+    /* Enable period Interrupt */
+    TC1_CallbackObject.callback = NULL;
+    TC1_REGS->COUNT8.TC_INTENSET = (uint8_t)(TC_INTENSET_OVF_Msk);
 
     while((TC1_REGS->COUNT8.TC_SYNCBUSY) != 0U)
     {
@@ -106,12 +108,6 @@ void TC1_CompareInitialize( void )
 /* Enable the counter */
 void TC1_CompareStart( void )
 {
-    /* In one-shot mode, first disable the TC and then enable */
-    TC1_REGS->COUNT8.TC_CTRLA &= ~TC_CTRLA_ENABLE_Msk;
-    while((TC1_REGS->COUNT8.TC_SYNCBUSY & TC_SYNCBUSY_ENABLE_Msk) == TC_SYNCBUSY_ENABLE_Msk)
-    {
-        /* Wait for Write Synchronization */
-    }
     TC1_REGS->COUNT8.TC_CTRLA |= TC_CTRLA_ENABLE_Msk;
     while((TC1_REGS->COUNT8.TC_SYNCBUSY & TC_SYNCBUSY_ENABLE_Msk) == TC_SYNCBUSY_ENABLE_Msk)
     {
@@ -131,7 +127,7 @@ void TC1_CompareStop( void )
 
 uint32_t TC1_CompareFrequencyGet( void )
 {
-    return (uint32_t)(7500000UL);
+    return (uint32_t)(234375UL);
 }
 
 void TC1_CompareCommandSet(TC_COMMAND command)
@@ -223,12 +219,28 @@ bool TC1_Compare8bitMatch1Set( uint8_t compareValue )
 
 
 
-/* Check if period interrupt flag is set */
-TC_COMPARE_STATUS TC1_CompareStatusGet( void )
+/* Register callback function */
+void TC1_CompareCallbackRegister( TC_COMPARE_CALLBACK callback, uintptr_t context )
 {
-    TC_COMPARE_STATUS compare_status;
-    compare_status = ((TC_COMPARE_STATUS)(TC1_REGS->COUNT8.TC_INTFLAG));
-    /* Clear interrupt */
-    TC1_REGS->COUNT8.TC_INTFLAG = (uint8_t)compare_status;
-    return compare_status;
+    TC1_CallbackObject.callback = callback;
+
+    TC1_CallbackObject.context = context;
 }
+
+/* Compare match interrupt handler */
+void __attribute__((used)) TC1_CompareInterruptHandler( void )
+{
+    if (TC1_REGS->COUNT8.TC_INTENSET != 0U)
+    {
+        TC_COMPARE_STATUS status;
+        status = TC1_REGS->COUNT8.TC_INTFLAG;
+        /* clear interrupt flag */
+        TC1_REGS->COUNT8.TC_INTFLAG = (uint8_t)TC_INTFLAG_Msk;
+        if((TC1_CallbackObject.callback != NULL) && (status != TC_COMPARE_STATUS_NONE))
+        {
+            uintptr_t context = TC1_CallbackObject.context;
+            TC1_CallbackObject.callback(status, context);
+        }
+    }
+}
+

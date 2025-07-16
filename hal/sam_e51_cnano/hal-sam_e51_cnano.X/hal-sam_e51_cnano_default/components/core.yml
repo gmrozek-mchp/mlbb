@@ -163,7 +163,7 @@ data:
       - children:
         - attributes:
             id: core
-            value: '0xd7ff'
+            value: '0x97ff'
           type: Dynamic
         type: Values
       type: String
@@ -207,7 +207,7 @@ data:
       - children:
         - attributes:
             id: core
-            value: 'true'
+            value: 'false'
           type: Dynamic
         type: Values
       type: Boolean
@@ -218,7 +218,7 @@ data:
       - children:
         - attributes:
             id: core
-            value: TC0_TimerInterruptHandler
+            value: TC0_Handler
           type: Dynamic
         type: Values
       type: String
@@ -229,7 +229,7 @@ data:
       - children:
         - attributes:
             id: core
-            value: 'true'
+            value: 'false'
           type: Dynamic
         type: Values
       type: Boolean
@@ -240,7 +240,7 @@ data:
       - children:
         - attributes:
             id: core
-            value: 'false'
+            value: 'true'
           type: Dynamic
         type: Values
       type: Boolean
@@ -251,7 +251,7 @@ data:
       - children:
         - attributes:
             id: core
-            value: TC1_Handler
+            value: TC1_CompareInterruptHandler
           type: Dynamic
         type: Values
       type: String
@@ -262,7 +262,7 @@ data:
       - children:
         - attributes:
             id: core
-            value: 'false'
+            value: 'true'
           type: Dynamic
         type: Values
       type: Boolean
@@ -273,7 +273,7 @@ data:
       - children:
         - attributes:
             id: core
-            value: 'false'
+            value: 'true'
           type: Dynamic
         type: Values
       type: Boolean
@@ -284,7 +284,7 @@ data:
       - children:
         - attributes:
             id: core
-            value: TC4_Handler
+            value: TC4_CompareInterruptHandler
           type: Dynamic
         type: Values
       type: String
@@ -295,7 +295,7 @@ data:
       - children:
         - attributes:
             id: core
-            value: 'false'
+            value: 'true'
           type: Dynamic
         type: Values
       type: Boolean
@@ -4181,7 +4181,7 @@ data:
       - children:
         - attributes:
             id: core
-            value: 'true'
+            value: 'false'
           type: Dynamic
         type: Values
       type: Boolean
@@ -4192,21 +4192,10 @@ data:
       - children:
         - attributes:
             id: core
-            value: '60000000'
+            value: '0'
           type: Dynamic
         type: Values
       type: Integer
-    TC0_INTERRUPT_ENABLE:
-      attributes:
-        id: TC0_INTERRUPT_ENABLE
-      children:
-      - children:
-        - attributes:
-            id: tc0
-            value: 'true'
-          type: Dynamic
-        type: Values
-      type: Boolean
     TC0_INTERRUPT_ENABLE_UPDATE:
       attributes:
         id: TC0_INTERRUPT_ENABLE_UPDATE
@@ -4214,28 +4203,6 @@ data:
       - children:
         - attributes:
             id: core
-            value: 'false'
-          type: Dynamic
-        type: Values
-      type: Boolean
-    TC0_INTERRUPT_HANDLER:
-      attributes:
-        id: TC0_INTERRUPT_HANDLER
-      children:
-      - children:
-        - attributes:
-            id: tc0
-            value: TC0_TimerInterruptHandler
-          type: Dynamic
-        type: Values
-      type: String
-    TC0_INTERRUPT_HANDLER_LOCK:
-      attributes:
-        id: TC0_INTERRUPT_HANDLER_LOCK
-      children:
-      - children:
-        - attributes:
-            id: tc0
             value: 'true'
           type: Dynamic
         type: Values
@@ -4269,7 +4236,7 @@ data:
       - children:
         - attributes:
             id: tc1
-            value: 'false'
+            value: 'true'
           type: Dynamic
         type: Values
       type: Boolean
@@ -4280,7 +4247,7 @@ data:
       - children:
         - attributes:
             id: core
-            value: 'true'
+            value: 'false'
           type: Dynamic
         type: Values
       type: Boolean
@@ -4291,7 +4258,7 @@ data:
       - children:
         - attributes:
             id: tc1
-            value: TC1_Handler
+            value: TC1_CompareInterruptHandler
           type: Dynamic
         type: Values
       type: String
@@ -4302,7 +4269,7 @@ data:
       - children:
         - attributes:
             id: tc1
-            value: 'false'
+            value: 'true'
           type: Dynamic
         type: Values
       type: Boolean
@@ -4335,7 +4302,7 @@ data:
       - children:
         - attributes:
             id: tc4
-            value: 'false'
+            value: 'true'
           type: Dynamic
         type: Values
       type: Boolean
@@ -4346,7 +4313,7 @@ data:
       - children:
         - attributes:
             id: core
-            value: 'true'
+            value: 'false'
           type: Dynamic
         type: Values
       type: Boolean
@@ -4357,7 +4324,7 @@ data:
       - children:
         - attributes:
             id: tc4
-            value: TC4_Handler
+            value: TC4_CompareInterruptHandler
           type: Dynamic
         type: Values
       type: String
@@ -4368,7 +4335,7 @@ data:
       - children:
         - attributes:
             id: tc4
-            value: 'false'
+            value: 'true'
           type: Dynamic
         type: Values
       type: Boolean
