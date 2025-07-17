@@ -7,6 +7,8 @@
 #include "FreeRTOS.h"
 #include "task.h"
 
+#include "peripheral/port/plib_port.h"
+
 //#include "ball/ar1100.h"
 #include "nunchuk/nunchuk.h"
 #include "platform/platform.h"
@@ -89,6 +91,15 @@ static void BALANCE_RTOS_Task( void * pvParameters )
         
         nunchukData = NUNCHUK_Data_Get();
         
+        if( nunchukData.button_z )
+        {
+            STEPPER_nENABLE_Clear();
+        }
+        else
+        {
+            STEPPER_nENABLE_Set();            
+        }            
+
         x = (q15_t)nunchukData.joystick_x * 25;
         y = (q15_t)nunchukData.joystick_y * 25;
 
