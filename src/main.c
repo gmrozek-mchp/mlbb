@@ -6,10 +6,8 @@
  */
 
 #include "bsp.h"
-#include "peripheral/port/plib_port.h"
-#include "system/reset/sys_reset.h"
 
-#include "FreeRTOS.h"
+#include "FreeRTOS.h"   // IWYU pragma: keep - FreeRTOS.h must be included before other FreeRTOS headers
 #include "task.h"
 
 #include "command/command.h"
