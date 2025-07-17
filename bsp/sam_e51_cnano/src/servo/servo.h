@@ -14,7 +14,10 @@ typedef enum {
 } servo_id_t;
 
 
-void  SERVO_Initialize( void );
+void SERVO_Initialize( void );
+
+void SERVO_Disable( void );
+void SERVO_Enable( void );
 
 q15_t SERVO_Position_Get_q15angle( servo_id_t servo_id );
 q15_t SERVO_Position_Command_Get_q15angle( servo_id_t servo_id );

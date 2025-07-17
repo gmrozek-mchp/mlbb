@@ -127,6 +127,16 @@ void SERVO_Initialize( void )
     );
 }
 
+void SERVO_Disable( void )
+{
+    STEPPER_nENABLE_Set();
+}
+
+void SERVO_Enable( void )
+{
+    STEPPER_nENABLE_Clear();
+}
+
 q15_t SERVO_Position_Get_q15angle( servo_id_t servo_id )
 {
     if( servo_id >= SERVO_ID_NUM_SERVOS )

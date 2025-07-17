@@ -19,6 +19,9 @@ typedef struct {
 
 void PLATFORM_Initialize( void );
 
+void PLATFORM_Disable( void );
+void PLATFORM_Enable( void );
+
 platform_xy_t PLATFORM_Position_XY_Get( void );
 void PLATFORM_Position_XY_Set( q15_t x, q15_t y );
 

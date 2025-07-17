@@ -95,6 +95,16 @@ void PLATFORM_Initialize( void )
     );
 }
 
+void PLATFORM_Disable( void )
+{
+    SERVO_Disable();
+}
+
+void PLATFORM_Enable( void )
+{
+    SERVO_Enable();
+}
+
 platform_xy_t PLATFORM_Position_XY_Get( void )
 {
     platform_xy_t xy = {0};
