@@ -63,6 +63,13 @@ static void PLATFORM_RTOS_Task( void * pvParameters );
 
 
 // ******************************************************************
+// Section: Command Portal Function Declarations
+// ******************************************************************
+static void PLATFORM_CMD_Position_XY( void );
+static void PLATFORM_CMD_Position_ABC( void );
+
+
+// ******************************************************************
 // Section: Public Functions
 // ******************************************************************
 
@@ -159,4 +166,19 @@ static void PLATFORM_RTOS_Task( void * pvParameters )
     {        
         vTaskDelayUntil( &platform_taskLastWakeTime, configTICK_RATE_HZ / PLATFORM_TASK_RATE_HZ );    
     }
+}
+
+
+// ******************************************************************
+// Section: Command Portal Functions
+// ******************************************************************
+
+static void PLATFORM_CMD_Position_XY( void )
+{
+    
+}
+
+static void PLATFORM_CMD_Position_ABC( void )
+{
+
 }

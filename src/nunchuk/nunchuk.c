@@ -64,6 +64,12 @@ static void NUNCHUK_SendConfigSequence( void );
 
 
 // ******************************************************************
+// Section: Command Portal Function Declarations
+// ******************************************************************
+void NUNCHUK_CMD_Print_Data( void );
+
+
+// ******************************************************************
 // Section: Public Functions
 // ******************************************************************
 
@@ -187,4 +193,24 @@ static void NUNCHUK_SendConfigSequence( void )
     DRIVER_I2C_Write( NUNCHUK_I2C_ADDRESS, (uint8_t*)nunchuk_cmd_init2, sizeof(nunchuk_cmd_init2) );
     
     vTaskDelay(1);  // Nunchuk communications need delay between commands    
+}
+
+
+// ******************************************************************
+// Section: Command Portal Functions
+// ******************************************************************
+
+void NUNCHUK_CMD_Print_Data( void )
+{
+    nunchuk_data_t data = NUNCHUK_Data_Get();
+    
+    CMD_PrintString( "C: ", true );
+    CMD_PrintDecimal_U32( (uint32_t)data.button_c, true, 1, true );
+    CMD_PrintString( " Z: ", true );
+    CMD_PrintDecimal_U32( (uint32_t)data.button_z, true, 1, true );
+    CMD_PrintString( " X: ", true );
+    CMD_PrintDecimal_U32( data.joystick_x, true, 4, true );
+    CMD_PrintString( " Y: ", true );
+    CMD_PrintDecimal_U32( data.joystick_y, true, 4, true );
+    CMD_PrintString( "\r\n", true );
 }
