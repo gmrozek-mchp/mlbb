@@ -27,6 +27,7 @@
 #define PLATFORM_POWER_UP_DELAY_mS   (100)
 #define PLATFORM_TASK_RATE_HZ        (100)
 
+#define PLATFORM_SERVO_ZERO_ANGLE    ((q15_t)0xC00)
 
 #define angle_0deg      ((q15_t)0x0000)
 #define angle_30deg     ((q15_t)0x0AAA)
@@ -51,6 +52,8 @@ static StaticTask_t platform_taskBuffer;
 static StackType_t  platform_taskStack[ PLATFORM_RTOS_STACK_SIZE ];
 
 static TickType_t platform_taskLastWakeTime;
+
+static bool platform_enabled = false;
 
 static platform_abc_t platform_position_command_abc;
 static platform_abc_t platform_position_actual_abc;
@@ -97,12 +100,52 @@ void PLATFORM_Initialize( void )
 
 void PLATFORM_Disable( void )
 {
-    SERVO_Disable();
+    if( platform_enabled )
+    {
+        SERVO_Position_Command_Set_q15angle( SERVO_ID_A, -PLATFORM_SERVO_ZERO_ANGLE );
+        SERVO_Position_Command_Set_q15angle( SERVO_ID_B, -PLATFORM_SERVO_ZERO_ANGLE );
+        SERVO_Position_Command_Set_q15angle( SERVO_ID_C, -PLATFORM_SERVO_ZERO_ANGLE );
+
+        while( ( SERVO_Position_Get_q15angle(SERVO_ID_A) != -PLATFORM_SERVO_ZERO_ANGLE ) ||
+               ( SERVO_Position_Get_q15angle(SERVO_ID_B) != -PLATFORM_SERVO_ZERO_ANGLE ) ||
+               ( SERVO_Position_Get_q15angle(SERVO_ID_C) != -PLATFORM_SERVO_ZERO_ANGLE ) )
+        {
+            vTaskDelay(1);
+        }
+
+        SERVO_Disable();
+
+        platform_enabled = false;
+    }
 }
 
 void PLATFORM_Enable( void )
 {
-    SERVO_Enable();
+    if( !platform_enabled )
+    {
+        SERVO_Enable();
+
+        SERVO_Position_Zero_Set( SERVO_ID_A );
+        SERVO_Position_Zero_Set( SERVO_ID_B );
+        SERVO_Position_Zero_Set( SERVO_ID_C );
+
+        SERVO_Position_Command_Set_q15angle( SERVO_ID_A, PLATFORM_SERVO_ZERO_ANGLE );
+        SERVO_Position_Command_Set_q15angle( SERVO_ID_B, PLATFORM_SERVO_ZERO_ANGLE );
+        SERVO_Position_Command_Set_q15angle( SERVO_ID_C, PLATFORM_SERVO_ZERO_ANGLE );
+
+        while( ( SERVO_Position_Get_q15angle(SERVO_ID_A) != PLATFORM_SERVO_ZERO_ANGLE ) ||
+               ( SERVO_Position_Get_q15angle(SERVO_ID_B) != PLATFORM_SERVO_ZERO_ANGLE ) ||
+               ( SERVO_Position_Get_q15angle(SERVO_ID_C) != PLATFORM_SERVO_ZERO_ANGLE ) )
+        {
+            vTaskDelay(1);
+        }
+
+        SERVO_Position_Zero_Set( SERVO_ID_A );
+        SERVO_Position_Zero_Set( SERVO_ID_B );
+        SERVO_Position_Zero_Set( SERVO_ID_C );
+
+        platform_enabled = true;
+    }
 }
 
 platform_xy_t PLATFORM_Position_XY_Get( void )
@@ -159,16 +202,6 @@ static void PLATFORM_RTOS_Task( void * pvParameters )
     (void)pvParameters;
     
     vTaskDelay( pdMS_TO_TICKS(PLATFORM_POWER_UP_DELAY_mS) );
-
-    SERVO_Position_Command_Set_q15angle( SERVO_ID_A, 0xB00 );
-    SERVO_Position_Command_Set_q15angle( SERVO_ID_B, 0xB00 );
-    SERVO_Position_Command_Set_q15angle( SERVO_ID_C, 0xB00 );
-    
-    vTaskDelay( pdMS_TO_TICKS(500) );
-
-    SERVO_Position_Zero_Set( SERVO_ID_A );
-    SERVO_Position_Zero_Set( SERVO_ID_B );
-    SERVO_Position_Zero_Set( SERVO_ID_C );
     
     platform_taskLastWakeTime = xTaskGetTickCount();
     

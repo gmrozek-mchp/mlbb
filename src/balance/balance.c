@@ -93,17 +93,17 @@ static void BALANCE_RTOS_Task( void * pvParameters )
         
         if( nunchukData.button_z )
         {
-            STEPPER_nENABLE_Clear();
+            PLATFORM_Enable();
+
+            x = (q15_t)nunchukData.joystick_x * 25;
+            y = (q15_t)nunchukData.joystick_y * 25;
+
+            PLATFORM_Position_XY_Set( x, y );
         }
         else
         {
-            STEPPER_nENABLE_Set();            
+            PLATFORM_Disable();
         }            
-
-        x = (q15_t)nunchukData.joystick_x * 25;
-        y = (q15_t)nunchukData.joystick_y * 25;
-
-        PLATFORM_Position_XY_Set( x, y );
 
         vTaskDelayUntil( &balance_taskLastWakeTime, configTICK_RATE_HZ / BALANCE_TASK_RATE_HZ );    
     }
