@@ -116,7 +116,7 @@ void NUNCHUK_Zero_Set( void )
     taskENTER_CRITICAL();
     
     nunchuk_joystick_x_zero = nunchuk_data_raw.joystick_x;
-    nunchuk_joystick_x_zero = nunchuk_data_raw.joystick_y;
+    nunchuk_joystick_y_zero = nunchuk_data_raw.joystick_y;
 
     taskEXIT_CRITICAL();
 }
