@@ -6,10 +6,11 @@
 	],
 	"settings": {
 		"mplab.clangd.arguments": [
-			"--compile-commands-dir=${cwd}Users/greg/projects/microchip/mlbb/_build/mlbb/sam_e51_cnano"
+			"--compile-commands-dir=${cwd}/_build/mlbb/sam_e51_cnano"
 		],
 		"mplab.mplab-importer.ignorePatterns": [
-			"hal/sam_e51_cnano/bsp-sam_e51_cnano.X/nbproject/configurations.xml"
-		]
+			"hal/sam_e51_cnano/hal-sam_e51_cnano.X/nbproject/configurations.xml"
+		],
+		"mplab.clangd.path": "/Applications/microchip/xc32/v4.60/bin/xc32-clangd"
 	}
 }
