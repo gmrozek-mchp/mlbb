@@ -19,18 +19,12 @@
             "showDevDebugOutput": "none"
         },
         {
-            "name": "Launch MPLAB project",
-            "type": "mplab-core-da",
-            "request": "launch",
-            "stopOnEntry": true
-        },
-        {
             "name": "Launch mlbb: sam_e51_cnano",
             "type": "mplab-core-da",
             "request": "launch",
             "project": "mlbb",
             "configuration": "sam_e51_cnano",
-            "stopOnEntry": true,
+            "stopOnEntry": false,
             "preLaunchTask": "mlbb: sam_e51_cnano - Full Build"
         }
     ]
