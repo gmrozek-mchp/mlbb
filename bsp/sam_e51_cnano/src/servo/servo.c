@@ -14,7 +14,6 @@
 #include "task.h"
 
 #include "peripheral/port/plib_port.h"
-#include "peripheral/tc/plib_tc0.h"
 #include "peripheral/tc/plib_tc1.h"
 #include "peripheral/tc/plib_tc4.h"
 
@@ -36,7 +35,7 @@
 #define SERVO_STEPPER19_I2C_ADDRESS_C     (0x72)
 
 #define SERVO_MOTOR_STEPS_PER_REVOLUTION  (200)
-#define SERVO_DRIVE_MICROSTEPS            (8)
+#define SERVO_DRIVE_MICROSTEPS            (16)
 #define SERVO_DRIVE_STEPS_PER_REVOLUTION  (SERVO_MOTOR_STEPS_PER_REVOLUTION * SERVO_DRIVE_MICROSTEPS)
 #define SERVO_DRIVE_ANGLE_PER_STEP_Q15    (INT16_MAX / SERVO_DRIVE_STEPS_PER_REVOLUTION)
 #define SERVO_DRIVE_SPEED_MAX             (1)
@@ -87,7 +86,8 @@ static const uint8_t servo_stepper19_cmd_output[] = { 0x01, 0x13 };
 // ******************************************************************
 static void SERVO_RTOS_Task( void * pvParameters );
 
-static void SERVO_TC0_TimerCallback( TC_TIMER_STATUS status, uintptr_t context );
+static void SERVO_TC1_CompareCallback( TC_COMPARE_STATUS status, uintptr_t context );
+static void SERVO_TC4_CompareCallback( TC_COMPARE_STATUS status, uintptr_t context );
 
 static void SERVO_Drive( servo_id_t servo_id );
 static void SERVO_Drive_StepAndDirection( servo_id_t servo_id, bool step, bool direction );
@@ -233,38 +233,30 @@ static void SERVO_RTOS_Task( void * pvParameters )
     
     vTaskDelay( pdMS_TO_TICKS(SERVO_POWER_UP_DELAY_mS) );
 
-    DRIVER_I2C_Write( SERVO_STEPPER19_I2C_ADDRESS_A, (uint8_t*)servo_stepper19_cmd_output, sizeof(servo_stepper19_cmd_output) );
-    DRIVER_I2C_Write( SERVO_STEPPER19_I2C_ADDRESS_A, (uint8_t*)servo_stepper19_cmd_config, sizeof(servo_stepper19_cmd_config) );
+    TC1_CompareCallbackRegister( SERVO_TC1_CompareCallback, (uintptr_t)NULL );
+    TC1_CompareStart();
 
-    MIKROBUS1_RST_Set();
-    MIKROBUS1_CS_Set();
-            
-    DRIVER_I2C_Write( SERVO_STEPPER19_I2C_ADDRESS_B, (uint8_t*)servo_stepper19_cmd_output, sizeof(servo_stepper19_cmd_output) );
-    DRIVER_I2C_Write( SERVO_STEPPER19_I2C_ADDRESS_B, (uint8_t*)servo_stepper19_cmd_config, sizeof(servo_stepper19_cmd_config) );
-
-    MIKROBUS2_RST_Set();
-    MIKROBUS2_CS_Set();
-            
-    DRIVER_I2C_Write( SERVO_STEPPER19_I2C_ADDRESS_C, (uint8_t*)servo_stepper19_cmd_output, sizeof(servo_stepper19_cmd_output) );
-    DRIVER_I2C_Write( SERVO_STEPPER19_I2C_ADDRESS_C, (uint8_t*)servo_stepper19_cmd_config, sizeof(servo_stepper19_cmd_config) );
-
-    MIKROBUS3_RST_Set();
-    MIKROBUS3_CS_Set();
-            
-    TC0_TimerCallbackRegister( SERVO_TC0_TimerCallback, (uintptr_t)NULL );
-    TC0_TimerStart();
-
+    TC4_CompareCallbackRegister( SERVO_TC4_CompareCallback, (uintptr_t)NULL );
+    TC4_CompareStart();
+    
     // Servo module is completely interrupt driven. Don't need the task running any more.
     vTaskSuspend( NULL );
 }
 
-static void SERVO_TC0_TimerCallback( TC_TIMER_STATUS status, uintptr_t context )
+static void SERVO_TC1_CompareCallback( TC_COMPARE_STATUS status, uintptr_t context )
 {
     (void)status;
     (void)context;
 
     SERVO_Drive( SERVO_ID_A );
     SERVO_Drive( SERVO_ID_B );
+}
+
+static void SERVO_TC4_CompareCallback( TC_COMPARE_STATUS status, uintptr_t context )
+{
+    (void)status;
+    (void)context;
+    
     SERVO_Drive( SERVO_ID_C );    
 }
 
@@ -360,11 +352,11 @@ static void SERVO_Drive_StepAndDirection( servo_id_t servo_id, bool step, bool d
             {
                 if( direction )
                 {
-                    MIKROBUS1_DIR_Set();
+                    STEPPER1_DIRECTION_Set();
                 }
                 else
                 {
-                    MIKROBUS1_DIR_Clear();
+                    STEPPER1_DIRECTION_Clear();
                 }
                 TC1_Compare8bitMatch0Set( SERVO_STEP_COMPARE_VALUE );
             }
@@ -380,11 +372,11 @@ static void SERVO_Drive_StepAndDirection( servo_id_t servo_id, bool step, bool d
             {
                 if( direction )
                 {
-                    MIKROBUS2_DIR_Set();
+                    STEPPER2_DIRECTION_Set();
                 }
                 else
                 {
-                    MIKROBUS2_DIR_Clear();
+                    STEPPER2_DIRECTION_Clear();
                 }
                 TC1_Compare8bitMatch1Set( SERVO_STEP_COMPARE_VALUE );
             }
@@ -400,11 +392,11 @@ static void SERVO_Drive_StepAndDirection( servo_id_t servo_id, bool step, bool d
             {
                 if( direction )
                 {
-                    MIKROBUS3_DIR_Set();
+                    STEPPER3_DIRECTION_Set();
                 }
                 else
                 {
-                    MIKROBUS3_DIR_Clear();
+                    STEPPER3_DIRECTION_Clear();
                 }
                 TC4_Compare8bitMatch1Set( SERVO_STEP_COMPARE_VALUE );
             }

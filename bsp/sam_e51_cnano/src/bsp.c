@@ -15,11 +15,11 @@ void SetLED( void )
         
         if( state[0] == '0' )
         {
-            LED_Set();
+            LED_CNANO_Set();
         }
         else
         {
-            LED_Clear();
+            LED_CNANO_Clear();
         }
     }
 }
