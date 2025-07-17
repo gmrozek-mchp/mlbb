@@ -20,7 +20,9 @@
                 }
             ],
             "fileSet": "sam_e51_cnano",
-            "toolchain": "sam_e51_cnano-XC32"
+            "toolchain": "sam_e51_cnano-XC32",
+            "preBuildSteps": [],
+            "postBuildSteps": []
         }
     ],
     "propertyGroups": [
