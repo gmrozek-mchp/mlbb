@@ -408,7 +408,7 @@ void CMD_PrintDecimal_U32( uint32_t value, bool zero_blank, uint8_t width, bool 
 	while( ((value > 0) || (width > 0)) && (ptrChar > decimalString) )
 	{
 		ptrChar--;
-		if( value == 0 )
+        if( value == 0 )
 		{
             if( zero_blank )
             {

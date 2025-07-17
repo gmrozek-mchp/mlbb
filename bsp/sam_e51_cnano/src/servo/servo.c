@@ -4,11 +4,8 @@
 
 #include "servo.h"
 
-#include <limits.h>
 #include <stddef.h>
 #include <stdint.h>
-
-#include "arm_math.h"
 
 #include "FreeRTOS.h"
 #include "task.h"
@@ -16,8 +13,6 @@
 #include "peripheral/port/plib_port.h"
 #include "peripheral/tc/plib_tc1.h"
 #include "peripheral/tc/plib_tc4.h"
-
-#include "driver/driver_i2c.h"
 
 #include "command/command.h"
 
@@ -30,10 +25,6 @@
 
 #define SERVO_POWER_UP_DELAY_mS   (100)
 
-#define SERVO_STEPPER19_I2C_ADDRESS_A     (0x70)
-#define SERVO_STEPPER19_I2C_ADDRESS_B     (0x71)
-#define SERVO_STEPPER19_I2C_ADDRESS_C     (0x72)
-
 #define SERVO_MOTOR_STEPS_PER_REVOLUTION  (200)
 #define SERVO_DRIVE_MICROSTEPS            (16)
 #define SERVO_DRIVE_STEPS_PER_REVOLUTION  (SERVO_MOTOR_STEPS_PER_REVOLUTION * SERVO_DRIVE_MICROSTEPS)
@@ -41,7 +32,6 @@
 #define SERVO_DRIVE_SPEED_MAX             (1)
 
 #define SERVO_STEP_COMPARE_VALUE    (10)
-
 
 
 // ******************************************************************

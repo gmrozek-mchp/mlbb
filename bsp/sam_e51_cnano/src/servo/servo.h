@@ -2,7 +2,7 @@
 #define	SERVO_H
 
 
-#include "arm_math.h"
+#include "arm_math_types.h"
 
 
 typedef enum {

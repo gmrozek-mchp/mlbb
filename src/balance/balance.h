@@ -2,9 +2,6 @@
 #define	BALANCE_H
 
 
-#include <stdint.h>
-
-
 void BALANCE_Initialize( void );
 
 

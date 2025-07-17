@@ -2,9 +2,7 @@
 #define	PLATFORM_H
 
 
-#include <stdint.h>
-
-#include "arm_math.h"
+#include "arm_math_types.h"
 
 
 typedef struct {
