@@ -6,7 +6,39 @@
 #include "command/command.h"
 
 
-void SetLED( void )
+// ******************************************************************
+// Section: Command Portal Function Declarations
+// ******************************************************************
+
+static void ForceReset( void );
+static void SetLED( void );
+
+
+// ******************************************************************
+// Section: Public Functions
+// ******************************************************************
+
+void BSP_Initialize( void )
+{
+    SYS_Initialize ( NULL );
+
+    DRIVER_I2C_Initialize();
+
+    CMD_RegisterCommand( "led", SetLED );
+    CMD_RegisterCommand( "reset", ForceReset );    
+}
+
+
+// ******************************************************************
+// Section: Command Portal Functions
+// ******************************************************************
+
+static void ForceReset( void )
+{
+    SYS_RESET_SoftwareReset();
+}
+
+static void SetLED( void )
 {
     if( CMD_GetArgc() >= 2 )
     {
@@ -22,20 +54,4 @@ void SetLED( void )
             LED_CNANO_Clear();
         }
     }
-}
-
-void ForceReset( void )
-{
-    SYS_RESET_SoftwareReset();
-}
-
-
-void BSP_Initialize( void )
-{
-    SYS_Initialize ( NULL );
-
-    DRIVER_I2C_Initialize();
-
-    CMD_RegisterCommand( "led", SetLED );
-    CMD_RegisterCommand( "reset", ForceReset );    
 }
