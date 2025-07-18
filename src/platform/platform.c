@@ -21,6 +21,7 @@
 // ******************************************************************
 // Section: Macro Declarations
 // ******************************************************************
+
 #define PLATFORM_RTOS_PRIORITY       (3)
 #define PLATFORM_RTOS_STACK_SIZE     (configMINIMAL_STACK_SIZE)
 
@@ -62,12 +63,14 @@ static platform_abc_t platform_position_actual_abc;
 // ******************************************************************
 // Section: Private Function Declarations
 // ******************************************************************
+
 static void PLATFORM_RTOS_Task( void * pvParameters );
 
 
 // ******************************************************************
 // Section: Command Portal Function Declarations
 // ******************************************************************
+
 static void PLATFORM_CMD_Position_XY( void );
 static void PLATFORM_CMD_Position_ABC( void );
 

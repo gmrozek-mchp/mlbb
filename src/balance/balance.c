@@ -9,7 +9,7 @@
 
 #include "peripheral/port/plib_port.h"
 
-//#include "ball/ar1100.h"
+#include "ball/ball.h"
 #include "nunchuk/nunchuk.h"
 #include "platform/platform.h"
 
@@ -51,7 +51,7 @@ static void BALANCE_RTOS_Task( void * pvParameters );
 
 void BALANCE_Initialize( void )
 {
-    // AR1100_Initialize();
+    BALL_Initialize();
 
     NUNCHUK_Initialize();
 
