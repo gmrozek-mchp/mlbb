@@ -13,6 +13,9 @@
 #include "command/command.h"
 
 #include "balance/balance.h"
+#include "ball/ball.h"
+#include "nunchuk/nunchuk.h"
+#include "platform/platform.h"
 
 
 int main()
@@ -20,8 +23,11 @@ int main()
     BSP_Initialize();
 
     CMD_Initialize();
-
+    
     BALANCE_Initialize();
+    BALL_Initialize();
+    NUNCHUK_Initialize();
+    PLATFORM_Initialize();
 
     vTaskStartScheduler();
 
