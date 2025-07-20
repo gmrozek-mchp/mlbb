@@ -22,12 +22,12 @@
 // Section: Macro Declarations
 // ******************************************************************
 
-#define BALANCE_PID_CONSTANT_Kp (0x1)
+#define BALANCE_PID_CONSTANT_Kp (0x400)
 #define BALANCE_PID_CONSTANT_Ki (0x1)
-#define BALANCE_PID_CONSTANT_Kd (0x0)
+#define BALANCE_PID_CONSTANT_Kd (0x1)
 
-#define BALANCE_PID_TARGET_X    (0x4000)
-#define BALANCE_PID_TARGET_Y    (0x4000)
+#define BALANCE_PID_TARGET_X    (0x0890)
+#define BALANCE_PID_TARGET_Y    (0x0AF0)
 
 
 // ******************************************************************
@@ -52,6 +52,7 @@ arm_pid_instance_q15 balance_pid_y;
 // Section: Command Portal Function Declarations
 // ******************************************************************
 
+static void BALANCE_PID_CMD_Print_State( void );
 static void BALANCE_PID_CMD_Print_Constants( void );
 static void BALANCE_PID_CMD_Set_Kp( void );
 static void BALANCE_PID_CMD_Set_Ki( void );
@@ -64,17 +65,18 @@ static void BALANCE_PID_CMD_Set_Kd( void );
 
 void BALANCE_PID_Initialize( void )
 {
-    balance_pid_x.Kp = 0x100;
-    balance_pid_x.Ki = 0x100;
-    balance_pid_x.Kd = 0x100;
+    balance_pid_x.Kp = BALANCE_PID_CONSTANT_Kp;
+    balance_pid_x.Ki = BALANCE_PID_CONSTANT_Ki;
+    balance_pid_x.Kd = BALANCE_PID_CONSTANT_Kd;
     arm_pid_init_q15( &balance_pid_x, 1 );
 
-    balance_pid_y.Kp = 0x100;
-    balance_pid_y.Ki = 0x100;
-    balance_pid_y.Kd = 0x100;
+    balance_pid_y.Kp = BALANCE_PID_CONSTANT_Kp;
+    balance_pid_y.Ki = BALANCE_PID_CONSTANT_Ki;
+    balance_pid_y.Kd = BALANCE_PID_CONSTANT_Kd;
     arm_pid_init_q15( &balance_pid_y, 1 );
 
-    CMD_RegisterCommand( "pid", BALANCE_PID_CMD_Print_Constants );
+    CMD_RegisterCommand( "pid", BALANCE_PID_CMD_Print_State );
+    CMD_RegisterCommand( "pidk", BALANCE_PID_CMD_Print_Constants );
     CMD_RegisterCommand( "kp", BALANCE_PID_CMD_Set_Kp );
     CMD_RegisterCommand( "ki", BALANCE_PID_CMD_Set_Ki );
     CMD_RegisterCommand( "kd", BALANCE_PID_CMD_Set_Kd );
@@ -88,17 +90,34 @@ void BALANCE_PID_Reset( void )
 
 void BALANCE_PID_Run( void )
 {
-    ball_data_t ball_data = BALL_Position_Get();
+    ball_data_t ball_data;
+    static uint16_t debounce_count = 0;
+    
+    ball_data = BALL_Position_Get();
 
     if( ball_data.detected )
     {
-        q15_t error_x = BALANCE_PID_TARGET_X - ball_data.x;
-        q15_t error_y = BALANCE_PID_TARGET_Y - ball_data.y;
+        q15_t error_x = -(BALANCE_PID_TARGET_X - ball_data.x) * 10;
+        q15_t error_y = BALANCE_PID_TARGET_Y - ball_data.y * 10;
 
         q15_t command_x = arm_pid_q15( &balance_pid_x, error_x );
         q15_t command_y = arm_pid_q15( &balance_pid_y, error_y );
 
         PLATFORM_Position_XY_Set( command_x, command_y );
+
+        debounce_count = 0;
+    }
+    else
+    {
+        debounce_count++;
+        if( debounce_count >= 10 )
+        {
+            debounce_count = 10;
+
+            arm_pid_reset_q15( &balance_pid_x );
+            arm_pid_reset_q15( &balance_pid_y );
+            PLATFORM_Position_XY_Set( 0, 0 );
+        }
     }
 }
 
@@ -111,6 +130,17 @@ void BALANCE_PID_Run( void )
 // ******************************************************************
 // Section: Command Portal Functions
 // ******************************************************************
+
+static void BALANCE_PID_CMD_Print_State( void )
+{
+    CMD_PrintString( "xS0: ", true );
+    CMD_PrintHex_U16( (uint16_t)balance_pid_x.state[0], true );
+    CMD_PrintString( " xS1: ", true );
+    CMD_PrintHex_U16( (uint16_t)balance_pid_x.state[1], true );
+    CMD_PrintString( " xS2: ", true );
+    CMD_PrintHex_U16( (uint16_t)balance_pid_x.state[2], true );
+    CMD_PrintString( "\r\n", true );
+}
 
 static void BALANCE_PID_CMD_Print_Constants( void )
 {

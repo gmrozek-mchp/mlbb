@@ -44,6 +44,8 @@ ball_data_t BALL_Position_Get( void )
     balldata.detected = touchdata.down;
     balldata.x = (int16_t)touchdata.x;
     balldata.y = (int16_t)touchdata.y;
+
+    return balldata;
 }
 
 

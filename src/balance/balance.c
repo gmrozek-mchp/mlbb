@@ -42,7 +42,7 @@ static StackType_t  balance_taskStack[ BALANCE_RTOS_STACK_SIZE ];
 
 static TickType_t balance_taskLastWakeTime;
 
-static balance_mode_t balance_mode = BALANCE_MODE_OFF;
+static balance_mode_t balance_mode = BALANCE_MODE_PID;
 
 
 // ******************************************************************
@@ -141,13 +141,14 @@ static void BALANCE_RTOS_Task( void * pvParameters )
                 case BALANCE_MODE_OFF:
                 {
                     PLATFORM_Disable();
+                    break;
                 }
 
                 case BALANCE_MODE_HUMAN:
                 {
                     LED_MODE_HUMAN_Set();
                     BALANCE_HUMAN_Reset();
-                    PLATFORM_Enable();
+//                    PLATFORM_Enable();
                     break;
                 }
 

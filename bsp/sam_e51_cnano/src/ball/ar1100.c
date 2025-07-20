@@ -119,8 +119,8 @@ static void ar1100_UartReadCallback( uintptr_t context )
                 uint8_t writeIndex = (ar1100_touchData_readIndex + 1) % 2;
 
                 ar1100_touchData[writeIndex].down = ((ar1100_readBuffer[0] & 0x01) != 0);
-                ar1100_touchData[writeIndex].x = ((ar1100_readBuffer[2] & 0x1f) << 7) | (ar1100_readBuffer[1] & 0x7f);
-                ar1100_touchData[writeIndex].y = ((ar1100_readBuffer[4] & 0x1f) << 7) | (ar1100_readBuffer[3] & 0x7f);
+                ar1100_touchData[writeIndex].y = ((ar1100_readBuffer[2] & 0x1f) << 7) | (ar1100_readBuffer[1] & 0x7f);
+                ar1100_touchData[writeIndex].x = ((ar1100_readBuffer[4] & 0x1f) << 7) | (ar1100_readBuffer[3] & 0x7f);
                 
                 if( ar1100_touchCallback != NULL )
                 {
