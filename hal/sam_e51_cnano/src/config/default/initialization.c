@@ -139,6 +139,8 @@ void SYS_Initialize ( void* data )
 
 
 
+    TCC1_PWMInitialize();
+
     SERCOM2_I2C_Initialize();
 
     EVSYS_Initialize();
@@ -146,10 +148,6 @@ void SYS_Initialize ( void* data )
     SERCOM0_USART_Initialize();
 
     SERCOM5_USART_Initialize();
-
-    TC1_CompareInitialize();
-
-    TC4_CompareInitialize();
 
 
     NVIC_Initialize();

@@ -48,8 +48,9 @@
 #include <stdint.h>
 #include <stddef.h>
 #include <stdbool.h>
-#include "peripheral/sercom/i2c_master/plib_sercom2_i2c_master.h"
+#include "peripheral/tcc/plib_tcc1.h"
 #include "peripheral/nvmctrl/plib_nvmctrl.h"
+#include "peripheral/sercom/i2c_master/plib_sercom2_i2c_master.h"
 #include "peripheral/evsys/plib_evsys.h"
 #include "peripheral/sercom/usart/plib_sercom0_usart.h"
 #include "peripheral/port/plib_port.h"
@@ -57,8 +58,6 @@
 #include "peripheral/nvic/plib_nvic.h"
 #include "peripheral/cmcc/plib_cmcc.h"
 #include "peripheral/sercom/usart/plib_sercom5_usart.h"
-#include "peripheral/tc/plib_tc1.h"
-#include "peripheral/tc/plib_tc4.h"
 #include "system/reset/sys_reset.h"
 
 // DOM-IGNORE-BEGIN

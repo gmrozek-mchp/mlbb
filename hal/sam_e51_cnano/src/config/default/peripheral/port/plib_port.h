@@ -65,15 +65,6 @@
 // *****************************************************************************
 // *****************************************************************************
 
-/*** Macros for STEPPER1_DIRECTION pin ***/
-#define STEPPER1_DIRECTION_Set()               (PORT_REGS->GROUP[0].PORT_OUTSET = ((uint32_t)1U << 2U))
-#define STEPPER1_DIRECTION_Clear()             (PORT_REGS->GROUP[0].PORT_OUTCLR = ((uint32_t)1U << 2U))
-#define STEPPER1_DIRECTION_Toggle()            (PORT_REGS->GROUP[0].PORT_OUTTGL = ((uint32_t)1U << 2U))
-#define STEPPER1_DIRECTION_OutputEnable()      (PORT_REGS->GROUP[0].PORT_DIRSET = ((uint32_t)1U << 2U))
-#define STEPPER1_DIRECTION_InputEnable()       (PORT_REGS->GROUP[0].PORT_DIRCLR = ((uint32_t)1U << 2U))
-#define STEPPER1_DIRECTION_Get()               (((PORT_REGS->GROUP[0].PORT_IN >> 2U)) & 0x01U)
-#define STEPPER1_DIRECTION_PIN                  PORT_PIN_PA02
-
 /*** Macros for LED_SPARE_5 pin ***/
 #define LED_SPARE_5_Set()               (PORT_REGS->GROUP[1].PORT_OUTSET = ((uint32_t)1U << 7U))
 #define LED_SPARE_5_Clear()             (PORT_REGS->GROUP[1].PORT_OUTCLR = ((uint32_t)1U << 7U))
@@ -82,28 +73,6 @@
 #define LED_SPARE_5_InputEnable()       (PORT_REGS->GROUP[1].PORT_DIRCLR = ((uint32_t)1U << 7U))
 #define LED_SPARE_5_Get()               (((PORT_REGS->GROUP[1].PORT_IN >> 7U)) & 0x01U)
 #define LED_SPARE_5_PIN                  PORT_PIN_PB07
-
-/*** Macros for STEPPER3_DIRECTION pin ***/
-#define STEPPER3_DIRECTION_Set()               (PORT_REGS->GROUP[1].PORT_OUTSET = ((uint32_t)1U << 8U))
-#define STEPPER3_DIRECTION_Clear()             (PORT_REGS->GROUP[1].PORT_OUTCLR = ((uint32_t)1U << 8U))
-#define STEPPER3_DIRECTION_Toggle()            (PORT_REGS->GROUP[1].PORT_OUTTGL = ((uint32_t)1U << 8U))
-#define STEPPER3_DIRECTION_OutputEnable()      (PORT_REGS->GROUP[1].PORT_DIRSET = ((uint32_t)1U << 8U))
-#define STEPPER3_DIRECTION_InputEnable()       (PORT_REGS->GROUP[1].PORT_DIRCLR = ((uint32_t)1U << 8U))
-#define STEPPER3_DIRECTION_Get()               (((PORT_REGS->GROUP[1].PORT_IN >> 8U)) & 0x01U)
-#define STEPPER3_DIRECTION_PIN                  PORT_PIN_PB08
-
-/*** Macros for STEPPER3_STEP pin ***/
-#define STEPPER3_STEP_Get()               (((PORT_REGS->GROUP[1].PORT_IN >> 9U)) & 0x01U)
-#define STEPPER3_STEP_PIN                  PORT_PIN_PB09
-
-/*** Macros for STEPPER_nENABLE pin ***/
-#define STEPPER_nENABLE_Set()               (PORT_REGS->GROUP[0].PORT_OUTSET = ((uint32_t)1U << 4U))
-#define STEPPER_nENABLE_Clear()             (PORT_REGS->GROUP[0].PORT_OUTCLR = ((uint32_t)1U << 4U))
-#define STEPPER_nENABLE_Toggle()            (PORT_REGS->GROUP[0].PORT_OUTTGL = ((uint32_t)1U << 4U))
-#define STEPPER_nENABLE_OutputEnable()      (PORT_REGS->GROUP[0].PORT_DIRSET = ((uint32_t)1U << 4U))
-#define STEPPER_nENABLE_InputEnable()       (PORT_REGS->GROUP[0].PORT_DIRCLR = ((uint32_t)1U << 4U))
-#define STEPPER_nENABLE_Get()               (((PORT_REGS->GROUP[0].PORT_IN >> 4U)) & 0x01U)
-#define STEPPER_nENABLE_PIN                  PORT_PIN_PA04
 
 /*** Macros for LED_MODE_NEURAL_NETWORK pin ***/
 #define LED_MODE_NEURAL_NETWORK_Set()               (PORT_REGS->GROUP[0].PORT_OUTSET = ((uint32_t)1U << 5U))
@@ -131,14 +100,6 @@
 #define TOUCH_RX_Get()               (((PORT_REGS->GROUP[0].PORT_IN >> 9U)) & 0x01U)
 #define TOUCH_RX_PIN                  PORT_PIN_PA09
 
-/*** Macros for STEPPER1_STEP pin ***/
-#define STEPPER1_STEP_Get()               (((PORT_REGS->GROUP[0].PORT_IN >> 10U)) & 0x01U)
-#define STEPPER1_STEP_PIN                  PORT_PIN_PA10
-
-/*** Macros for STEPPER2_STEP pin ***/
-#define STEPPER2_STEP_Get()               (((PORT_REGS->GROUP[0].PORT_IN >> 11U)) & 0x01U)
-#define STEPPER2_STEP_PIN                  PORT_PIN_PA11
-
 /*** Macros for I2C_SDA pin ***/
 #define I2C_SDA_Get()               (((PORT_REGS->GROUP[0].PORT_IN >> 12U)) & 0x01U)
 #define I2C_SDA_PIN                  PORT_PIN_PA12
@@ -164,6 +125,18 @@
 #define BUTTON_CNANO_InputEnable()       (PORT_REGS->GROUP[0].PORT_DIRCLR = ((uint32_t)1U << 15U))
 #define BUTTON_CNANO_Get()               (((PORT_REGS->GROUP[0].PORT_IN >> 15U)) & 0x01U)
 #define BUTTON_CNANO_PIN                  PORT_PIN_PA15
+
+/*** Macros for SERVO_PULSE_A pin ***/
+#define SERVO_PULSE_A_Get()               (((PORT_REGS->GROUP[0].PORT_IN >> 16U)) & 0x01U)
+#define SERVO_PULSE_A_PIN                  PORT_PIN_PA16
+
+/*** Macros for SERVO_PULSE_B pin ***/
+#define SERVO_PULSE_B_Get()               (((PORT_REGS->GROUP[0].PORT_IN >> 17U)) & 0x01U)
+#define SERVO_PULSE_B_PIN                  PORT_PIN_PA17
+
+/*** Macros for SERVO_PULSE_C pin ***/
+#define SERVO_PULSE_C_Get()               (((PORT_REGS->GROUP[0].PORT_IN >> 18U)) & 0x01U)
+#define SERVO_PULSE_C_PIN                  PORT_PIN_PA18
 
 /*** Macros for VIRTUAL_COM_TX pin ***/
 #define VIRTUAL_COM_TX_Get()               (((PORT_REGS->GROUP[1].PORT_IN >> 16U)) & 0x01U)
@@ -235,15 +208,6 @@
 #define LED_SPARE_4_InputEnable()       (PORT_REGS->GROUP[1].PORT_DIRCLR = ((uint32_t)1U << 1U))
 #define LED_SPARE_4_Get()               (((PORT_REGS->GROUP[1].PORT_IN >> 1U)) & 0x01U)
 #define LED_SPARE_4_PIN                  PORT_PIN_PB01
-
-/*** Macros for STEPPER2_DIRECTION pin ***/
-#define STEPPER2_DIRECTION_Set()               (PORT_REGS->GROUP[1].PORT_OUTSET = ((uint32_t)1U << 3U))
-#define STEPPER2_DIRECTION_Clear()             (PORT_REGS->GROUP[1].PORT_OUTCLR = ((uint32_t)1U << 3U))
-#define STEPPER2_DIRECTION_Toggle()            (PORT_REGS->GROUP[1].PORT_OUTTGL = ((uint32_t)1U << 3U))
-#define STEPPER2_DIRECTION_OutputEnable()      (PORT_REGS->GROUP[1].PORT_DIRSET = ((uint32_t)1U << 3U))
-#define STEPPER2_DIRECTION_InputEnable()       (PORT_REGS->GROUP[1].PORT_DIRCLR = ((uint32_t)1U << 3U))
-#define STEPPER2_DIRECTION_Get()               (((PORT_REGS->GROUP[1].PORT_IN >> 3U)) & 0x01U)
-#define STEPPER2_DIRECTION_PIN                  PORT_PIN_PB03
 
 // *****************************************************************************
 /* PORT Group

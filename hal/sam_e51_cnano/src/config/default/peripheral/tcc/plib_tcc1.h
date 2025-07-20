@@ -1,26 +1,23 @@
 /*******************************************************************************
-  Timer/Counter(TC1) PLIB
+  Data Type definition of Timer/Counter(TCC) PLIB
 
-  Company
+  Company:
     Microchip Technology Inc.
 
-  File Name
-    plib_tc1.h
+  File Name:
+    plib_tcc1.h
 
-  Summary
-    TC1 PLIB Header File.
+  Summary:
+    Data Type definition of the TCC Peripheral Interface Plib.
 
-  Description
-    This file defines the interface to the TC peripheral library. This
-    library provides access to and control of the associated peripheral
-    instance.
+  Description:
+    This file defines the Data Types for the TCC Plib.
 
   Remarks:
     None.
 
 *******************************************************************************/
 
-// DOM-IGNORE-BEGIN
 /*******************************************************************************
 * Copyright (C) 2018 Microchip Technology Inc. and its subsidiaries.
 *
@@ -43,24 +40,15 @@
 * ANY WAY RELATED TO THIS SOFTWARE WILL NOT EXCEED THE AMOUNT OF FEES, IF ANY,
 * THAT YOU HAVE PAID DIRECTLY TO MICROCHIP FOR THIS SOFTWARE.
 *******************************************************************************/
-// DOM-IGNORE-END
 
-#ifndef PLIB_TC1_H       // Guards against multiple inclusion
-#define PLIB_TC1_H
-
-// *****************************************************************************
-// *****************************************************************************
-// Section: Included Files
-// *****************************************************************************
-// *****************************************************************************
-/* This section lists the other files that are included in this file.
-*/
+#ifndef PLIB_TCC1_H
+#define PLIB_TCC1_H
 
 #include "device.h"
-#include "plib_tc_common.h"
+#include "plib_tcc_common.h"
 
 // DOM-IGNORE-BEGIN
-#ifdef __cplusplus // Provide C Compatibility
+#ifdef __cplusplus  // Provide C++ Compatibility
 
     extern "C" {
 
@@ -72,9 +60,55 @@
 // Section: Data Types
 // *****************************************************************************
 // *****************************************************************************
-/* The following data type definitions are used by the functions in this
+/*  The following data type definitions are used by the functions in this
     interface and should be considered part it.
 */
+
+/* Total number of TCC channels in a module */
+#define TCC1_NUM_CHANNELS    (4U)
+
+/* TCC Channel numbers
+
+   Summary:
+    Identifies channel number within TCC module
+
+   Description:
+    This enumeration identifies TCC channel number.
+
+   Remarks:
+    None.
+*/
+typedef enum
+{
+    TCC1_CHANNEL0,
+    TCC1_CHANNEL1,
+    TCC1_CHANNEL2,
+    TCC1_CHANNEL3,
+}TCC1_CHANNEL_NUM;
+
+// *****************************************************************************
+
+/* TCC Channel interrupt status
+
+   Summary:
+    Identifies TCC PWM interrupt status flags
+
+   Description:
+    This enumeration identifies TCC PWM interrupt status falgs
+
+   Remarks:
+    None.
+*/
+typedef enum
+{
+    TCC1_PWM_STATUS_OVF = TCC_INTFLAG_OVF_Msk,
+    TCC1_PWM_STATUS_FAULT_0 = TCC_INTFLAG_FAULT0_Msk,
+    TCC1_PWM_STATUS_FAULT_1 = TCC_INTFLAG_FAULT1_Msk,
+    TCC1_PWM_STATUS_MC_0 = TCC_INTFLAG_MC0_Msk,
+    TCC1_PWM_STATUS_MC_1 = TCC_INTFLAG_MC1_Msk,
+    TCC1_PWM_STATUS_MC_2 = TCC_INTFLAG_MC2_Msk,
+    TCC1_PWM_STATUS_MC_3 = TCC_INTFLAG_MC3_Msk,
+}TCC1_PWM_STATUS;
 
 // *****************************************************************************
 // *****************************************************************************
@@ -85,40 +119,50 @@
    this interface.
 */
 
+// *****************************************************************************
+void TCC1_PWMInitialize(void);
 
-void TC1_CompareInitialize( void );
+void TCC1_PWMStart(void);
 
-void TC1_CompareStart( void );
+void TCC1_PWMStop(void);
 
-void TC1_CompareStop( void );
+void TCC1_PWMDeadTimeSet(uint8_t deadtime_high, uint8_t deadtime_low);
 
-uint32_t TC1_CompareFrequencyGet( void );
+void TCC1_PWMForceUpdate(void);
 
-bool TC1_Compare8bitPeriodSet( uint8_t period );
-
-uint8_t TC1_Compare8bitPeriodGet( void );
-
-uint8_t TC1_Compare8bitCounterGet( void );
-
-void TC1_Compare8bitCounterSet( uint8_t count );
-
-bool TC1_Compare8bitMatch0Set( uint8_t compareValue );
-
-bool TC1_Compare8bitMatch1Set( uint8_t compareValue );
+bool TCC1_PWMPatternSet(uint8_t pattern_enable, uint8_t pattern_output);
 
 
-void TC1_CompareCallbackRegister( TC_COMPARE_CALLBACK callback, uintptr_t context );
+void TCC1_PWMPeriodInterruptEnable(void);
 
+void TCC1_PWMPeriodInterruptDisable(void);
 
-void TC1_CompareCommandSet(TC_COMMAND command);
+uint32_t TCC1_PWMInterruptStatusGet(void);
 
+bool TCC1_PWM24bitPeriodSet(uint32_t period);
+
+uint32_t TCC1_PWM24bitPeriodGet(void);
+
+void TCC1_PWM24bitCounterSet(uint32_t countVal);
+
+uint32_t TCC1_PWM24bitCounterGet(void);
+
+__STATIC_INLINE bool TCC1_PWM24bitDutySet(TCC1_CHANNEL_NUM channel, uint32_t duty)
+{
+    bool status = false;
+    if ((TCC1_REGS->TCC_STATUS & (1UL << (TCC_STATUS_CCBUFV0_Pos + (uint32_t)channel))) == 0U)
+    {
+        TCC1_REGS->TCC_CCBUF[channel] = duty & 0xFFFFFFU;
+        status = true;
+    }
+    return status;
+}
 
 // DOM-IGNORE-BEGIN
 #ifdef __cplusplus  // Provide C++ Compatibility
 
     }
-
 #endif
 // DOM-IGNORE-END
 
-#endif /* PLIB_TC1_H */
+#endif /* PLIB_TCC1_H */
