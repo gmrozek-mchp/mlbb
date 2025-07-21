@@ -567,6 +567,13 @@ uint8_t CMD_GetArgv( uint8_t argv_index,
 }
 #endif
 
+#if (CMD_ENABLE_STREAM == 1)
+bool CMD_CheckEscape(void)
+{
+    // check for escape character to exit stream mode.
+    return ( !CMD_HAL_IO_RxBufferEmpty() && (CMD_HAL_IO_Read() == CMD_ESCAPE_CHAR) );
+}
+#endif
 
 void CMD_Initialize(void)
 {

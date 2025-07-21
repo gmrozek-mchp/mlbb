@@ -6,6 +6,7 @@ void BALANCE_PID_Initialize( void );
 
 void BALANCE_PID_Reset( void );
 void BALANCE_PID_Run( void );
+void BALANCE_PID_DataVisualizer( void );
 
 
 #endif	/* BALANCE_PID_H */

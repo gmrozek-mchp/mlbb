@@ -9,9 +9,7 @@
 
 #include "peripheral/port/plib_port.h"
 
-#include "ball/ball.h"
-#include "nunchuk/nunchuk.h"
-#include "platform/platform.h"
+#include "command/command.h"
 
 #include "balance/balance_human.h"
 #include "balance/balance_nn.h"
@@ -31,6 +29,13 @@
 // ******************************************************************
 // Section: Data Type Definitions
 // ******************************************************************
+typedef struct {
+    void (*init)( void );
+    void (*reset)( void );
+    void (*run)( void );
+    void (*dv)( void );
+    PORT_PIN led_mode_pin;
+} balance_interface_t;
 
 
 // ******************************************************************
@@ -44,11 +49,51 @@ static TickType_t balance_taskLastWakeTime;
 
 static balance_mode_t balance_mode = BALANCE_MODE_PID;
 
+static bool balance_dv_active = false;
+
+static const balance_interface_t balancer_off = {
+    .init = NULL,
+    .reset = NULL,
+    .run = NULL,
+    .dv = NULL,
+    .led_mode_pin = PORT_PIN_NONE
+};
+static const balance_interface_t balancer_human = { 
+    .init = BALANCE_HUMAN_Initialize,
+    .reset = BALANCE_HUMAN_Reset,
+    .run = BALANCE_HUMAN_Run,
+    .dv = NULL,
+    .led_mode_pin = LED_MODE_HUMAN_PIN
+};
+static const balance_interface_t balancer_pid = {
+    .init = BALANCE_PID_Initialize,
+    .reset = BALANCE_PID_Reset,
+    .run = BALANCE_PID_Run,
+    .dv = BALANCE_PID_DataVisualizer,
+    .led_mode_pin = LED_MODE_PID_PIN
+};
+static const balance_interface_t balancer_nn = {
+    .init = BALANCE_NN_Initialize,
+    .reset = BALANCE_NN_Reset,
+    .run = BALANCE_NN_Run,
+    .dv = NULL,
+    .led_mode_pin = LED_MODE_NEURAL_NETWORK_PIN
+};
+
+static balance_interface_t balancers[] = {
+    balancer_off,
+    balancer_human,
+    balancer_pid,
+    balancer_nn
+};
+
 
 // ******************************************************************
 // Section: Private Function Declarations
 // ******************************************************************
 static void BALANCE_RTOS_Task( void * pvParameters );
+
+static void BALANCE_CMD_DataVisualizer( void );
 
 
 // ******************************************************************
@@ -60,7 +105,9 @@ void BALANCE_Initialize( void )
     BALANCE_HUMAN_Initialize();
     BALANCE_NN_Initialize();
     BALANCE_PID_Initialize();
-    
+
+    CMD_RegisterCommand( "dvbalance", BALANCE_CMD_DataVisualizer );
+
     balance_taskHandle = xTaskCreateStatic(
         BALANCE_RTOS_Task,        /* Function that implements the task. */
         "Balance",                /* Text name for the task. */
@@ -128,81 +175,57 @@ static void BALANCE_RTOS_Task( void * pvParameters )
     
     while(1)
     {
+        // Check if balance mode has changed.
         if( active_balance_mode != balance_mode )
         {
             active_balance_mode = balance_mode;
+            balance_dv_active = false;
 
             LED_MODE_HUMAN_Clear();
             LED_MODE_PID_Clear();
             LED_MODE_NEURAL_NETWORK_Clear();
 
-            switch( active_balance_mode )
+            if( balancers[active_balance_mode].led_mode_pin != PORT_PIN_NONE )
             {
-                case BALANCE_MODE_OFF:
-                {
-                    PLATFORM_Disable();
-                    break;
-                }
-
-                case BALANCE_MODE_HUMAN:
-                {
-                    LED_MODE_HUMAN_Set();
-                    BALANCE_HUMAN_Reset();
-                    PLATFORM_Enable();
-                    break;
-                }
-
-                case BALANCE_MODE_PID:
-                {
-                    LED_MODE_PID_Set();
-                    BALANCE_PID_Reset();
-                    PLATFORM_Enable();
-                    break;
-                }
-
-                case BALANCE_MODE_NN:
-                {
-                    LED_MODE_NEURAL_NETWORK_Set();
-                    BALANCE_NN_Reset();
-                    PLATFORM_Enable();
-                    break;
-                }
-
-                default:
-                {
-                    break;
-                }
+                PORT_PinSet( balancers[active_balance_mode].led_mode_pin );
             }
 
+            // Reset the active balancer.
+            if( balancers[active_balance_mode].reset != NULL )
+            {
+                balancers[active_balance_mode].reset();
+            }
         }
 
-        switch( active_balance_mode )
+        // Run the active balancer
+        if( balancers[active_balance_mode].run != NULL )
         {
-            case BALANCE_MODE_HUMAN:
-            {
-                BALANCE_HUMAN_Run();
-                break;
-            }
+            balancers[active_balance_mode].run();
+        }
 
-            case BALANCE_MODE_PID:
-            {
-                BALANCE_PID_Run();
-                break;
-            }
-
-            case BALANCE_MODE_NN:
-            {
-                BALANCE_NN_Run();
-                break;
-            }
-
-            default:
-            {
-                break;
-            }
+        // Stream data visualizer if active
+        if( balance_dv_active && (balancers[active_balance_mode].dv != NULL) )
+        {
+            balancers[active_balance_mode].dv();
         }
 
         vTaskDelayUntil( &balance_taskLastWakeTime, configTICK_RATE_HZ / BALANCE_TASK_RATE_HZ );    
     }
 }
 
+
+// ******************************************************************
+// Section: Command Portal Functions
+// ******************************************************************
+
+static void BALANCE_CMD_DataVisualizer( void )
+{
+    balance_dv_active = true;
+
+    while( !CMD_CheckEscape() && balance_dv_active )
+    {
+        vTaskDelay( 10 );
+    }
+
+    balance_dv_active = false;
+}

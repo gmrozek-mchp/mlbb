@@ -233,6 +233,9 @@ uint8_t CMD_GetArgv( uint8_t argv_index, char* buffer, uint8_t buffer_size );
 #endif
 
 
+bool CMD_CheckEscape(void);
+
+
 // ******************************************************************
 // Section: Operation Routines
 // ******************************************************************

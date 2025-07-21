@@ -25,11 +25,11 @@
 // ******************************************************************
 
 #define BALANCE_PID_CONSTANT_Kp (5000)
-#define BALANCE_PID_CONSTANT_Ki (30)
-#define BALANCE_PID_CONSTANT_Kd (800000)
+#define BALANCE_PID_CONSTANT_Ki (20)
+#define BALANCE_PID_CONSTANT_Kd (500000)
 
-#define BALANCE_PID_TARGET_X    (0x0890)
-#define BALANCE_PID_TARGET_Y    (0x0AF0)
+#define BALANCE_PID_TARGET_X    (0x07E7)
+#define BALANCE_PID_TARGET_Y    (0x081F)
 
 
 // ******************************************************************
@@ -133,6 +133,25 @@ void BALANCE_PID_Run( void )
             PLATFORM_Position_XY_Set( command_x, command_y );
         }
     }
+}
+
+void BALANCE_PID_DataVisualizer( void )
+{
+    static uint8_t dv_data[11];
+
+    dv_data[0] = 0x03;
+    dv_data[1] = 'M';
+    dv_data[2] = 'i';
+    dv_data[3] = 'c';
+    dv_data[4] = 'r';
+    dv_data[5] = 'o';
+    dv_data[6] = 'c';
+    dv_data[7] = 'h';
+    dv_data[8] = 'i';
+    dv_data[9] = 'p';
+    dv_data[10] = 0xFC;
+
+    CMD_PrintByteArray( dv_data, sizeof(dv_data), false );
 }
 
 
