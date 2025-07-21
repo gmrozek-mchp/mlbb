@@ -6,9 +6,7 @@
 
 #include <stdlib.h>
 
-#include "arm_math.h"
-
-#include "peripheral/port/plib_port.h"
+#include "arm_math_types.h"
 
 #include "FreeRTOS.h"
 #include "task.h"
@@ -24,12 +22,9 @@
 // Section: Macro Declarations
 // ******************************************************************
 
-#define BALANCE_PID_CONSTANT_Kp (5000)
-#define BALANCE_PID_CONSTANT_Ki (20)
-#define BALANCE_PID_CONSTANT_Kd (500000)
-
-#define BALANCE_PID_TARGET_X    (0x07E7)
-#define BALANCE_PID_TARGET_Y    (0x081F)
+#define BALANCE_PID_CONSTANT_Kp (6600)
+#define BALANCE_PID_CONSTANT_Ki (24)
+#define BALANCE_PID_CONSTANT_Kd (1000000)
 
 
 // ******************************************************************
@@ -88,11 +83,9 @@ void BALANCE_PID_Reset( void )
 {
     arm_pid_reset_q31( &balance_pid_x );
     arm_pid_reset_q31( &balance_pid_y );
-
-    LED_TARGET_CENTER_Set();
 }
 
-void BALANCE_PID_Run( void )
+void BALANCE_PID_Run( q15_t target_x, q15_t target_y )
 {
     ball_data_t ball_data;
     static uint16_t debounce_count = 10;
@@ -101,8 +94,8 @@ void BALANCE_PID_Run( void )
 
     if( ball_data.detected )
     {
-        q31_t error_x = -((q31_t)BALANCE_PID_TARGET_X - ball_data.x) << 20;
-        q31_t error_y = ((q31_t)BALANCE_PID_TARGET_Y - ball_data.y) << 20;
+        q31_t error_x = -((q31_t)target_x - ball_data.x) << 19;
+        q31_t error_y = ((q31_t)target_y - ball_data.y) << 19;
 
         q15_t command_x = arm_pid_q31( &balance_pid_x, error_x );
         q15_t command_y = arm_pid_q31( &balance_pid_y, error_y );
@@ -124,8 +117,8 @@ void BALANCE_PID_Run( void )
         }
         else
         {
-            q31_t error_x = -((q31_t)BALANCE_PID_TARGET_X - ball_data.x) << 20;
-            q31_t error_y = ((q31_t)BALANCE_PID_TARGET_Y - ball_data.y) << 20;
+            q31_t error_x = -((q31_t)target_x - ball_data.x) << 19;
+            q31_t error_y = ((q31_t)target_y - ball_data.y) << 19;
 
             q15_t command_x = arm_pid_q31( &balance_pid_x, error_x );
             q15_t command_y = arm_pid_q31( &balance_pid_y, error_y );
