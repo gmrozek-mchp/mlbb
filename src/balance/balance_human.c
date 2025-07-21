@@ -46,7 +46,7 @@ void BALANCE_HUMAN_Reset( void )
     NUNCHUK_Zero_Set();
 }
 
-void BALANCE_HUMAN_Run( void )
+void BALANCE_HUMAN_Run( q15_t target_x, q15_t target_y )
 {
     nunchuk_data_t nunchukData;
     q15_t x;
@@ -67,6 +67,11 @@ void BALANCE_HUMAN_Run( void )
     // {
     //     PLATFORM_Disable();
     // }            
+}
+
+void BALANCE_HUMAN_DataVisualizer( void )
+{
+
 }
 
 

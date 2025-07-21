@@ -4,6 +4,10 @@
 
 #include "balance.h"
 
+#include <stdlib.h>
+
+#include "arm_math_types.h"
+
 #include "FreeRTOS.h"
 #include "task.h"
 
@@ -25,6 +29,7 @@
 #define BALANCE_POWER_UP_DELAY_mS   (1000)
 #define BALANCE_TASK_RATE_HZ        (100)
 
+#define BALANCE_TARGET_CYCLE_INTERVAL   (500)
 
 // ******************************************************************
 // Section: Data Type Definitions
@@ -32,10 +37,16 @@
 typedef struct {
     void (*init)( void );
     void (*reset)( void );
-    void (*run)( void );
+    void (*run)( q15_t target_x, q15_t target_y );
     void (*dv)( void );
     PORT_PIN led_mode_pin;
 } balance_interface_t;
+
+typedef struct {
+    q15_t x;
+    q15_t y;
+    PORT_PIN led_target_pin;
+} balance_target_t;
 
 
 // ******************************************************************
@@ -49,6 +60,7 @@ static TickType_t balance_taskLastWakeTime;
 
 static balance_mode_t balance_mode = BALANCE_MODE_PID;
 
+static balance_target_t balance_target;
 static bool balance_dv_active = false;
 
 static const balance_interface_t balancer_off = {
@@ -62,7 +74,7 @@ static const balance_interface_t balancer_human = {
     .init = BALANCE_HUMAN_Initialize,
     .reset = BALANCE_HUMAN_Reset,
     .run = BALANCE_HUMAN_Run,
-    .dv = NULL,
+    .dv = BALANCE_HUMAN_DataVisualizer,
     .led_mode_pin = LED_MODE_HUMAN_PIN
 };
 static const balance_interface_t balancer_pid = {
@@ -76,7 +88,7 @@ static const balance_interface_t balancer_nn = {
     .init = BALANCE_NN_Initialize,
     .reset = BALANCE_NN_Reset,
     .run = BALANCE_NN_Run,
-    .dv = NULL,
+    .dv = BALANCE_NN_DataVisualizer,
     .led_mode_pin = LED_MODE_NEURAL_NETWORK_PIN
 };
 
@@ -85,6 +97,14 @@ static balance_interface_t balancers[] = {
     balancer_human,
     balancer_pid,
     balancer_nn
+};
+
+static balance_target_t balance_targets[] = {
+    { .x = 0x7F0, .y = 0x810, .led_target_pin = LED_TARGET_CENTER_PIN },
+    { .x = 0x4C8, .y = 0xBC0, .led_target_pin = LED_TARGET_TOP_RIGHT_PIN },
+    { .x = 0xB18, .y = 0xBB8, .led_target_pin = LED_TARGET_TOP_LEFT_PIN },
+    { .x = 0xB18, .y = 0x470, .led_target_pin = LED_TARGET_BOTTOM_LEFT_PIN },
+    { .x = 0x4C8, .y = 0x470, .led_target_pin = LED_TARGET_BOTTOM_RIGHT_PIN }
 };
 
 
@@ -111,6 +131,9 @@ void BALANCE_Initialize( void )
             balancers[balancer_index].init();
         }
     }
+
+    balance_target = balance_targets[balance_target_cycle_index];
+    PORT_PinSet( balance_targets[balance_target_cycle_index].led_target_pin );
 
     CMD_RegisterCommand( "dvbalance", BALANCE_CMD_DataVisualizer );
 
@@ -172,6 +195,7 @@ void BALANCE_MODE_Previous( void )
 static void BALANCE_RTOS_Task( void * pvParameters )
 {
     balance_mode_t active_balance_mode = BALANCE_MODE_INVALID;
+    uint32_t balance_target_timer = 0;
 
     (void)pvParameters;
     
@@ -221,6 +245,28 @@ static void BALANCE_RTOS_Task( void * pvParameters )
         if( balance_dv_active && (balancers[active_balance_mode].dv != NULL) )
         {
             balancers[active_balance_mode].dv();
+        }
+
+        balance_target_timer++;
+        if( balance_target_timer >= BALANCE_TARGET_CYCLE_INTERVAL )
+        {
+            size_t new_index;
+
+            balance_target_timer = 0;
+
+            PORT_PinClear( balance_targets[balance_target_cycle_index].led_target_pin );
+
+            new_index = (size_t)rand() % sizeof(balance_targets)/sizeof(balance_target_t);
+            while( new_index == balance_target_cycle_index )
+            {
+                new_index = (size_t)rand() % sizeof(balance_targets)/sizeof(balance_target_t);
+            }
+            balance_target_cycle_index = new_index;
+
+            balance_target.x = balance_targets[balance_target_cycle_index].x;
+            balance_target.y = balance_targets[balance_target_cycle_index].y;
+
+            PORT_PinSet( balance_targets[balance_target_cycle_index].led_target_pin );
         }
 
         vTaskDelayUntil( &balance_taskLastWakeTime, configTICK_RATE_HZ / BALANCE_TASK_RATE_HZ );    

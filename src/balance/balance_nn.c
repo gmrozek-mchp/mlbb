@@ -39,14 +39,22 @@
 
 void BALANCE_NN_Initialize( void )
 {
+
 }
 
 void BALANCE_NN_Reset( void )
 {
+
 }
 
-void BALANCE_NN_Run( void )
+void BALANCE_NN_Run( q15_t target_x, q15_t target_y )
 {
+
+}
+
+void BALANCE_NN_DataVisualizer( void )
+{
+
 }
 
 
