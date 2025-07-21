@@ -102,9 +102,15 @@ static void BALANCE_CMD_DataVisualizer( void );
 
 void BALANCE_Initialize( void )
 {
-    BALANCE_HUMAN_Initialize();
-    BALANCE_NN_Initialize();
-    BALANCE_PID_Initialize();
+    balance_mode_t balancer_index;
+
+    for( balancer_index = 0; balancer_index < BALANCE_MODE_NUM_MODES; balancer_index++ )
+    {
+        if( balancers[balancer_index].init != NULL )
+        {
+            balancers[balancer_index].init();
+        }
+    }
 
     CMD_RegisterCommand( "dvbalance", BALANCE_CMD_DataVisualizer );
 
@@ -178,13 +184,21 @@ static void BALANCE_RTOS_Task( void * pvParameters )
         // Check if balance mode has changed.
         if( active_balance_mode != balance_mode )
         {
+            balance_mode_t balancer_index;
+
             active_balance_mode = balance_mode;
             balance_dv_active = false;
 
-            LED_MODE_HUMAN_Clear();
-            LED_MODE_PID_Clear();
-            LED_MODE_NEURAL_NETWORK_Clear();
+            // Turn off all balance mode indicators.
+            for( balancer_index = 0; balancer_index < BALANCE_MODE_NUM_MODES; balancer_index++ )
+            {
+                if( balancers[active_balance_mode].led_mode_pin != PORT_PIN_NONE )
+                {
+                    PORT_PinClear( balancers[active_balance_mode].led_mode_pin );
+                }
+            }
 
+            // Turn on active balance mode indicator.
             if( balancers[active_balance_mode].led_mode_pin != PORT_PIN_NONE )
             {
                 PORT_PinSet( balancers[active_balance_mode].led_mode_pin );
