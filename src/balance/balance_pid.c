@@ -8,6 +8,8 @@
 
 #include "arm_math.h"
 
+#include "peripheral/port/plib_port.h"
+
 #include "FreeRTOS.h"
 #include "task.h"
 
@@ -86,6 +88,8 @@ void BALANCE_PID_Reset( void )
 {
     arm_pid_reset_q31( &balance_pid_x );
     arm_pid_reset_q31( &balance_pid_y );
+
+    LED_TARGET_CENTER_Set();
 }
 
 void BALANCE_PID_Run( void )
