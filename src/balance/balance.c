@@ -22,7 +22,7 @@
 // Section: Macro Declarations
 // ******************************************************************
 #define BALANCE_RTOS_PRIORITY       (2)
-#define BALANCE_RTOS_STACK_SIZE     (configMINIMAL_STACK_SIZE)
+#define BALANCE_RTOS_STACK_SIZE     (2*configMINIMAL_STACK_SIZE)
 
 #define BALANCE_POWER_UP_DELAY_mS   (1000)
 #define BALANCE_TASK_RATE_HZ        (100)
@@ -42,7 +42,7 @@ static StackType_t  balance_taskStack[ BALANCE_RTOS_STACK_SIZE ];
 
 static TickType_t balance_taskLastWakeTime;
 
-static balance_mode_t balance_mode = BALANCE_MODE_HUMAN;
+static balance_mode_t balance_mode = BALANCE_MODE_PID;
 
 
 // ******************************************************************

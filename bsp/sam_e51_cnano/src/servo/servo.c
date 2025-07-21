@@ -38,7 +38,7 @@
 #define SERVO_B_ZERO_OFFSET         (int32_t)(4000)
 #define SERVO_C_ZERO_OFFSET         (int32_t)(900)
 
-#define SERVO_RATE_LIMIT            140
+#define SERVO_RATE_LIMIT            100
 
 
 // ******************************************************************
@@ -86,6 +86,7 @@ void SERVO_Initialize( void )
     for( index = 0; index < SERVO_ID_NUM_SERVOS; index++ )
     {
         servos[index].command_angle = 0;
+        servos[index].rate_limited_angle = 0;
     }
 
     CMD_RegisterCommand( "servo", SERVO_CMD_Position_GetSet_q15angle );
