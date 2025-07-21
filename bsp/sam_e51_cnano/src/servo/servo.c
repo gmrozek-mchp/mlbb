@@ -23,6 +23,7 @@
 #define SERVO_RTOS_STACK_SIZE       (configMINIMAL_STACK_SIZE)
 
 #define SERVO_POWER_UP_DELAY_mS     (100)
+#define SERVO_TASK_RATE_HZ          (200)
 
 #define ANGLE_DEG_to_Q15(deg)       ((q15_t)((deg * 65536) / 360))
 
@@ -37,12 +38,15 @@
 #define SERVO_B_ZERO_OFFSET         (int32_t)(4000)
 #define SERVO_C_ZERO_OFFSET         (int32_t)(900)
 
+#define SERVO_RATE_LIMIT            140
+
 
 // ******************************************************************
 // Section: Data Type Definitions
 // ******************************************************************
 typedef struct {
     q15_t command_angle;
+    q15_t rate_limited_angle;
 } servo_state_t;
 
 
@@ -52,6 +56,8 @@ typedef struct {
 static TaskHandle_t servo_taskHandle = NULL;
 static StaticTask_t servo_taskBuffer;
 static StackType_t  servo_taskStack[ SERVO_RTOS_STACK_SIZE ];
+
+static TickType_t servo_taskLastWakeTime;
 
 static servo_state_t servos[SERVO_ID_NUM_SERVOS];
 
@@ -133,31 +139,6 @@ void SERVO_Position_Command_Set_q15angle( servo_id_t servo_id, q15_t angle )
     }
     
     servos[servo_id].command_angle = angle;
-
-    duty = (((int64_t)angle * (SERVO_PULSE_WIDTH_POS_90 - SERVO_PULSE_WIDTH_NEG_90)) >> 15) + SERVO_PULSE_WIDTH_ZERO;
-
-    switch( servo_id )
-    {
-        case SERVO_ID_A:
-        {
-            TCC1_PWM24bitDutySet( TCC1_CHANNEL0, (uint32_t)(duty + SERVO_A_ZERO_OFFSET) );
-            break;
-        }
-        case SERVO_ID_B:
-        {
-            TCC1_PWM24bitDutySet( TCC1_CHANNEL1, (uint32_t)(duty + SERVO_B_ZERO_OFFSET) );
-            break;
-        }
-        case SERVO_ID_C:
-        {
-            TCC1_PWM24bitDutySet( TCC1_CHANNEL2, (uint32_t)(duty + SERVO_C_ZERO_OFFSET) );
-            break;
-        }
-        default:
-        {
-            break;
-        }
-    }
 }
 
 void SERVO_Position_Zero_Set( servo_id_t servo_id )
@@ -186,8 +167,56 @@ static void SERVO_RTOS_Task( void * pvParameters )
     TCC1_PWM24bitDutySet( TCC1_CHANNEL2, SERVO_PULSE_WIDTH_ZERO + SERVO_C_ZERO_OFFSET );
     TCC1_PWMStart();
 
-    // Servo module is completely interrupt driven. Don't need the task running any more.
-    vTaskSuspend( NULL );
+    servo_taskLastWakeTime = xTaskGetTickCount();
+
+    while(1)
+    {
+        servo_id_t servo_id;
+        
+        for( servo_id = 0; servo_id < SERVO_ID_NUM_SERVOS; servo_id++ )
+        {
+            q15_t error = servos[servo_id].command_angle - servos[servo_id].rate_limited_angle;
+            int32_t duty;
+            
+            if( error >= SERVO_RATE_LIMIT )
+            {
+                error = SERVO_RATE_LIMIT;
+            }
+            else if( error <= -SERVO_RATE_LIMIT )
+            {
+                error = -SERVO_RATE_LIMIT;
+            }
+
+            servos[servo_id].rate_limited_angle += error;
+
+            duty = (((int64_t)servos[servo_id].rate_limited_angle * (SERVO_PULSE_WIDTH_POS_90 - SERVO_PULSE_WIDTH_NEG_90)) >> 15) + SERVO_PULSE_WIDTH_ZERO;
+
+            switch( servo_id )
+            {
+                case SERVO_ID_A:
+                {
+                    TCC1_PWM24bitDutySet( TCC1_CHANNEL0, (uint32_t)(duty + SERVO_A_ZERO_OFFSET) );
+                    break;
+                }
+                case SERVO_ID_B:
+                {
+                    TCC1_PWM24bitDutySet( TCC1_CHANNEL1, (uint32_t)(duty + SERVO_B_ZERO_OFFSET) );
+                    break;
+                }
+                case SERVO_ID_C:
+                {
+                    TCC1_PWM24bitDutySet( TCC1_CHANNEL2, (uint32_t)(duty + SERVO_C_ZERO_OFFSET) );
+                    break;
+                }
+                default:
+                {
+                    break;
+                }
+            }
+        }
+
+        vTaskDelayUntil( &servo_taskLastWakeTime, configTICK_RATE_HZ / SERVO_TASK_RATE_HZ );    
+    }
 }
 
 
