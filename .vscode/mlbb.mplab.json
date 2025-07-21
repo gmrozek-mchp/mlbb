@@ -32,6 +32,7 @@
             "provider": "microchip.toolchains:xc32@4.60",
             "properties": {
                 "compiler.isolate-each-function": true,
+                "compiler.place-data-into-section": true,
                 "compiler.extra-include-directories": [
                     "src",
                     "hal/sam_e51_cnano/src/config/default",
@@ -119,6 +120,9 @@
                 "bsp/sam_e51_cnano/src/servo/servo.c",
                 "extern/CMSIS-DSP/Source/ControllerFunctions/arm_pid_init_q31.c",
                 "extern/CMSIS-DSP/Source/ControllerFunctions/arm_pid_reset_q31.c",
+                "extern/CMSIS-DSP/Source/FastMathFunctions/arm_sin_q15.c",
+                "extern/CMSIS-DSP/Source/FastMathFunctions/arm_cos_q15.c",
+                "extern/CMSIS-DSP/Source/CommonTables/arm_common_tables.c",
                 "extern/FreeRTOS-Kernel/include/FreeRTOS.h",
                 "extern/FreeRTOS-Kernel/include/StackMacros.h",
                 "extern/FreeRTOS-Kernel/include/atomic.h",

@@ -9,6 +9,7 @@
 #include "arm_math_types.h"
 
 #include "FreeRTOS.h"
+#include "dsp/fast_math_functions.h"
 #include "task.h"
 
 #include "peripheral/port/plib_port.h"
@@ -30,6 +31,8 @@
 #define BALANCE_TASK_RATE_HZ        (100)
 
 #define BALANCE_TARGET_CYCLE_INTERVAL   (500)
+#define BALANCE_TARGET_CIRCLE_INCREMENT (50)
+
 
 // ******************************************************************
 // Section: Data Type Definitions
@@ -61,6 +64,8 @@ static TickType_t balance_taskLastWakeTime;
 static balance_mode_t balance_mode = BALANCE_MODE_PID;
 
 static balance_target_t balance_target;
+static size_t balance_target_cycle_index = 0;
+
 static bool balance_dv_active = false;
 
 static const balance_interface_t balancer_off = {
@@ -106,6 +111,8 @@ static balance_target_t balance_targets[] = {
     { .x = 0xB18, .y = 0x470, .led_target_pin = LED_TARGET_BOTTOM_LEFT_PIN },
     { .x = 0x4C8, .y = 0x470, .led_target_pin = LED_TARGET_BOTTOM_RIGHT_PIN }
 };
+
+static q15_t balance_target_circle_degrees = 0;
 
 
 // ******************************************************************
@@ -238,7 +245,7 @@ static void BALANCE_RTOS_Task( void * pvParameters )
         // Run the active balancer
         if( balancers[active_balance_mode].run != NULL )
         {
-            balancers[active_balance_mode].run();
+            balancers[active_balance_mode].run( balance_target.x, balance_target.y );
         }
 
         // Stream data visualizer if active
@@ -268,6 +275,10 @@ static void BALANCE_RTOS_Task( void * pvParameters )
 
             PORT_PinSet( balance_targets[balance_target_cycle_index].led_target_pin );
         }
+
+        // balance_target_circle_degrees += BALANCE_TARGET_CIRCLE_INCREMENT;
+        // balance_target.x = balance_targets[0].x - (((q31_t)arm_sin_q15(balance_target_circle_degrees) * 0x300) >> 16);
+        // balance_target.y = balance_targets[0].y - (((q31_t)arm_cos_q15(balance_target_circle_degrees) * 0x300) >> 16);
 
         vTaskDelayUntil( &balance_taskLastWakeTime, configTICK_RATE_HZ / BALANCE_TASK_RATE_HZ );    
     }
