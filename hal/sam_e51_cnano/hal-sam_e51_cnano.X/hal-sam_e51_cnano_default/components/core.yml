@@ -883,7 +883,7 @@ data:
       children:
       - children:
         - attributes:
-            value: LED_TARGET_BOTTOM_RIGHT
+            value: LED_TARGET_BOTTOM_LEFT
           type: User
         type: Values
       type: String
@@ -1443,7 +1443,7 @@ data:
       children:
       - children:
         - attributes:
-            value: LED_TARGET_TOP_RIGHT
+            value: LED_TARGET_TOP_LEFT
           type: User
         type: Values
       type: String
@@ -1583,7 +1583,7 @@ data:
       children:
       - children:
         - attributes:
-            value: LED_TARGET_BOTTOM_LEFT
+            value: LED_TARGET_BOTTOM_RIGHT
           type: User
         type: Values
       type: String
@@ -1653,7 +1653,7 @@ data:
       children:
       - children:
         - attributes:
-            value: LED_TARGET_TOP_LEFT
+            value: LED_TARGET_TOP_RIGHT
           type: User
         type: Values
       type: String
@@ -1723,7 +1723,7 @@ data:
       children:
       - children:
         - attributes:
-            value: LED_MODE_HUMAN
+            value: LED_MODE_PID
           type: User
         type: Values
       type: String
@@ -1803,7 +1803,7 @@ data:
       children:
       - children:
         - attributes:
-            value: LED_MODE_PID
+            value: LED_MODE_HUMAN
           type: User
         type: Values
       type: String

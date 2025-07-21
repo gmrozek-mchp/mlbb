@@ -20,7 +20,7 @@ generatedFileHashHistoryMap:
 - file: ../src/config/default/ATSAME51J20A.ld
   hash: cf9e43606b6883c68912608a9a10db9fe47b5ee9e5c3bccf5cfc26bb7676f6d6
 - file: ../src/config/default/definitions.h
-  hash: bc6e88ca59e372b5f56c1d9c89b8094a1d36923d5830479085d9d9c94c72a65e
+  hash: 9ad0b7dbbfdd2b4dac97fb7ae4272b003ecc769ca9815fac4575ae4a06a27e7b
 - file: ../src/config/default/device.h
   hash: 238ff5a236ff86e1ff76d0fec3b8ea4472f5f787803514cf9116e2e0c2d5a7e2
 - file: ../src/config/default/device_cache.h
@@ -60,7 +60,7 @@ generatedFileHashHistoryMap:
 - file: ../src/config/default/peripheral/port/plib_port.c
   hash: 2df7fea2a52efac75033cad7f2c09ee706faa67da74a05982af11541be690b84
 - file: ../src/config/default/peripheral/port/plib_port.h
-  hash: dd175ae8745e3dd65072f1fa3b75f917ebfa92228d63bfe487bcb98f260f5cb4
+  hash: c9db44137df8c9964a510f708ab55f62a606f09d91233dda9c912b2fd722cce4
 - file: ../src/config/default/peripheral/sercom/i2c_master/plib_sercom2_i2c_master.c
   hash: 58af9757fa06d6469ef1810c93dc858539b49b8d127358d344bb504994a39a99
 - file: ../src/config/default/peripheral/sercom/i2c_master/plib_sercom2_i2c_master.h
@@ -84,7 +84,7 @@ generatedFileHashHistoryMap:
 - file: ../src/config/default/peripheral/tcc/plib_tcc_common.h
   hash: 2bd78c7b794475007265f122ca57ef54a64efc8894cc2423a1d0f74caa627b2b
 - file: ../src/config/default/pin_configurations.csv
-  hash: 88fb5eea8eb82a43ebcf7ee55b243bf7cf24bf928caebfcabc277d76cc47f1c8
+  hash: 2c6352d13eeeef1adecdf4b0b5bec3ea921c824ebb929bff026b6e396c841056
 - file: ../src/config/default/startup_xc32.c
   hash: f374b97d65f92553f1b75d8c9239b8b0f8581c710f78ea47b02c7f6fa6f74c74
 - file: ../src/config/default/stdio/xc32_monitor.c

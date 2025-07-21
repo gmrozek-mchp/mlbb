@@ -11,7 +11,7 @@ Pin Number,Pin ID,Custom Name,Function,Mode, Direction,Latch,Pull Up,Pull Down,D
 12,PB09,,Available,,,,,,NORMAL
 13,PA04,,Available,,,,,,NORMAL
 14,PA05,LED_MODE_NEURAL_NETWORK,GPIO,Digital,Out,Low,,,STRONG
-15,PA06,LED_TARGET_BOTTOM_RIGHT,GPIO,Digital,Out,Low,,,STRONG
+15,PA06,LED_TARGET_BOTTOM_LEFT,GPIO,Digital,Out,Low,,,STRONG
 16,PA07,,Available,,,,,,NORMAL
 17,PA08,TOUCH_TX,SERCOM0_PAD0,Digital,High Impedance,n/a,No,No,NORMAL
 18,PA09,TOUCH_RX,SERCOM0_PAD1,Digital,High Impedance,n/a,No,No,NORMAL
@@ -33,20 +33,20 @@ Pin Number,Pin ID,Custom Name,Function,Mode, Direction,Latch,Pull Up,Pull Down,D
 38,PA19,,Available,,,,,,NORMAL
 39,PB16,VIRTUAL_COM_TX,SERCOM5_PAD0,Digital,High Impedance,n/a,No,No,NORMAL
 40,PB17,VIRTUAL_COM_RX,SERCOM5_PAD1,Digital,High Impedance,n/a,No,No,NORMAL
-41,PA20,LED_TARGET_TOP_RIGHT,GPIO,Digital,Out,Low,,,STRONG
+41,PA20,LED_TARGET_TOP_LEFT,GPIO,Digital,Out,Low,,,STRONG
 42,PA21,LED_TARGET_CENTER,GPIO,Digital,Out,Low,,,STRONG
-43,PA22,LED_TARGET_BOTTOM_LEFT,GPIO,Digital,Out,Low,,,STRONG
-44,PA23,LED_TARGET_TOP_LEFT,GPIO,Digital,Out,Low,,,STRONG
+43,PA22,LED_TARGET_BOTTOM_RIGHT,GPIO,Digital,Out,Low,,,STRONG
+44,PA23,LED_TARGET_TOP_RIGHT,GPIO,Digital,Out,Low,,,STRONG
 45,PA24,,Available,,,,,,NORMAL
 46,PA25,,Available,,,,,,NORMAL
 49,PB22,,Available,,,,,,NORMAL
 50,PB23,,Available,,,,,,NORMAL
-51,PA27,LED_MODE_HUMAN,GPIO,Digital,Out,Low,,,STRONG
+51,PA27,LED_MODE_PID,GPIO,Digital,Out,Low,,,STRONG
 57,PA30,,Available,,,,,,NORMAL
 58,PA31,,Available,,,,,,NORMAL
 59,PB30,,Available,,,,,,NORMAL
 60,PB31,,Available,,,,,,NORMAL
-61,PB00,LED_MODE_PID,GPIO,Digital,Out,Low,,,STRONG
+61,PB00,LED_MODE_HUMAN,GPIO,Digital,Out,Low,,,STRONG
 62,PB01,LED_SPARE_4,GPIO,Digital,Out,Low,,,STRONG
 63,PB02,,Available,,,,,,NORMAL
 64,PB03,,Available,,,,,,NORMAL
