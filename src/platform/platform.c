@@ -28,8 +28,6 @@
 #define PLATFORM_POWER_UP_DELAY_mS   (100)
 #define PLATFORM_TASK_RATE_HZ        (100)
 
-#define PLATFORM_SERVO_ZERO_ANGLE    ((q15_t)0xC00)
-
 #define angle_0deg      ((q15_t)0x0000)
 #define angle_30deg     ((q15_t)0x0AAA)
 #define angle_45deg     ((q15_t)0x1000)
@@ -105,10 +103,12 @@ void PLATFORM_Disable( void )
 {
     if( platform_enabled )
     {
-        SERVO_Position_Command_Set_q15angle( SERVO_ID_A, -PLATFORM_SERVO_ZERO_ANGLE );
-        SERVO_Position_Command_Set_q15angle( SERVO_ID_B, -PLATFORM_SERVO_ZERO_ANGLE );
-        SERVO_Position_Command_Set_q15angle( SERVO_ID_C, -PLATFORM_SERVO_ZERO_ANGLE );
-
+        // Stagger servo movement because all 3 moving identical could trip power supply on deceleration
+        SERVO_Position_Command_Set_q15angle( SERVO_ID_A, angle_0deg );
+        vTaskDelay(100);
+        SERVO_Position_Command_Set_q15angle( SERVO_ID_B, angle_0deg );
+        vTaskDelay(100);
+        SERVO_Position_Command_Set_q15angle( SERVO_ID_C, angle_0deg );
         vTaskDelay(500);
 
         SERVO_Disable();
@@ -123,19 +123,13 @@ void PLATFORM_Enable( void )
     {
         SERVO_Enable();
 
-        SERVO_Position_Zero_Set( SERVO_ID_A );
-        SERVO_Position_Zero_Set( SERVO_ID_B );
-        SERVO_Position_Zero_Set( SERVO_ID_C );
-
-        SERVO_Position_Command_Set_q15angle( SERVO_ID_A, PLATFORM_SERVO_ZERO_ANGLE );
-        SERVO_Position_Command_Set_q15angle( SERVO_ID_B, PLATFORM_SERVO_ZERO_ANGLE );
-        SERVO_Position_Command_Set_q15angle( SERVO_ID_C, PLATFORM_SERVO_ZERO_ANGLE );
-
+        // Stagger servo movement because all 3 moving identical could trip power supply on deceleration
+        SERVO_Position_Command_Set_q15angle( SERVO_ID_A, angle_0deg );
+        vTaskDelay(100);
+        SERVO_Position_Command_Set_q15angle( SERVO_ID_B, angle_0deg );
+        vTaskDelay(100);
+        SERVO_Position_Command_Set_q15angle( SERVO_ID_C, angle_0deg );
         vTaskDelay(500);
-
-        SERVO_Position_Zero_Set( SERVO_ID_A );
-        SERVO_Position_Zero_Set( SERVO_ID_B );
-        SERVO_Position_Zero_Set( SERVO_ID_C );
 
         platform_enabled = true;
     }

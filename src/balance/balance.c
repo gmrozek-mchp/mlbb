@@ -148,7 +148,7 @@ static void BALANCE_RTOS_Task( void * pvParameters )
                 {
                     LED_MODE_HUMAN_Set();
                     BALANCE_HUMAN_Reset();
-//                    PLATFORM_Enable();
+                    PLATFORM_Enable();
                     break;
                 }
 
