@@ -54,19 +54,19 @@ void BALANCE_HUMAN_Run( void )
     
     nunchukData = NUNCHUK_Data_Get();
     
-    if( nunchukData.button_z )
-    {
-        PLATFORM_Enable();
+    // if( nunchukData.button_z )
+    // {
+    //    PLATFORM_Enable();
 
-        x = (q15_t)nunchukData.joystick_x * 25;
-        y = (q15_t)nunchukData.joystick_y * 25;
+        x = (q15_t)nunchukData.joystick_x * 75;
+        y = (q15_t)nunchukData.joystick_y * 75;
 
         PLATFORM_Position_XY_Set( x, y );
-    }
-    else
-    {
-        PLATFORM_Disable();
-    }            
+    // }
+    // else
+    // {
+    //     PLATFORM_Disable();
+    // }            
 }
 
 

@@ -109,12 +109,7 @@ void PLATFORM_Disable( void )
         SERVO_Position_Command_Set_q15angle( SERVO_ID_B, -PLATFORM_SERVO_ZERO_ANGLE );
         SERVO_Position_Command_Set_q15angle( SERVO_ID_C, -PLATFORM_SERVO_ZERO_ANGLE );
 
-        while( ( SERVO_Position_Get_q15angle(SERVO_ID_A) != -PLATFORM_SERVO_ZERO_ANGLE ) ||
-               ( SERVO_Position_Get_q15angle(SERVO_ID_B) != -PLATFORM_SERVO_ZERO_ANGLE ) ||
-               ( SERVO_Position_Get_q15angle(SERVO_ID_C) != -PLATFORM_SERVO_ZERO_ANGLE ) )
-        {
-            vTaskDelay(1);
-        }
+        vTaskDelay(500);
 
         SERVO_Disable();
 
@@ -136,12 +131,7 @@ void PLATFORM_Enable( void )
         SERVO_Position_Command_Set_q15angle( SERVO_ID_B, PLATFORM_SERVO_ZERO_ANGLE );
         SERVO_Position_Command_Set_q15angle( SERVO_ID_C, PLATFORM_SERVO_ZERO_ANGLE );
 
-        while( ( SERVO_Position_Get_q15angle(SERVO_ID_A) != PLATFORM_SERVO_ZERO_ANGLE ) ||
-               ( SERVO_Position_Get_q15angle(SERVO_ID_B) != PLATFORM_SERVO_ZERO_ANGLE ) ||
-               ( SERVO_Position_Get_q15angle(SERVO_ID_C) != PLATFORM_SERVO_ZERO_ANGLE ) )
-        {
-            vTaskDelay(1);
-        }
+        vTaskDelay(500);
 
         SERVO_Position_Zero_Set( SERVO_ID_A );
         SERVO_Position_Zero_Set( SERVO_ID_B );

@@ -42,7 +42,7 @@ static StackType_t  balance_taskStack[ BALANCE_RTOS_STACK_SIZE ];
 
 static TickType_t balance_taskLastWakeTime;
 
-static balance_mode_t balance_mode = BALANCE_MODE_PID;
+static balance_mode_t balance_mode = BALANCE_MODE_HUMAN;
 
 
 // ******************************************************************

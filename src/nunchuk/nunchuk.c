@@ -216,9 +216,9 @@ void NUNCHUK_CMD_Print_Data( void )
     CMD_PrintDecimal_U32( (uint32_t)data.button_c, true, 1, true );
     CMD_PrintString( " Z: ", true );
     CMD_PrintDecimal_U32( (uint32_t)data.button_z, true, 1, true );
-    CMD_PrintString( " X: ", true );
-    CMD_PrintDecimal_U32( data.joystick_x, true, 4, true );
-    CMD_PrintString( " Y: ", true );
-    CMD_PrintDecimal_U32( data.joystick_y, true, 4, true );
+    CMD_PrintString( " X: 0x", true );
+    CMD_PrintHex_U16( data.joystick_x, true );
+    CMD_PrintString( " Y: 0x", true );
+    CMD_PrintHex_U16( data.joystick_y, true );
     CMD_PrintString( "\r\n", true );
 }
