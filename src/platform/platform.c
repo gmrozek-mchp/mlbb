@@ -55,7 +55,6 @@ static TickType_t platform_taskLastWakeTime;
 static bool platform_enabled = false;
 
 static platform_abc_t platform_position_command_abc;
-static platform_abc_t platform_position_actual_abc;
 
 
 // ******************************************************************
@@ -156,7 +155,7 @@ void PLATFORM_Position_XY_Set( q15_t x, q15_t y )
 
 platform_abc_t PLATFORM_Position_ABC_Get( void )
 {
-    return platform_position_actual_abc;
+    return platform_position_command_abc;
 }
 
 void PLATFORM_Position_ABC_Set( q15_t a, q15_t b, q15_t c )
