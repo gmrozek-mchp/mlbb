@@ -70,12 +70,10 @@ void BALANCE_HUMAN_Run( q15_t target_x, q15_t target_y )
 
 void BALANCE_HUMAN_DataVisualizer( void )
 {
-    static uint8_t dv_data[25];
+    static uint8_t dv_data[21];
 
     ball_data_t ball = BALL_Position_Get();;
     platform_abc_t platform_abc = PLATFORM_Position_ABC_Get();
-    q15_t error_x = human_target_x - ball.x;
-    q15_t error_y = human_target_y - ball.y;
 
     dv_data[0] = 'H';
 
@@ -91,26 +89,21 @@ void BALANCE_HUMAN_DataVisualizer( void )
     dv_data[8] = (uint8_t)ball.y;
     dv_data[9] = (uint8_t)(ball.y >> 8);
 
-    dv_data[10] = (uint8_t)error_x;
-    dv_data[11] = (uint8_t)(error_x >> 8);
-    dv_data[12] = (uint8_t)error_y;
-    dv_data[13] = (uint8_t)(error_y >> 8);
+    dv_data[10] = (uint8_t)human_platform_command_x;
+    dv_data[11] = (uint8_t)(human_platform_command_x >> 8);
+    dv_data[12] = (uint8_t)human_platform_command_y;
+    dv_data[13] = (uint8_t)(human_platform_command_y >> 8);
 
-    dv_data[14] = (uint8_t)human_platform_command_x;
-    dv_data[15] = (uint8_t)(human_platform_command_x >> 8);
-    dv_data[16] = (uint8_t)human_platform_command_y;
-    dv_data[17] = (uint8_t)(human_platform_command_y >> 8);
+    dv_data[14] = (uint8_t)platform_abc.a;
+    dv_data[15] = (uint8_t)(platform_abc.a >> 8);
+    dv_data[16] = (uint8_t)platform_abc.b;
+    dv_data[17] = (uint8_t)(platform_abc.b >> 8);
+    dv_data[18] = (uint8_t)platform_abc.c;
+    dv_data[19] = (uint8_t)(platform_abc.c >> 8);
 
-    dv_data[18] = (uint8_t)platform_abc.a;
-    dv_data[19] = (uint8_t)(platform_abc.a >> 8);
-    dv_data[20] = (uint8_t)platform_abc.b;
-    dv_data[21] = (uint8_t)(platform_abc.b >> 8);
-    dv_data[22] = (uint8_t)platform_abc.c;
-    dv_data[23] = (uint8_t)(platform_abc.c >> 8);
+    dv_data[20] = ~'H';
 
-    dv_data[24] = ~'H';
-
-    CMD_PrintByteArray( dv_data, 25, false );
+    CMD_PrintByteArray( dv_data, sizeof(dv_data), false );
 }
 
 
