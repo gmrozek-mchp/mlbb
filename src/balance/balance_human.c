@@ -28,6 +28,7 @@
 
 static q15_t human_target_x;
 static q15_t human_target_y;
+
 static q15_t human_platform_command_x;
 static q15_t human_platform_command_y;
 
@@ -70,40 +71,45 @@ void BALANCE_HUMAN_Run( q15_t target_x, q15_t target_y )
 
 void BALANCE_HUMAN_DataVisualizer( void )
 {
-    static uint8_t dv_data[21];
+    static uint8_t dv_data[22];
 
     ball_data_t ball = BALL_Position_Get();;
     platform_abc_t platform_abc = PLATFORM_Position_ABC_Get();
 
-    dv_data[0] = 'H';
+    if( ball.detected )
+    {
+        dv_data[0] = 0x03;
 
-    dv_data[1] = (uint8_t)ball.detected;
+        dv_data[1] = (uint8_t)'H';
 
-    dv_data[2] = (uint8_t)human_target_x;
-    dv_data[3] = (uint8_t)(human_target_x >> 8);
-    dv_data[4] = (uint8_t)human_target_y;
-    dv_data[5] = (uint8_t)(human_target_y >> 8);
+        dv_data[2] = (uint8_t)ball.detected;
 
-    dv_data[6] = (uint8_t)ball.x;
-    dv_data[7] = (uint8_t)(ball.x >> 8);
-    dv_data[8] = (uint8_t)ball.y;
-    dv_data[9] = (uint8_t)(ball.y >> 8);
+        dv_data[3] = (uint8_t)human_target_x;
+        dv_data[4] = (uint8_t)(human_target_x >> 8);
+        dv_data[5] = (uint8_t)human_target_y;
+        dv_data[6] = (uint8_t)(human_target_y >> 8);
 
-    dv_data[10] = (uint8_t)human_platform_command_x;
-    dv_data[11] = (uint8_t)(human_platform_command_x >> 8);
-    dv_data[12] = (uint8_t)human_platform_command_y;
-    dv_data[13] = (uint8_t)(human_platform_command_y >> 8);
+        dv_data[7] = (uint8_t)ball.x;
+        dv_data[8] = (uint8_t)(ball.x >> 8);
+        dv_data[9] = (uint8_t)ball.y;
+        dv_data[10] = (uint8_t)(ball.y >> 8);
 
-    dv_data[14] = (uint8_t)platform_abc.a;
-    dv_data[15] = (uint8_t)(platform_abc.a >> 8);
-    dv_data[16] = (uint8_t)platform_abc.b;
-    dv_data[17] = (uint8_t)(platform_abc.b >> 8);
-    dv_data[18] = (uint8_t)platform_abc.c;
-    dv_data[19] = (uint8_t)(platform_abc.c >> 8);
+        dv_data[11] = (uint8_t)human_platform_command_x;
+        dv_data[12] = (uint8_t)(human_platform_command_x >> 8);
+        dv_data[13] = (uint8_t)human_platform_command_y;
+        dv_data[14] = (uint8_t)(human_platform_command_y >> 8);
 
-    dv_data[20] = ~'H';
+        dv_data[15] = (uint8_t)platform_abc.a;
+        dv_data[16] = (uint8_t)(platform_abc.a >> 8);
+        dv_data[17] = (uint8_t)platform_abc.b;
+        dv_data[18] = (uint8_t)(platform_abc.b >> 8);
+        dv_data[19] = (uint8_t)platform_abc.c;
+        dv_data[20] = (uint8_t)(platform_abc.c >> 8);
 
-    CMD_PrintByteArray( dv_data, sizeof(dv_data), false );
+        dv_data[21] = ~0x03;
+
+        CMD_PrintByteArray( dv_data, sizeof(dv_data), false );
+    }
 }
 
 

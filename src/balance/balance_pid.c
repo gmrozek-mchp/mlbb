@@ -96,17 +96,20 @@ void BALANCE_PID_Run( q15_t target_x, q15_t target_y )
     ball_data_t ball_data;
     static uint16_t debounce_count = 10;
     
+    pid_target_x = target_x;
+    pid_target_y = target_y;
+
     ball_data = BALL_Position_Get();
 
     if( ball_data.detected )
     {
-        q31_t error_x = -((q31_t)target_x - ball_data.x) << 19;
-        q31_t error_y = ((q31_t)target_y - ball_data.y) << 19;
+        q31_t error_x = -((q31_t)pid_target_x - ball_data.x) << 19;
+        q31_t error_y = ((q31_t)pid_target_y - ball_data.y) << 19;
 
-        q15_t command_x = arm_pid_q31( &balance_pid_x, error_x );
-        q15_t command_y = arm_pid_q31( &balance_pid_y, error_y );
+        pid_platform_command_x = arm_pid_q31( &balance_pid_x, error_x );
+        pid_platform_command_y = arm_pid_q31( &balance_pid_y, error_y );
 
-        PLATFORM_Position_XY_Set( command_x, command_y );
+        PLATFORM_Position_XY_Set( pid_platform_command_x, pid_platform_command_y );
 
         debounce_count = 0;
     }
@@ -123,53 +126,58 @@ void BALANCE_PID_Run( q15_t target_x, q15_t target_y )
         }
         else
         {
-            q31_t error_x = -((q31_t)target_x - ball_data.x) << 19;
-            q31_t error_y = ((q31_t)target_y - ball_data.y) << 19;
+            q31_t error_x = -((q31_t)pid_target_x - ball_data.x) << 19;
+            q31_t error_y = ((q31_t)pid_target_y - ball_data.y) << 19;
 
-            q15_t command_x = arm_pid_q31( &balance_pid_x, error_x );
-            q15_t command_y = arm_pid_q31( &balance_pid_y, error_y );
+            pid_platform_command_x = arm_pid_q31( &balance_pid_x, error_x );
+            pid_platform_command_y = arm_pid_q31( &balance_pid_y, error_y );
 
-            PLATFORM_Position_XY_Set( command_x, command_y );
+            PLATFORM_Position_XY_Set( pid_platform_command_x, pid_platform_command_y );
         }
     }
 }
 
 void BALANCE_PID_DataVisualizer( void )
 {
-    static uint8_t dv_data[21];
+    static uint8_t dv_data[22];
 
     ball_data_t ball = BALL_Position_Get();;
     platform_abc_t platform_abc = PLATFORM_Position_ABC_Get();
 
-    dv_data[0] = 'P';
+    if( ball.detected )
+    {
+        dv_data[0] = 0x03;
 
-    dv_data[1] = (uint8_t)ball.detected;
+        dv_data[1] = (uint8_t)'P';
 
-    dv_data[2] = (uint8_t)pid_target_x;
-    dv_data[3] = (uint8_t)(pid_target_y >> 8);
-    dv_data[4] = (uint8_t)pid_target_y;
-    dv_data[5] = (uint8_t)(pid_target_x >> 8);
+        dv_data[2] = (uint8_t)ball.detected;
 
-    dv_data[6] = (uint8_t)ball.x;
-    dv_data[7] = (uint8_t)(ball.x >> 8);
-    dv_data[8] = (uint8_t)ball.y;
-    dv_data[9] = (uint8_t)(ball.y >> 8);
+        dv_data[3] = (uint8_t)pid_target_x;
+        dv_data[4] = (uint8_t)(pid_target_y >> 8);
+        dv_data[5] = (uint8_t)pid_target_y;
+        dv_data[6] = (uint8_t)(pid_target_x >> 8);
 
-    dv_data[10] = (uint8_t)pid_platform_command_x;
-    dv_data[11] = (uint8_t)(pid_platform_command_x >> 8);
-    dv_data[12] = (uint8_t)pid_platform_command_y;
-    dv_data[13] = (uint8_t)(pid_platform_command_y >> 8);
+        dv_data[7] = (uint8_t)ball.x;
+        dv_data[8] = (uint8_t)(ball.x >> 8);
+        dv_data[9] = (uint8_t)ball.y;
+        dv_data[10] = (uint8_t)(ball.y >> 8);
 
-    dv_data[14] = (uint8_t)platform_abc.a;
-    dv_data[15] = (uint8_t)(platform_abc.a >> 8);
-    dv_data[16] = (uint8_t)platform_abc.b;
-    dv_data[17] = (uint8_t)(platform_abc.b >> 8);
-    dv_data[18] = (uint8_t)platform_abc.c;
-    dv_data[19] = (uint8_t)(platform_abc.c >> 8);
+        dv_data[11] = (uint8_t)pid_platform_command_x;
+        dv_data[12] = (uint8_t)(pid_platform_command_x >> 8);
+        dv_data[13] = (uint8_t)pid_platform_command_y;
+        dv_data[14] = (uint8_t)(pid_platform_command_y >> 8);
 
-    dv_data[20] = ~'P';
+        dv_data[15] = (uint8_t)platform_abc.a;
+        dv_data[16] = (uint8_t)(platform_abc.a >> 8);
+        dv_data[17] = (uint8_t)platform_abc.b;
+        dv_data[18] = (uint8_t)(platform_abc.b >> 8);
+        dv_data[19] = (uint8_t)platform_abc.c;
+        dv_data[20] = (uint8_t)(platform_abc.c >> 8);
 
-    CMD_PrintByteArray( dv_data, sizeof(dv_data), false );
+        dv_data[21] = ~0x03;
+
+        CMD_PrintByteArray( dv_data, sizeof(dv_data), false );
+    }
 }
 
 
