@@ -9,12 +9,15 @@
 #include "arm_math_types.h"
 
 #include "FreeRTOS.h"
-#include "dsp/fast_math_functions.h"
+#include "nunchuk/nunchuk.h"
+#include "platform/platform.h"
 #include "task.h"
 
 #include "peripheral/port/plib_port.h"
 
 #include "command/command.h"
+
+#include "nunchuk/nunchuk.h"
 
 #include "balance/balance_human.h"
 #include "balance/balance_nn.h"
@@ -32,6 +35,8 @@
 
 #define BALANCE_TARGET_CYCLE_INTERVAL   (500)
 #define BALANCE_TARGET_CIRCLE_INCREMENT (50)
+
+#define BALANCE_NUNCHUK_DEBOUNCE_COUNT  (10)
 
 
 // ******************************************************************
@@ -61,16 +66,17 @@ static StackType_t  balance_taskStack[ BALANCE_RTOS_STACK_SIZE ];
 
 static TickType_t balance_taskLastWakeTime;
 
-static balance_mode_t balance_mode = BALANCE_MODE_PID;
+static balance_mode_t machine_balance_mode = BALANCE_MODE_PID;
 
 static balance_target_t balance_target;
 static size_t balance_target_cycle_index = 0;
 
 static bool balance_dv_active = false;
 
+static void BALANCE_OFF_Reset( void );
 static const balance_interface_t balancer_off = {
     .init = NULL,
-    .reset = NULL,
+    .reset = BALANCE_OFF_Reset,
     .run = NULL,
     .dv = NULL,
     .led_mode_pin = PORT_PIN_NONE
@@ -105,11 +111,11 @@ static balance_interface_t balancers[] = {
 };
 
 static balance_target_t balance_targets[] = {
-    { .x = 0x7F0, .y = 0x810, .led_target_pin = LED_TARGET_CENTER_PIN },
+    { .x = 0x7E0, .y = 0x810, .led_target_pin = LED_TARGET_CENTER_PIN },
     { .x = 0x4C8, .y = 0xBC0, .led_target_pin = LED_TARGET_TOP_RIGHT_PIN },
-    { .x = 0xB18, .y = 0xBB8, .led_target_pin = LED_TARGET_TOP_LEFT_PIN },
+    { .x = 0xB20, .y = 0xBB8, .led_target_pin = LED_TARGET_TOP_LEFT_PIN },
     { .x = 0xB18, .y = 0x470, .led_target_pin = LED_TARGET_BOTTOM_LEFT_PIN },
-    { .x = 0x4C8, .y = 0x470, .led_target_pin = LED_TARGET_BOTTOM_RIGHT_PIN }
+    { .x = 0x4D0, .y = 0x468, .led_target_pin = LED_TARGET_BOTTOM_RIGHT_PIN }
 };
 
 static q15_t balance_target_circle_degrees = 0;
@@ -157,7 +163,7 @@ void BALANCE_Initialize( void )
 
 balance_mode_t BALANCE_MODE_Get( void )
 {
-    return balance_mode;
+    return machine_balance_mode;
 }
 
 void BALANCE_MODE_Set( balance_mode_t mode )
@@ -167,30 +173,30 @@ void BALANCE_MODE_Set( balance_mode_t mode )
         return;
     }
 
-    balance_mode = mode;
+    machine_balance_mode = mode;
 }
 
 void BALANCE_MODE_Next( void )
 {
-    if( balance_mode >= BALANCE_MODE_NUM_MODES - 1 )
+    if( machine_balance_mode >= BALANCE_MODE_NUM_MODES - 1 )
     {
-        balance_mode = 0;
+        machine_balance_mode = 0;
     }
     else
     {
-        balance_mode++;
+        machine_balance_mode++;
     }
 }
 
 void BALANCE_MODE_Previous( void )
 {
-    if( balance_mode == 0 )
+    if( machine_balance_mode == 0 )
     {
-        balance_mode = BALANCE_MODE_NUM_MODES - 1;
+        machine_balance_mode = BALANCE_MODE_NUM_MODES - 1;
     }
     else
     {
-        balance_mode--;
+        machine_balance_mode--;
     }
 }
 
@@ -202,7 +208,15 @@ void BALANCE_MODE_Previous( void )
 static void BALANCE_RTOS_Task( void * pvParameters )
 {
     balance_mode_t active_balance_mode = BALANCE_MODE_INVALID;
+    balance_mode_t pending_balance_mode = BALANCE_MODE_INVALID;
+
     uint32_t balance_target_timer = 0;
+
+    bool balance_nunchuk_state_c = false;
+    uint32_t balance_nunchuk_debounce_c = 0;
+
+    bool balance_nunchuk_state_z = false;
+    uint32_t balance_nunchuk_debounce_z = 0;
 
     (void)pvParameters;
     
@@ -212,20 +226,82 @@ static void BALANCE_RTOS_Task( void * pvParameters )
     
     while(1)
     {
+        nunchuk_data_t nunchuk = NUNCHUK_Data_Get();
+
+        if( nunchuk.button_c != balance_nunchuk_state_c )
+        {
+            balance_nunchuk_debounce_c++;
+            if( balance_nunchuk_debounce_c >= BALANCE_NUNCHUK_DEBOUNCE_COUNT )
+            {
+                balance_nunchuk_state_c = nunchuk.button_c;
+
+                if( balance_nunchuk_state_c )
+                {
+                    switch( machine_balance_mode )
+                    {
+                        case BALANCE_MODE_OFF:
+                        {
+                            machine_balance_mode = BALANCE_MODE_PID;
+                            break;
+                        }
+                        case BALANCE_MODE_PID:
+                        {
+                            machine_balance_mode = BALANCE_MODE_OFF;
+                            break;
+                        }
+                        case BALANCE_MODE_NN:
+                        {
+                            machine_balance_mode = BALANCE_MODE_PID;
+                            break;
+                        }
+                        default:
+                        {
+                            machine_balance_mode = BALANCE_MODE_OFF;
+                        }                        
+                    }
+                }
+            }
+        }
+        else 
+        {
+            balance_nunchuk_debounce_c = 0;
+        }
+
+        if( nunchuk.button_z != balance_nunchuk_state_z )
+        {
+            balance_nunchuk_debounce_z++;
+            if( balance_nunchuk_debounce_z >= BALANCE_NUNCHUK_DEBOUNCE_COUNT )
+            {
+                balance_nunchuk_state_z = nunchuk.button_z;
+            }
+        }
+        else 
+        {
+            balance_nunchuk_debounce_z = 0;
+        }
+
+        if( balance_nunchuk_state_z )
+        {
+            pending_balance_mode = BALANCE_MODE_HUMAN;
+        }
+        else
+        {
+            pending_balance_mode = machine_balance_mode;
+        }
+
         // Check if balance mode has changed.
-        if( active_balance_mode != balance_mode )
+        if( active_balance_mode != pending_balance_mode )
         {
             balance_mode_t balancer_index;
 
-            active_balance_mode = balance_mode;
-            balance_dv_active = false;
+            active_balance_mode = pending_balance_mode;
 
             // Turn off all balance mode indicators.
             for( balancer_index = 0; balancer_index < BALANCE_MODE_NUM_MODES; balancer_index++ )
             {
-                if( balancers[active_balance_mode].led_mode_pin != PORT_PIN_NONE )
+                if( balancers[balancer_index].led_mode_pin != PORT_PIN_NONE )
                 {
-                    PORT_PinClear( balancers[active_balance_mode].led_mode_pin );
+                    PORT_PinClear( balancers[balancer_index].led_mode_pin );
                 }
             }
 
@@ -276,12 +352,13 @@ static void BALANCE_RTOS_Task( void * pvParameters )
             PORT_PinSet( balance_targets[balance_target_cycle_index].led_target_pin );
         }
 
-        // balance_target_circle_degrees += BALANCE_TARGET_CIRCLE_INCREMENT;
-        // balance_target.x = balance_targets[0].x - (((q31_t)arm_sin_q15(balance_target_circle_degrees) * 0x300) >> 16);
-        // balance_target.y = balance_targets[0].y - (((q31_t)arm_cos_q15(balance_target_circle_degrees) * 0x300) >> 16);
-
         vTaskDelayUntil( &balance_taskLastWakeTime, configTICK_RATE_HZ / BALANCE_TASK_RATE_HZ );    
     }
+}
+
+static void BALANCE_OFF_Reset( void )
+{
+    PLATFORM_Position_XY_Set( 0, 0 );
 }
 
 
