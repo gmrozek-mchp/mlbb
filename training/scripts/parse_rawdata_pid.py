@@ -5,8 +5,12 @@ error_x = target_x - ball_x
 error_y = target_y - ball_y
 integral_x = running sum of error_x
 integral_y = running sum of error_y
-derivative_x = average of two consecutive differences in error_x
-derivative_y = average of two consecutive differences in error_y
+error_x_prev1 = error_x from previous row
+error_x_prev2 = error_x from two rows back
+error_y_prev1 = error_y from previous row
+error_y_prev2 = error_y from two rows back
+derivative_x_n = sum of n consecutive differences in error_x (n=1 to 10)
+derivative_y_n = sum of n consecutive differences in error_y (n=1 to 10)
 """
 
 import csv
@@ -54,80 +58,96 @@ def parse_human01_csv(input_file, output_file):
             
             # Read all rows and calculate error_x, error_y, integrals, and derivatives
             rows = []
-            error_x_values = []
-            error_y_values = []
-            integral_x = 0.0
-            integral_y = 0.0
+            integral_x = 0
+            integral_y = 0
             
-            # Keep track of previous error values for derivative calculation
+            # Keep track of previous error values for derivative calculation and previous error columns
             prev_error_x = []
             prev_error_y = []
             
             for row in reader:
-                # Filter based on determined target mode
-                if int(row['mode']) != target_mode:
+                # Filter based on determined target mode and active flag
+                if int(row['mode']) != target_mode or int(row['active']) != 1:
                     continue
                 
                 # Calculate error_x = target_x - ball_x
-                ball_x = float(row['ball_x'])
-                target_x = float(row['target_x'])
+                ball_x = int(row['ball_x'])
+                target_x = int(row['target_x'])
                 error_x = target_x - ball_x
                 
                 # Calculate error_y = target_y - ball_y
-                ball_y = float(row['ball_y'])
-                target_y = float(row['target_y'])
+                ball_y = int(row['ball_y'])
+                target_y = int(row['target_y'])
                 error_y = target_y - ball_y
                 
                 # Calculate running integrals
                 integral_x += error_x
                 integral_y += error_y
                 
-                # Calculate derivatives (average of two consecutive differences)
-                derivative_x = 0.0
-                derivative_y = 0.0
+                # Calculate multiple derivative terms as sum of n consecutive differences (n=1 to 10)
+                derivative_terms_x = []
+                derivative_terms_y = []
                 
-                if len(prev_error_x) >= 2:
-                    # Calculate average of two consecutive differences:
-                    # 1. Current - Previous
-                    # 2. Previous - Before that
-                    diff1_x = error_x - prev_error_x[-1]
-                    diff2_x = prev_error_x[-1] - prev_error_x[-2]
-                    derivative_x = (diff1_x + diff2_x) / 2.0
-                    
-                    diff1_y = error_y - prev_error_y[-1]
-                    diff2_y = prev_error_y[-1] - prev_error_y[-2]
-                    derivative_y = (diff1_y + diff2_y) / 2.0
-                elif len(prev_error_x) == 1:
-                    # Only one previous row available
-                    derivative_x = error_x - prev_error_x[-1]
-                    derivative_y = error_y - prev_error_y[-1]
-                else:
-                    # No previous rows available, derivative is 0
-                    derivative_x = 0.0
-                    derivative_y = 0.0
-                
-                # Update previous error lists (keep only last 2)
-                prev_error_x.append(error_x)
-                prev_error_y.append(error_y)
-                if len(prev_error_x) > 2:
-                    prev_error_x.pop(0)
-                    prev_error_y.pop(0)
+                for n in range(1, 11):  # n ranges from 1 to 10
+                    if len(prev_error_x) >= n:
+                        derivative_terms_x.append(error_x - prev_error_x[-n])
+                        derivative_terms_y.append(error_y - prev_error_y[-n])
+                    elif len(prev_error_x) >= 1:
+                        derivative_terms_x.append(error_x - prev_error_x[-len(prev_error_x)])
+                        derivative_terms_y.append(error_y - prev_error_y[-len(prev_error_y)])
+                    else:
+                        derivative_terms_x.append(0)
+                        derivative_terms_y.append(0)
                 
                 # Add error_x, error_y, integrals, and derivatives to the row
                 row['error_x'] = error_x
                 row['error_y'] = error_y
+
+                # Add previous error columns (check length before adding current error)
+                for n in range(1, 11):
+                    if len(prev_error_x) >= n:
+                        row[f'error_x_prev{n}'] = prev_error_x[-n]
+                        row[f'error_y_prev{n}'] = prev_error_y[-n]
+                    else:
+                        row[f'error_x_prev{n}'] = 0
+                        row[f'error_y_prev{n}'] = 0
+                                
                 row['integral_x'] = integral_x
                 row['integral_y'] = integral_y
-                row['derivative_x'] = derivative_x
-                row['derivative_y'] = derivative_y
+
+                # Add multiple derivative terms (n=1 to 10)
+                for n in range(1, 11):
+                    row[f'derivative_x_{n}'] = derivative_terms_x[n-1]
+                    row[f'derivative_y_{n}'] = derivative_terms_y[n-1]
+
                 rows.append(row)
-                error_x_values.append(error_x)
-                error_y_values.append(error_y)
             
+                # Update previous error lists (keep only last 10 for previous error columns and derivative calculations)
+                prev_error_x.append(error_x)
+                prev_error_y.append(error_y)
+                if len(prev_error_x) > 10:
+                    prev_error_x.pop(0)
+                    prev_error_y.pop(0)
+                
             # Write the new file
             print(f"Saving to {output_file}...")
+            
+            # Create fieldnames including all derivative terms
+            base_fieldnames = ['error_x', 'error_y', 'integral_x', 'integral_y']
+            
+            # Add previous error fieldnames for n=1 to 10
+            prev_error_fieldnames = []
+            for n in range(1, 11):
+                prev_error_fieldnames.extend([f'error_x_prev{n}', f'error_y_prev{n}'])
+            
+            # Add derivative terms for n=1 to 10
+            derivative_fieldnames = []
+            for n in range(1, 11):
+                derivative_fieldnames.extend([f'derivative_x_{n}', f'derivative_y_{n}'])
+            
+            fieldnames = reader.fieldnames + base_fieldnames + prev_error_fieldnames + derivative_fieldnames
+            
             with open(output_file, 'w', newline='') as outfile:
-                fieldnames = reader.fieldnames + ['error_x', 'error_y', 'integral_x', 'integral_y', 'derivative_x', 'derivative_y']
                 writer = csv.DictWriter(outfile, fieldnames=fieldnames)
                 writer.writeheader()
                 writer.writerows(rows)
@@ -135,36 +155,50 @@ def parse_human01_csv(input_file, output_file):
             print(f"Successfully processed {len(rows)} rows")
             print(f"Output saved to: {output_file}")
             
-            # Display some statistics
-            print("\nError statistics:")
-            print("Error X:")
-            print(f"  Mean error_x: {statistics.mean(error_x_values):.2f}")
-            print(f"  Std error_x: {statistics.stdev(error_x_values):.2f}")
-            print(f"  Min error_x: {min(error_x_values):.2f}")
-            print(f"  Max error_x: {max(error_x_values):.2f}")
-            print("Error Y:")
-            print(f"  Mean error_y: {statistics.mean(error_y_values):.2f}")
-            print(f"  Std error_y: {statistics.stdev(error_y_values):.2f}")
-            print(f"  Min error_y: {min(error_y_values):.2f}")
-            print(f"  Max error_y: {max(error_y_values):.2f}")
-            print("Integral statistics:")
-            print(f"  Final integral_x: {integral_x:.2f}")
-            print(f"  Final integral_y: {integral_y:.2f}")
-            
-            # Calculate derivative statistics
-            derivative_x_values = [row['derivative_x'] for row in rows]
-            derivative_y_values = [row['derivative_y'] for row in rows]
-            print("Derivative statistics:")
-            print("Derivative X:")
-            print(f"  Mean derivative_x: {statistics.mean(derivative_x_values):.2f}")
-            print(f"  Std derivative_x: {statistics.stdev(derivative_x_values):.2f}")
-            print(f"  Min derivative_x: {min(derivative_x_values):.2f}")
-            print(f"  Max derivative_x: {max(derivative_x_values):.2f}")
-            print("Derivative Y:")
-            print(f"  Mean derivative_y: {statistics.mean(derivative_y_values):.2f}")
-            print(f"  Std derivative_y: {statistics.stdev(derivative_y_values):.2f}")
-            print(f"  Min derivative_y: {min(derivative_y_values):.2f}")
-            print(f"  Max derivative_y: {max(derivative_y_values):.2f}")
+            # Only display statistics if we have data
+            if len(rows) > 0:
+                # Extract error values from rows for statistics
+                error_x_values = [row['error_x'] for row in rows]
+                error_y_values = [row['error_y'] for row in rows]
+                
+                # Display some statistics
+                print("\nError statistics:")
+                print("Error X:")
+                print(f"  Mean error_x: {statistics.mean(error_x_values):.2f}")
+                print(f"  Std error_x: {statistics.stdev(error_x_values):.2f}")
+                print(f"  Min error_x: {min(error_x_values):.2f}")
+                print(f"  Max error_x: {max(error_x_values):.2f}")
+                print("Error Y:")
+                print(f"  Mean error_y: {statistics.mean(error_y_values):.2f}")
+                print(f"  Std error_y: {statistics.stdev(error_y_values):.2f}")
+                print(f"  Min error_y: {min(error_y_values):.2f}")
+                print(f"  Max error_y: {max(error_y_values):.2f}")
+                print("Integral statistics:")
+                print(f"  Final integral_x: {integral_x:.2f}")
+                print(f"  Final integral_y: {integral_y:.2f}")
+                
+                # Calculate statistics for derivative terms (n=1 to 10)
+                print("\nAdditional derivative terms statistics:")
+                for n in range(1, 11):
+                    if n == 2:  # Skip n=2 as it's already shown above
+                        continue
+                        
+                    derivative_x_n_values = [row[f'derivative_x_{n}'] for row in rows]
+                    derivative_y_n_values = [row[f'derivative_y_{n}'] for row in rows]
+                    
+                    print(f"Derivative X (n={n}):")
+                    print(f"  Mean: {statistics.mean(derivative_x_n_values):.2f}")
+                    print(f"  Std: {statistics.stdev(derivative_x_n_values):.2f}")
+                    print(f"  Min: {min(derivative_x_n_values):.2f}")
+                    print(f"  Max: {max(derivative_x_n_values):.2f}")
+                    print(f"Derivative Y (n={n}):")
+                    print(f"  Mean: {statistics.mean(derivative_y_n_values):.2f}")
+                    print(f"  Std: {statistics.stdev(derivative_y_n_values):.2f}")
+                    print(f"  Min: {min(derivative_y_n_values):.2f}")
+                    print(f"  Max: {max(derivative_y_n_values):.2f}")
+                    print()
+            else:
+                print("No rows processed - no statistics available")
             
             return True
         
