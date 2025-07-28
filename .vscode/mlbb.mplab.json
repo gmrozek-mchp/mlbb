@@ -40,7 +40,8 @@
                     "extern/FreeRTOS-Kernel/include",
                     "extern/FreeRTOS-Kernel/portable/GCC/ARM_CM4F",
                     "extern/CMSIS-DSP/Include",
-                    "extern/CMSIS-DSP/PrivateInclude"
+                    "extern/CMSIS-DSP/PrivateInclude",
+                    "extern/CMSIS-NN/Include"
                 ],
                 "linker.remove-unused-sections": true
             }
@@ -123,6 +124,8 @@
                 "extern/CMSIS-DSP/Source/FastMathFunctions/arm_sin_q15.c",
                 "extern/CMSIS-DSP/Source/FastMathFunctions/arm_cos_q15.c",
                 "extern/CMSIS-DSP/Source/CommonTables/arm_common_tables.c",
+                "extern/CMSIS-NN/Source/FullyConnectedFunctions/arm_fully_connected_s16.c",
+                "extern/CMSIS-NN/Source/NNSupportFunctions/arm_nn_vec_mat_mult_t_s16.c",
                 "extern/FreeRTOS-Kernel/include/FreeRTOS.h",
                 "extern/FreeRTOS-Kernel/include/StackMacros.h",
                 "extern/FreeRTOS-Kernel/include/atomic.h",
