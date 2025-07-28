@@ -42,6 +42,9 @@ arm_pid_instance_q31 balance_pid_y;
 q15_t pid_target_x;
 q15_t pid_target_y;
 
+q15_t pid_error_x;
+q15_t pid_error_y;
+
 q15_t pid_platform_command_x;
 q15_t pid_platform_command_y;
 
@@ -103,11 +106,17 @@ void BALANCE_PID_Run( q15_t target_x, q15_t target_y )
 
     if( ball_data.detected )
     {
-        q31_t error_x = -((q31_t)pid_target_x - ball_data.x) << 19;
-        q31_t error_y = ((q31_t)pid_target_y - ball_data.y) << 19;
+        // q31_t error_x = -((q31_t)pid_target_x - ball_data.x) << 19;
+        // q31_t error_y = ((q31_t)pid_target_y - ball_data.y) << 19;
 
-        pid_platform_command_x = arm_pid_q31( &balance_pid_x, error_x );
-        pid_platform_command_y = arm_pid_q31( &balance_pid_y, error_y );
+        // pid_platform_command_x = arm_pid_q31( &balance_pid_x, error_x ) >> 16;
+        // pid_platform_command_y = arm_pid_q31( &balance_pid_y, error_y ) >> 16;
+
+        pid_error_x = -(pid_target_x - ball_data.x);
+        pid_error_y = (pid_target_y - ball_data.y);
+
+        pid_platform_command_x = pid_error_x;
+        pid_platform_command_y = pid_error_y;
 
         PLATFORM_Position_XY_Set( pid_platform_command_x, pid_platform_command_y );
 
@@ -126,11 +135,17 @@ void BALANCE_PID_Run( q15_t target_x, q15_t target_y )
         }
         else
         {
-            q31_t error_x = -((q31_t)pid_target_x - ball_data.x) << 19;
-            q31_t error_y = ((q31_t)pid_target_y - ball_data.y) << 19;
+            // q31_t error_x = -((q31_t)pid_target_x - ball_data.x) << 19;
+            // q31_t error_y = ((q31_t)pid_target_y - ball_data.y) << 19;
 
-            pid_platform_command_x = arm_pid_q31( &balance_pid_x, error_x );
-            pid_platform_command_y = arm_pid_q31( &balance_pid_y, error_y );
+            // pid_platform_command_x = arm_pid_q31( &balance_pid_x, error_x ) >> 16;
+            // pid_platform_command_y = arm_pid_q31( &balance_pid_y, error_y ) >> 16;
+
+            pid_error_x = -(pid_target_x - ball_data.x);
+            pid_error_y = (pid_target_y - ball_data.y);
+
+            pid_platform_command_x = pid_error_x;
+            pid_platform_command_y = pid_error_y;
 
             PLATFORM_Position_XY_Set( pid_platform_command_x, pid_platform_command_y );
         }
@@ -192,18 +207,19 @@ void BALANCE_PID_DataVisualizer( void )
 
 static void BALANCE_PID_CMD_Print_State( void )
 {
-    CMD_PrintString( "xS0: ", true );
-    CMD_PrintHex_U16( (uint16_t)balance_pid_x.state[0], true );
-    CMD_PrintString( " xS1: ", true );
-    CMD_PrintHex_U16( (uint16_t)balance_pid_x.state[1], true );
-    CMD_PrintString( " xS2: ", true );
-    CMD_PrintHex_U16( (uint16_t)balance_pid_x.state[2], true );
-    CMD_PrintString( " yS0: ", true );
-    CMD_PrintHex_U16( (uint16_t)balance_pid_y.state[0], true );
-    CMD_PrintString( " yS1: ", true );
-    CMD_PrintHex_U16( (uint16_t)balance_pid_y.state[1], true );
-    CMD_PrintString( " yS2: ", true );
-    CMD_PrintHex_U16( (uint16_t)balance_pid_y.state[2], true );
+    q15_t ex = pid_error_x;
+    q15_t ey = pid_error_y;
+    q15_t px = pid_platform_command_x;
+    q15_t py = pid_platform_command_y;
+
+    CMD_PrintString( "ex: ", true );
+    CMD_PrintHex_U16( (uint16_t)ex, true );
+    CMD_PrintString( " ey: ", true );
+    CMD_PrintHex_U16( (uint16_t)ey, true );
+    CMD_PrintString( " px: ", true );
+    CMD_PrintHex_U16( (uint16_t)px, true );
+    CMD_PrintString( " py: ", true );
+    CMD_PrintHex_U16( (uint16_t)py, true );
     CMD_PrintString( "\r\n", true );
 }
 
