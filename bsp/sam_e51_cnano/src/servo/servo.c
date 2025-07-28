@@ -34,9 +34,15 @@
 #define SERVO_PULSE_WIDTH_NEG_90    (30000)
 #define SERVO_PULSE_WIDTH_POS_90    (150000)
 
-#define SERVO_A_ZERO_OFFSET         (int32_t)(-1400)
-#define SERVO_B_ZERO_OFFSET         (int32_t)(4000)
-#define SERVO_C_ZERO_OFFSET         (int32_t)(900)
+// PLATFORM_1
+// #define SERVO_A_ZERO_OFFSET         (int32_t)(-1400)
+// #define SERVO_B_ZERO_OFFSET         (int32_t)(4000)
+// #define SERVO_C_ZERO_OFFSET         (int32_t)(900)
+
+// PLATFORM_2
+#define SERVO_A_ZERO_OFFSET         (int32_t)(-3000)
+#define SERVO_B_ZERO_OFFSET         (int32_t)(-600)
+#define SERVO_C_ZERO_OFFSET         (int32_t)(1400)
 
 #define SERVO_RATE_LIMIT            100
 
