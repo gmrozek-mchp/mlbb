@@ -153,9 +153,9 @@ void BALANCE_PID_DataVisualizer( void )
         dv_data[2] = (uint8_t)ball.detected;
 
         dv_data[3] = (uint8_t)pid_target_x;
-        dv_data[4] = (uint8_t)(pid_target_y >> 8);
+        dv_data[4] = (uint8_t)(pid_target_x >> 8);
         dv_data[5] = (uint8_t)pid_target_y;
-        dv_data[6] = (uint8_t)(pid_target_x >> 8);
+        dv_data[6] = (uint8_t)(pid_target_y >> 8);
 
         dv_data[7] = (uint8_t)ball.x;
         dv_data[8] = (uint8_t)(ball.x >> 8);
