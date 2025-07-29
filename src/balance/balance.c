@@ -112,11 +112,11 @@ static balance_interface_t balancers[] = {
 };
 
 static balance_target_t balance_targets[] = {
-    { .x = 0x7E0, .y = 0x810, .led_target_pin = LED_TARGET_CENTER_PIN },
-    { .x = 0x4C8, .y = 0xBC0, .led_target_pin = LED_TARGET_TOP_RIGHT_PIN },
-    { .x = 0xB20, .y = 0xBB8, .led_target_pin = LED_TARGET_TOP_LEFT_PIN },
-    { .x = 0xB18, .y = 0x470, .led_target_pin = LED_TARGET_BOTTOM_LEFT_PIN },
-    { .x = 0x4D0, .y = 0x468, .led_target_pin = LED_TARGET_BOTTOM_RIGHT_PIN }
+    { .x = 0x820, .y = 0x810, .led_target_pin = LED_TARGET_CENTER_PIN },
+    { .x = 0xB38, .y = 0xBC0, .led_target_pin = LED_TARGET_TOP_RIGHT_PIN },
+    { .x = 0x4E0, .y = 0xBB8, .led_target_pin = LED_TARGET_TOP_LEFT_PIN },
+    { .x = 0x4E8, .y = 0x470, .led_target_pin = LED_TARGET_BOTTOM_LEFT_PIN },
+    { .x = 0xB30, .y = 0x468, .led_target_pin = LED_TARGET_BOTTOM_RIGHT_PIN }
 };
 
 static q15_t balance_target_circle_degrees = 0;
