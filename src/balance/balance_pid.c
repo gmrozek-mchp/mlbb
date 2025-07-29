@@ -30,6 +30,9 @@
 // Section: Data Type Definitions
 // ******************************************************************
 
+q15_t balance_pid_error_x_history[2];
+q15_t balance_pid_error_y_history[2];
+
 
 // ******************************************************************
 // Section: Private Variables
@@ -37,9 +40,6 @@
 
 arm_pid_instance_q31 balance_pid_x;
 arm_pid_instance_q31 balance_pid_y;
-
-q15_t pid_target_x;
-q15_t pid_target_y;
 
 q15_t pid_error_x;
 q15_t pid_error_y;
@@ -77,6 +77,11 @@ void BALANCE_PID_Initialize( void )
     balance_pid_y.Kd = BALANCE_PID_CONSTANT_Kd;
     arm_pid_init_q31( &balance_pid_y, 1 );
 
+    balance_pid_error_x_history[0] = 0;
+    balance_pid_error_x_history[1] = 0;
+    balance_pid_error_y_history[0] = 0;
+    balance_pid_error_x_history[1] = 0;
+
     CMD_RegisterCommand( "pid", BALANCE_PID_CMD_Print_State );
     CMD_RegisterCommand( "pidk", BALANCE_PID_CMD_Print_Constants );
     CMD_RegisterCommand( "kp", BALANCE_PID_CMD_Set_Kp );
@@ -94,8 +99,17 @@ void BALANCE_PID_Run( q15_t target_x, q15_t target_y, bool ball_detected, q15_t 
 {
     static uint16_t debounce_count = 10;
     
-    pid_target_x = target_x;
-    pid_target_y = target_y;
+    pid_error_x = -(target_x - ball_x);
+    pid_error_y = (target_y - ball_y);
+
+    q15_t pid_error_x_delta = 64 * (balance_pid_error_x_history[1] - pid_error_x);
+    q15_t pid_error_y_delta = 64 * (balance_pid_error_y_history[1] - pid_error_y);
+
+    balance_pid_error_x_history[1] = balance_pid_error_x_history[0];
+    balance_pid_error_x_history[0] = pid_error_x;
+
+    balance_pid_error_y_history[1] = balance_pid_error_y_history[0];
+    balance_pid_error_y_history[0] = pid_error_y;
 
     if( ball_detected )
     {
@@ -105,10 +119,7 @@ void BALANCE_PID_Run( q15_t target_x, q15_t target_y, bool ball_detected, q15_t 
         // pid_platform_command_x = arm_pid_q31( &balance_pid_x, error_x ) >> 16;
         // pid_platform_command_y = arm_pid_q31( &balance_pid_y, error_y ) >> 16;
 
-        pid_error_x = -(pid_target_x - ball_x);
-        pid_error_y = (pid_target_y - ball_y);
-
-        PLATFORM_Position_XY_Set( pid_error_x, pid_error_y );
+        PLATFORM_Position_XY_Set( pid_error_x - pid_error_x_delta, pid_error_y - pid_error_y_delta );
 
         debounce_count = 0;
     }
@@ -131,10 +142,7 @@ void BALANCE_PID_Run( q15_t target_x, q15_t target_y, bool ball_detected, q15_t 
             // pid_platform_command_x = arm_pid_q31( &balance_pid_x, error_x ) >> 16;
             // pid_platform_command_y = arm_pid_q31( &balance_pid_y, error_y ) >> 16;
 
-            pid_error_x = -(pid_target_x - ball_x);
-            pid_error_y = (pid_target_y - ball_y);
-
-            PLATFORM_Position_XY_Set( pid_error_x, pid_error_y );
+            PLATFORM_Position_XY_Set( pid_error_x - pid_error_x_delta, pid_error_y - pid_error_y_delta );
         }
     }
 }
