@@ -44,7 +44,7 @@
 #define SERVO_B_ZERO_OFFSET         (int32_t)(-600)
 #define SERVO_C_ZERO_OFFSET         (int32_t)(1400)
 
-#define SERVO_RATE_LIMIT            100
+#define SERVO_RATE_LIMIT            140
 
 
 // ******************************************************************
