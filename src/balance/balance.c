@@ -39,6 +39,8 @@
 
 #define BALANCE_NUNCHUK_DEBOUNCE_COUNT  (10)
 
+#define BALL_DETECTION_DEBOUNCE_COUNT   (100)
+
 
 // ******************************************************************
 // Section: Data Type Definitions
@@ -387,7 +389,58 @@ static nunchuk_data_t BALANCE_FilterNunchuk( void )
 
 static ball_data_t BALANCE_FilterBallPosition( void )
 {
+    static bool ball_detected_previous = false;
+    static uint16_t debounce_count = 0;
+
+    static q15_t ball_previous_x = 0;
+    static q15_t ball_previous_y = 0;
+
+    static q15_t ball_delta_x = 0;
+    static q15_t ball_delta_y = 0;
+
     ball_data_t ball = BALL_Position_Get();
+
+    if( ball.detected )
+    {
+        ball_detected_previous = true;
+        debounce_count = 0;
+
+        ball_delta_x = ball.x - ball_previous_x;
+        ball_delta_y = ball.y - ball_previous_y;
+
+        ball_previous_x = ball.x;
+        ball_previous_y = ball.y;
+    }
+    else
+    {
+        if( ball_detected_previous )
+        {
+            debounce_count++;
+            if( debounce_count < BALL_DETECTION_DEBOUNCE_COUNT )
+            {
+                ball.detected = true;
+                ball.x = ball_previous_x + ball_delta_x;
+                ball.y = ball_previous_y + ball_delta_y;
+
+                ball_previous_x = ball.x;
+                ball_previous_y = ball.y;
+            }
+            else
+            {
+                ball_detected_previous = false;
+
+                ball.detected = false;
+                ball.x = 0;
+                ball.y = 0;
+            }
+        }
+        else
+        {
+            ball.detected = false;
+            ball.x = 0;
+            ball.y = 0;
+        }
+    }
 
     return ball;
 }
