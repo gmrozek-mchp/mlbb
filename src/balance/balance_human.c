@@ -56,7 +56,7 @@ void BALANCE_HUMAN_Reset( void )
     NUNCHUK_Zero_Set();
 }
 
-void BALANCE_HUMAN_Run( q15_t target_x, q15_t target_y )
+void BALANCE_HUMAN_Run( q15_t target_x, q15_t target_y, q15_t ball_x, q15_t ball_y )
 {
     nunchuk_data_t nunchukData = NUNCHUK_Data_Get();
 

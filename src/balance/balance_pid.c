@@ -94,7 +94,7 @@ void BALANCE_PID_Reset( void )
     arm_pid_reset_q31( &balance_pid_y );
 }
 
-void BALANCE_PID_Run( q15_t target_x, q15_t target_y )
+void BALANCE_PID_Run( q15_t target_x, q15_t target_y, q15_t ball_x, q15_t ball_y )
 {
     ball_data_t ball_data;
     static uint16_t debounce_count = 10;

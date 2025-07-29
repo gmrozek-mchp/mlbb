@@ -9,6 +9,7 @@
 #include "arm_math_types.h"
 
 #include "FreeRTOS.h"
+#include "ball/ball.h"
 #include "nunchuk/nunchuk.h"
 #include "platform/platform.h"
 #include "task.h"
@@ -45,7 +46,7 @@
 typedef struct {
     void (*init)( void );
     void (*reset)( void );
-    void (*run)( q15_t target_x, q15_t target_y );
+    void (*run)( q15_t target_x, q15_t target_y, q15_t ball_x, q15_t ball_y );
     void (*dv)( void );
     PORT_PIN led_mode_pin;
 } balance_interface_t;
@@ -66,7 +67,7 @@ static StackType_t  balance_taskStack[ BALANCE_RTOS_STACK_SIZE ];
 
 static TickType_t balance_taskLastWakeTime;
 
-static balance_mode_t machine_balance_mode = BALANCE_MODE_PID;
+static balance_mode_t machine_balance_mode = BALANCE_MODE_OFF;
 
 static balance_target_t balance_target;
 static size_t balance_target_cycle_index = 0;
@@ -125,6 +126,9 @@ static q15_t balance_target_circle_degrees = 0;
 // Section: Private Function Declarations
 // ******************************************************************
 static void BALANCE_RTOS_Task( void * pvParameters );
+
+static nunchuk_data_t BALANCE_FilterNunchuk( void );
+static ball_data_t BALANCE_FilterBallPosition( void );
 
 static void BALANCE_CMD_DataVisualizer( void );
 
@@ -212,11 +216,7 @@ static void BALANCE_RTOS_Task( void * pvParameters )
 
     uint32_t balance_target_timer = 0;
 
-    bool balance_nunchuk_state_c = false;
-    uint32_t balance_nunchuk_debounce_c = 0;
-
-    bool balance_nunchuk_state_z = false;
-    uint32_t balance_nunchuk_debounce_z = 0;
+    bool nunchuk_state_c = false;
 
     (void)pvParameters;
     
@@ -226,61 +226,40 @@ static void BALANCE_RTOS_Task( void * pvParameters )
     
     while(1)
     {
-        nunchuk_data_t nunchuk = NUNCHUK_Data_Get();
+        nunchuk_data_t nunchuk = BALANCE_FilterNunchuk();
 
-        if( nunchuk.button_c != balance_nunchuk_state_c )
+        if( nunchuk.button_c != nunchuk_state_c )
         {
-            balance_nunchuk_debounce_c++;
-            if( balance_nunchuk_debounce_c >= BALANCE_NUNCHUK_DEBOUNCE_COUNT )
-            {
-                balance_nunchuk_state_c = nunchuk.button_c;
+            nunchuk_state_c = nunchuk.button_c;
 
-                if( balance_nunchuk_state_c )
+            if( nunchuk_state_c )
+            {
+                switch( machine_balance_mode )
                 {
-                    switch( machine_balance_mode )
+                    case BALANCE_MODE_OFF:
                     {
-                        case BALANCE_MODE_OFF:
-                        {
-                            machine_balance_mode = BALANCE_MODE_PID;
-                            break;
-                        }
-                        case BALANCE_MODE_PID:
-                        {
-                            machine_balance_mode = BALANCE_MODE_OFF;
-                            break;
-                        }
-                        case BALANCE_MODE_NN:
-                        {
-                            machine_balance_mode = BALANCE_MODE_PID;
-                            break;
-                        }
-                        default:
-                        {
-                            machine_balance_mode = BALANCE_MODE_OFF;
-                        }                        
+                        machine_balance_mode = BALANCE_MODE_PID;
+                        break;
                     }
+                    case BALANCE_MODE_PID:
+                    {
+                        machine_balance_mode = BALANCE_MODE_OFF;
+                        break;
+                    }
+                    case BALANCE_MODE_NN:
+                    {
+                        machine_balance_mode = BALANCE_MODE_PID;
+                        break;
+                    }
+                    default:
+                    {
+                        machine_balance_mode = BALANCE_MODE_OFF;
+                    }                        
                 }
             }
         }
-        else 
-        {
-            balance_nunchuk_debounce_c = 0;
-        }
 
-        if( nunchuk.button_z != balance_nunchuk_state_z )
-        {
-            balance_nunchuk_debounce_z++;
-            if( balance_nunchuk_debounce_z >= BALANCE_NUNCHUK_DEBOUNCE_COUNT )
-            {
-                balance_nunchuk_state_z = nunchuk.button_z;
-            }
-        }
-        else 
-        {
-            balance_nunchuk_debounce_z = 0;
-        }
-
-        if( balance_nunchuk_state_z )
+        if( nunchuk.button_z )
         {
             pending_balance_mode = BALANCE_MODE_HUMAN;
         }
@@ -318,10 +297,12 @@ static void BALANCE_RTOS_Task( void * pvParameters )
             }
         }
 
+        ball_data_t ball = BALANCE_FilterBallPosition();
+
         // Run the active balancer
         if( balancers[active_balance_mode].run != NULL )
         {
-            balancers[active_balance_mode].run( balance_target.x, balance_target.y );
+            balancers[active_balance_mode].run( balance_target.x, balance_target.y, ball.x, ball.y );
         }
 
         // Stream data visualizer if active
@@ -359,6 +340,56 @@ static void BALANCE_RTOS_Task( void * pvParameters )
 static void BALANCE_OFF_Reset( void )
 {
     PLATFORM_Position_XY_Set( 0, 0 );
+}
+
+static nunchuk_data_t BALANCE_FilterNunchuk( void )
+{
+    static bool state_c = false;
+    static uint16_t debounce_c = 0;
+
+    static bool state_z = false;
+    static uint16_t debounce_z = 0;
+
+    nunchuk_data_t nunchuk = NUNCHUK_Data_Get();
+
+    if( nunchuk.button_c != state_c )
+    {
+        debounce_c++;
+        if( debounce_c >= BALANCE_NUNCHUK_DEBOUNCE_COUNT )
+        {
+            state_c = nunchuk.button_c;
+        }
+    }
+    else 
+    {
+        debounce_c = 0;
+    }
+
+
+    if( nunchuk.button_z != state_z )
+    {
+        debounce_z++;
+        if( debounce_z >= BALANCE_NUNCHUK_DEBOUNCE_COUNT )
+        {
+            state_z = nunchuk.button_z;
+        }
+    }
+    else 
+    {
+        debounce_z = 0;
+    }
+    
+    nunchuk.button_c = state_c;
+    nunchuk.button_z = state_z;
+
+    return nunchuk;
+}
+
+static ball_data_t BALANCE_FilterBallPosition( void )
+{
+    ball_data_t ball = BALL_Position_Get();
+
+    return ball;
 }
 
 

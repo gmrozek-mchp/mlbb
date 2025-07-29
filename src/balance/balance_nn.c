@@ -248,7 +248,7 @@ void BALANCE_NN_Reset( void )
     nn_state.initialized = true;
 }
 
-void BALANCE_NN_Run( q15_t target_x, q15_t target_y )
+void BALANCE_NN_Run( q15_t target_x, q15_t target_y, q15_t ball_x, q15_t ball_y )
 {
     if (!nn_state.initialized) {
         BALANCE_NN_Initialize();

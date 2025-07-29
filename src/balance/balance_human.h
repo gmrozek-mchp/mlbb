@@ -9,7 +9,7 @@ void BALANCE_HUMAN_Initialize( void );
 
 void BALANCE_HUMAN_Reset( void );
 
-void BALANCE_HUMAN_Run( q15_t target_x, q15_t target_y );
+void BALANCE_HUMAN_Run( q15_t target_x, q15_t target_y, q15_t ball_x, q15_t ball_y );
 
 void BALANCE_HUMAN_DataVisualizer( void );
 
