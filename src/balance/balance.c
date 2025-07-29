@@ -46,8 +46,8 @@
 typedef struct {
     void (*init)( void );
     void (*reset)( void );
-    void (*run)( q15_t target_x, q15_t target_y, q15_t ball_x, q15_t ball_y );
-    void (*dv)( void );
+    void (*run)( q15_t target_x, q15_t target_y, bool ball_detected, q15_t ball_x, q15_t ball_y );
+    void (*dv)( q15_t target_x, q15_t target_y, bool ball_detected, q15_t ball_x, q15_t ball_y );
     PORT_PIN led_mode_pin;
 } balance_interface_t;
 
@@ -302,13 +302,13 @@ static void BALANCE_RTOS_Task( void * pvParameters )
         // Run the active balancer
         if( balancers[active_balance_mode].run != NULL )
         {
-            balancers[active_balance_mode].run( balance_target.x, balance_target.y, ball.x, ball.y );
+            balancers[active_balance_mode].run( balance_target.x, balance_target.y, ball.detected, ball.x, ball.y );
         }
 
         // Stream data visualizer if active
         if( balance_dv_active && (balancers[active_balance_mode].dv != NULL) )
         {
-            balancers[active_balance_mode].dv();
+            balancers[active_balance_mode].dv( balance_target.x, balance_target.y, ball.detected, ball.x, ball.y );
         }
 
         balance_target_timer++;

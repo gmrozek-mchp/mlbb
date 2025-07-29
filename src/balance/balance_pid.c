@@ -8,12 +8,11 @@
 
 #include "arm_math_types.h"
 
-#include "FreeRTOS.h"
+#include "FreeRTOS.h"   // IWYU pragma: keep - FreeRTOS.h must be included before other FreeRTOS headers
 #include "task.h"
 
 #include "command/command.h"
 
-#include "ball/ball.h"
 #include "dsp/controller_functions.h"
 #include "platform/platform.h"
 
@@ -44,9 +43,6 @@ q15_t pid_target_y;
 
 q15_t pid_error_x;
 q15_t pid_error_y;
-
-q15_t pid_platform_command_x;
-q15_t pid_platform_command_y;
 
 
 // ******************************************************************
@@ -94,17 +90,14 @@ void BALANCE_PID_Reset( void )
     arm_pid_reset_q31( &balance_pid_y );
 }
 
-void BALANCE_PID_Run( q15_t target_x, q15_t target_y, q15_t ball_x, q15_t ball_y )
+void BALANCE_PID_Run( q15_t target_x, q15_t target_y, bool ball_detected, q15_t ball_x, q15_t ball_y )
 {
-    ball_data_t ball_data;
     static uint16_t debounce_count = 10;
     
     pid_target_x = target_x;
     pid_target_y = target_y;
 
-    ball_data = BALL_Position_Get();
-
-    if( ball_data.detected )
+    if( ball_detected )
     {
         // q31_t error_x = -((q31_t)pid_target_x - ball_data.x) << 19;
         // q31_t error_y = ((q31_t)pid_target_y - ball_data.y) << 19;
@@ -112,13 +105,10 @@ void BALANCE_PID_Run( q15_t target_x, q15_t target_y, q15_t ball_x, q15_t ball_y
         // pid_platform_command_x = arm_pid_q31( &balance_pid_x, error_x ) >> 16;
         // pid_platform_command_y = arm_pid_q31( &balance_pid_y, error_y ) >> 16;
 
-        pid_error_x = -(pid_target_x - ball_data.x);
-        pid_error_y = (pid_target_y - ball_data.y);
+        pid_error_x = -(pid_target_x - ball_x);
+        pid_error_y = (pid_target_y - ball_y);
 
-        pid_platform_command_x = pid_error_x;
-        pid_platform_command_y = pid_error_y;
-
-        PLATFORM_Position_XY_Set( pid_platform_command_x, pid_platform_command_y );
+        PLATFORM_Position_XY_Set( pid_error_x, pid_error_y );
 
         debounce_count = 0;
     }
@@ -141,58 +131,52 @@ void BALANCE_PID_Run( q15_t target_x, q15_t target_y, q15_t ball_x, q15_t ball_y
             // pid_platform_command_x = arm_pid_q31( &balance_pid_x, error_x ) >> 16;
             // pid_platform_command_y = arm_pid_q31( &balance_pid_y, error_y ) >> 16;
 
-            pid_error_x = -(pid_target_x - ball_data.x);
-            pid_error_y = (pid_target_y - ball_data.y);
+            pid_error_x = -(pid_target_x - ball_x);
+            pid_error_y = (pid_target_y - ball_y);
 
-            pid_platform_command_x = pid_error_x;
-            pid_platform_command_y = pid_error_y;
-
-            PLATFORM_Position_XY_Set( pid_platform_command_x, pid_platform_command_y );
+            PLATFORM_Position_XY_Set( pid_error_x, pid_error_y );
         }
     }
 }
 
-void BALANCE_PID_DataVisualizer( void )
+void BALANCE_PID_DataVisualizer( q15_t target_x, q15_t target_y, bool ball_detected, q15_t ball_x, q15_t ball_y )
 {
     static uint8_t dv_data[22];
 
-    ball_data_t ball = BALL_Position_Get();;
+    platform_xy_t platform_xy = PLATFORM_Position_XY_Get();
     platform_abc_t platform_abc = PLATFORM_Position_ABC_Get();
 
-    if( ball.detected )
-    {
-        dv_data[0] = 0x03;
+    dv_data[0] = 0x03;
 
-        dv_data[1] = (uint8_t)'P';
+    dv_data[1] = (uint8_t)'P';
 
-        dv_data[2] = (uint8_t)ball.detected;
+    dv_data[2] = (uint8_t)ball_detected;
 
-        dv_data[3] = (uint8_t)pid_target_x;
-        dv_data[4] = (uint8_t)(pid_target_x >> 8);
-        dv_data[5] = (uint8_t)pid_target_y;
-        dv_data[6] = (uint8_t)(pid_target_y >> 8);
+    dv_data[3] = (uint8_t)target_x;
+    dv_data[4] = (uint8_t)(target_x >> 8);
+    dv_data[5] = (uint8_t)target_y;
+    dv_data[6] = (uint8_t)(target_y >> 8);
 
-        dv_data[7] = (uint8_t)ball.x;
-        dv_data[8] = (uint8_t)(ball.x >> 8);
-        dv_data[9] = (uint8_t)ball.y;
-        dv_data[10] = (uint8_t)(ball.y >> 8);
+    dv_data[7] = (uint8_t)ball_x;
+    dv_data[8] = (uint8_t)(ball_x >> 8);
+    dv_data[9] = (uint8_t)ball_y;
+    dv_data[10] = (uint8_t)(ball_y >> 8);
 
-        dv_data[11] = (uint8_t)pid_platform_command_x;
-        dv_data[12] = (uint8_t)(pid_platform_command_x >> 8);
-        dv_data[13] = (uint8_t)pid_platform_command_y;
-        dv_data[14] = (uint8_t)(pid_platform_command_y >> 8);
+    dv_data[11] = (uint8_t)platform_xy.x;
+    dv_data[12] = (uint8_t)(platform_xy.x >> 8);
+    dv_data[13] = (uint8_t)platform_xy.y;
+    dv_data[14] = (uint8_t)(platform_xy.y >> 8);
 
-        dv_data[15] = (uint8_t)platform_abc.a;
-        dv_data[16] = (uint8_t)(platform_abc.a >> 8);
-        dv_data[17] = (uint8_t)platform_abc.b;
-        dv_data[18] = (uint8_t)(platform_abc.b >> 8);
-        dv_data[19] = (uint8_t)platform_abc.c;
-        dv_data[20] = (uint8_t)(platform_abc.c >> 8);
+    dv_data[15] = (uint8_t)platform_abc.a;
+    dv_data[16] = (uint8_t)(platform_abc.a >> 8);
+    dv_data[17] = (uint8_t)platform_abc.b;
+    dv_data[18] = (uint8_t)(platform_abc.b >> 8);
+    dv_data[19] = (uint8_t)platform_abc.c;
+    dv_data[20] = (uint8_t)(platform_abc.c >> 8);
 
-        dv_data[21] = ~0x03;
+    dv_data[21] = ~0x03;
 
-        CMD_PrintByteArray( dv_data, sizeof(dv_data), false );
-    }
+    CMD_PrintByteArray( dv_data, sizeof(dv_data), false );
 }
 
 
@@ -209,17 +193,16 @@ static void BALANCE_PID_CMD_Print_State( void )
 {
     q15_t ex = pid_error_x;
     q15_t ey = pid_error_y;
-    q15_t px = pid_platform_command_x;
-    q15_t py = pid_platform_command_y;
+    platform_xy_t platform_xy = PLATFORM_Position_XY_Get();
 
     CMD_PrintString( "ex: ", true );
     CMD_PrintHex_U16( (uint16_t)ex, true );
     CMD_PrintString( " ey: ", true );
     CMD_PrintHex_U16( (uint16_t)ey, true );
     CMD_PrintString( " px: ", true );
-    CMD_PrintHex_U16( (uint16_t)px, true );
+    CMD_PrintHex_U16( (uint16_t)platform_xy.x, true );
     CMD_PrintString( " py: ", true );
-    CMD_PrintHex_U16( (uint16_t)py, true );
+    CMD_PrintHex_U16( (uint16_t)platform_xy.y, true );
     CMD_PrintString( "\r\n", true );
 }
 

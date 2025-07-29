@@ -248,7 +248,7 @@ void BALANCE_NN_Reset( void )
     nn_state.initialized = true;
 }
 
-void BALANCE_NN_Run( q15_t target_x, q15_t target_y, q15_t ball_x, q15_t ball_y )
+void BALANCE_NN_Run( q15_t target_x, q15_t target_y, bool ball_detected, q15_t ball_x, q15_t ball_y )
 {
     if (!nn_state.initialized) {
         BALANCE_NN_Initialize();
@@ -316,7 +316,7 @@ void BALANCE_NN_Run( q15_t target_x, q15_t target_y, q15_t ball_x, q15_t ball_y 
     PLATFORM_Position_XY_Set(platform_x, platform_y);
 }
 
-void BALANCE_NN_DataVisualizer( void )
+void BALANCE_NN_DataVisualizer( q15_t target_x, q15_t target_y, bool ball_detected, q15_t ball_x, q15_t ball_y )
 {
     // This function can be used for debugging and visualization
     // For now, it's empty but can be extended to output debug data
