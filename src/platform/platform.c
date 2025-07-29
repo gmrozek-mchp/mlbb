@@ -136,7 +136,18 @@ void PLATFORM_Enable( void )
 
 platform_xy_t PLATFORM_Position_XY_Get( void )
 {
-    platform_xy_t xy = {0};
+    platform_xy_t xy;
+    
+    
+    // x = (c + a*cos(60)) / sin(60)
+    // calculate in int32_t to prevent overflow and allow for fractional integer multiplication
+    int32_t x = platform_position_command_abc.c + (platform_position_command_abc.a / 2);
+    x = x * 37838 >> 15; // Divide by sin(60deg)
+
+    xy.x = (q15_t)x;
+
+    // y = a
+    xy.y = platform_position_command_abc.a;
     
     return xy;
 }
