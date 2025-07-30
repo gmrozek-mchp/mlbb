@@ -15,6 +15,8 @@
 
 #define AR1100_READ_BUFFER_SIZE     (5)
 
+#define AR1100_TOUCH_VALUE_MINIMUM   (0x0100)
+#define AR1100_TOUCH_VALUE_MAXIMUM   (0x0F00)
 
 // ******************************************************************
 // Section: Data Type Definitions
@@ -116,17 +118,35 @@ static void ar1100_UartReadCallback( uintptr_t context )
         {
             if( !(ar1100_readBuffer[ar1100_readBufferIndex] & 0x80) )
             {
+                bool down;
+                uint16_t x;
+                uint16_t y;
+
                 uint8_t writeIndex = (ar1100_touchData_readIndex + 1) % 2;
 
-                ar1100_touchData[writeIndex].down = ((ar1100_readBuffer[0] & 0x01) != 0);
-                ar1100_touchData[writeIndex].y = ((ar1100_readBuffer[2] & 0x1f) << 7) | (ar1100_readBuffer[1] & 0x7f);
-                ar1100_touchData[writeIndex].x = ((ar1100_readBuffer[4] & 0x1f) << 7) | (ar1100_readBuffer[3] & 0x7f);
-                
+                down = ((ar1100_readBuffer[0] & 0x01) != 0);
+                x = ((ar1100_readBuffer[4] & 0x1f) << 7) | (ar1100_readBuffer[3] & 0x7f);
+                y = ((ar1100_readBuffer[2] & 0x1f) << 7) | (ar1100_readBuffer[1] & 0x7f);
+
+                if( (x > AR1100_TOUCH_VALUE_MINIMUM) && (x < AR1100_TOUCH_VALUE_MAXIMUM) &&
+                    (y > AR1100_TOUCH_VALUE_MINIMUM) && (y < AR1100_TOUCH_VALUE_MAXIMUM) )
+                {
+                    ar1100_touchData[writeIndex].down = down;
+                    ar1100_touchData[writeIndex].x = x;
+                    ar1100_touchData[writeIndex].y = y;
+                }
+                else
+                {
+                    ar1100_touchData[writeIndex].down = false;
+                    ar1100_touchData[writeIndex].x = x;
+                    ar1100_touchData[writeIndex].y = y;
+                }
+
                 if( ar1100_touchCallback != NULL )
                 {
                     ar1100_touchCallback( ar1100_touchData[writeIndex] );
                 }
-                
+            
                 ar1100_touchData_readIndex = writeIndex;
             }
             ar1100_readBufferIndex = 0;
