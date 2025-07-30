@@ -76,6 +76,8 @@ static void BALANCE_PID_CMD_Print_Constants( void );
 static void BALANCE_PID_CMD_Set_Kp( void );
 static void BALANCE_PID_CMD_Set_Ki( void );
 static void BALANCE_PID_CMD_Set_Kd( void );
+static void BALANCE_PID_CMD_Set_OutputScaleFactor( void );
+static void BALANCE_PID_CMD_Set_DeltaFilterSize( void );
 
 
 // ******************************************************************
@@ -92,6 +94,8 @@ void BALANCE_PID_Initialize( void )
     CMD_RegisterCommand( "kp", BALANCE_PID_CMD_Set_Kp );
     CMD_RegisterCommand( "ki", BALANCE_PID_CMD_Set_Ki );
     CMD_RegisterCommand( "kd", BALANCE_PID_CMD_Set_Kd );
+    CMD_RegisterCommand( "ofs", BALANCE_PID_CMD_Set_OutputScaleFactor );
+    CMD_RegisterCommand( "df", BALANCE_PID_CMD_Set_DeltaFilterSize );
 }
 
 void BALANCE_PID_Reset( void )
@@ -265,12 +269,16 @@ static void BALANCE_PID_CMD_Print_State( void )
 
 static void BALANCE_PID_CMD_Print_Constants( void )
 {
-    CMD_PrintString( "Kp: ", true );
-    CMD_PrintHex_U32( (uint32_t)pid_x.Kp, true );
-    CMD_PrintString( " Ki: ", true );
-    CMD_PrintHex_U32( (uint32_t)pid_x.Ki, true );
-    CMD_PrintString( " Kd: ", true );
-    CMD_PrintHex_U32( (uint32_t)pid_x.Kd, true );
+    CMD_PrintString( "Kp: 0x", true );
+    CMD_PrintHex_U16( (uint16_t)pid_x.Kp, true );
+    CMD_PrintString( " Ki: 0x", true );
+    CMD_PrintHex_U16( (uint16_t)pid_x.Ki, true );
+    CMD_PrintString( " Kd: 0x", true );
+    CMD_PrintHex_U16( (uint16_t)pid_x.Kd, true );
+    CMD_PrintString( " Output Scale Factor: 0x", true );
+    CMD_PrintHex_U16( (uint16_t)pid_x.output_scale_factor, true );
+    CMD_PrintString( " Delta Filter Size: 0x", true );
+    CMD_PrintHex_U16( (uint16_t)pid_x.delta_filter_size, true );
     CMD_PrintString( "\r\n", true );
 }
 
@@ -280,10 +288,10 @@ static void BALANCE_PID_CMD_Set_Kp( void )
 
     if( CMD_GetArgc() >= 2 )
     {
-        q31_t kp;
+        uint16_t kp;
         
         CMD_GetArgv( 1, arg_buffer, sizeof(arg_buffer) );
-        kp = (q31_t)atoi( arg_buffer );
+        kp = (uint16_t)atoi( arg_buffer );
 
         pid_x.Kp = kp;
         pid_y.Kp = kp;
@@ -298,10 +306,10 @@ static void BALANCE_PID_CMD_Set_Ki( void )
 
     if( CMD_GetArgc() >= 2 )
     {
-        q31_t ki;
+        uint16_t ki;
         
         CMD_GetArgv( 1, arg_buffer, sizeof(arg_buffer) );
-        ki = (q31_t)atoi( arg_buffer );
+        ki = (uint16_t)atoi( arg_buffer );
 
         pid_x.Ki = ki;
         pid_y.Ki = ki;
@@ -316,13 +324,56 @@ static void BALANCE_PID_CMD_Set_Kd( void )
 
     if( CMD_GetArgc() >= 2 )
     {
-        q31_t kd;
+        uint16_t kd;
         
         CMD_GetArgv( 1, arg_buffer, sizeof(arg_buffer) );
-        kd = (q31_t)atoi( arg_buffer );
+        kd = (uint16_t)atoi( arg_buffer );
 
         pid_x.Kd = kd;
         pid_y.Kd = kd;
+    }
+
+    BALANCE_PID_CMD_Print_Constants();
+}
+
+static void BALANCE_PID_CMD_Set_OutputScaleFactor( void )
+{
+    char arg_buffer[10];
+
+    if( CMD_GetArgc() >= 2 )
+    {
+        uint16_t output_scale_factor;
+
+        CMD_GetArgv( 1, arg_buffer, sizeof(arg_buffer) );
+        output_scale_factor = (uint16_t)atoi( arg_buffer );
+
+        pid_x.output_scale_factor = output_scale_factor;
+        pid_y.output_scale_factor = output_scale_factor;
+    }
+
+    BALANCE_PID_CMD_Print_Constants();
+}
+
+static void BALANCE_PID_CMD_Set_DeltaFilterSize( void )
+{
+    char arg_buffer[10];
+
+    if( CMD_GetArgc() >= 2 )
+    {
+        size_t delta_filter_size;
+
+        CMD_GetArgv( 1, arg_buffer, sizeof(arg_buffer) );
+        delta_filter_size = (size_t)atoi( arg_buffer );
+
+        if( delta_filter_size > BALANCE_PID_HISTORY_DEPTH )
+        {
+            delta_filter_size = BALANCE_PID_HISTORY_DEPTH;
+        }
+
+        pid_x.delta_filter_size = delta_filter_size;
+        pid_y.delta_filter_size = delta_filter_size;
+
+        BALANCE_PID_Reset();
     }
 
     BALANCE_PID_CMD_Print_Constants();
