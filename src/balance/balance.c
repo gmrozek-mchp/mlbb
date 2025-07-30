@@ -9,16 +9,15 @@
 #include "arm_math_types.h"
 
 #include "FreeRTOS.h"
-#include "ball/ball.h"
-#include "nunchuk/nunchuk.h"
-#include "platform/platform.h"
 #include "task.h"
 
 #include "peripheral/port/plib_port.h"
 
 #include "command/command.h"
 
+#include "ball/ball.h"
 #include "nunchuk/nunchuk.h"
+#include "platform/platform.h"
 
 #include "balance/balance_human.h"
 #include "balance/balance_nn.h"
