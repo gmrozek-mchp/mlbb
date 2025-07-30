@@ -9,9 +9,6 @@
 
 #include "arm_math_types.h"
 
-#include "FreeRTOS.h"   // IWYU pragma: keep - FreeRTOS.h must be included before other FreeRTOS headers
-#include "task.h"
-
 #include "command/command.h"
 
 #include "platform/platform.h"
@@ -21,9 +18,9 @@
 // Section: Macro Declarations
 // ******************************************************************
 
-#define BALANCE_PID_CONSTANT_Kp_DEFAULT (800)
+#define BALANCE_PID_CONSTANT_Kp_DEFAULT (600)
 #define BALANCE_PID_CONSTANT_Ki_DEFAULT (0)
-#define BALANCE_PID_CONSTANT_Kd_DEFAULT (10000)
+#define BALANCE_PID_CONSTANT_Kd_DEFAULT (8000)
 
 #define BALANCE_PID_OUTPUT_SCALE_FACTOR_DEFAULT     (256)
 
