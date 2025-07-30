@@ -182,30 +182,6 @@ void BALANCE_MODE_Set( balance_mode_t mode )
     machine_balance_mode = mode;
 }
 
-void BALANCE_MODE_Next( void )
-{
-    if( machine_balance_mode >= BALANCE_MODE_NUM_MODES - 1 )
-    {
-        machine_balance_mode = 0;
-    }
-    else
-    {
-        machine_balance_mode++;
-    }
-}
-
-void BALANCE_MODE_Previous( void )
-{
-    if( machine_balance_mode == 0 )
-    {
-        machine_balance_mode = BALANCE_MODE_NUM_MODES - 1;
-    }
-    else
-    {
-        machine_balance_mode--;
-    }
-}
-
 
 // ******************************************************************
 // Section: Private Functions

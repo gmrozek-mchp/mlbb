@@ -17,8 +17,6 @@ void BALANCE_Initialize( void );
 
 balance_mode_t BALANCE_MODE_Get( void );
 void BALANCE_MODE_Set( balance_mode_t mode );
-void BALANCE_MODE_Next( void );
-void BALANCE_MODE_Previous( void );
 
 
 #endif	/* BALANCE_H */
