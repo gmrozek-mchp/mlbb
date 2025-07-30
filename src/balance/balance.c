@@ -29,7 +29,7 @@
 // Section: Macro Declarations
 // ******************************************************************
 #define BALANCE_RTOS_PRIORITY       (2)
-#define BALANCE_RTOS_STACK_SIZE     (2*configMINIMAL_STACK_SIZE)
+#define BALANCE_RTOS_STACK_SIZE     (4*configMINIMAL_STACK_SIZE)
 
 #define BALANCE_POWER_UP_DELAY_mS   (1000)
 #define BALANCE_TASK_RATE_HZ        (100)
