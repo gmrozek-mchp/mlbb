@@ -7,6 +7,7 @@
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
+#include <stdlib.h>
 
 #include "arm_math_types.h"
 
@@ -215,10 +216,60 @@ static void PLATFORM_RTOS_Task( void * pvParameters )
 
 static void PLATFORM_CMD_Position_XY( void )
 {
-    
+    char arg_buffer[10];
+
+    if( CMD_GetArgc() >= 3 )
+    {
+        q15_t platform_x;
+        q15_t platform_y;
+
+        CMD_GetArgv( 1, arg_buffer, sizeof(arg_buffer) );
+        platform_x = (q15_t)atoi( arg_buffer );
+
+        CMD_GetArgv( 2, arg_buffer, sizeof(arg_buffer) );
+        platform_y = (q15_t)atoi( arg_buffer );
+
+        PLATFORM_Position_XY_Set( platform_x, platform_y );
+    }
+
+    platform_xy_t platform_xy = PLATFORM_Position_XY_Get();
+
+    CMD_PrintString( "X: 0x", true );
+    CMD_PrintHex_U16( platform_xy.x, true );
+    CMD_PrintString( " Y: 0x", true );
+    CMD_PrintHex_U16( platform_xy.y, true );
+    CMD_PrintString( "\r\n", true );
 }
 
 static void PLATFORM_CMD_Position_ABC( void )
 {
+    char arg_buffer[10];
 
+    if( CMD_GetArgc() >= 4 )
+    {
+        q15_t platform_a;
+        q15_t platform_b;
+        q15_t platform_c;
+
+        CMD_GetArgv( 1, arg_buffer, sizeof(arg_buffer) );
+        platform_a = (q15_t)atoi( arg_buffer );
+
+        CMD_GetArgv( 2, arg_buffer, sizeof(arg_buffer) );
+        platform_b = (q15_t)atoi( arg_buffer );
+
+        CMD_GetArgv( 3, arg_buffer, sizeof(arg_buffer) );
+        platform_c = (q15_t)atoi( arg_buffer );
+
+        PLATFORM_Position_ABC_Set( platform_a, platform_b, platform_c );
+    }
+
+    platform_abc_t platform_abc = PLATFORM_Position_ABC_Get();
+
+    CMD_PrintString( "A: 0x", true );
+    CMD_PrintHex_U16( platform_abc.a, true );
+    CMD_PrintString( " B: 0x", true );
+    CMD_PrintHex_U16( platform_abc.b, true );
+    CMD_PrintString( " C: 0x", true );
+    CMD_PrintHex_U16( platform_abc.c, true );
+    CMD_PrintString( "\r\n", true );
 }
