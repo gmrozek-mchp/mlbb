@@ -39,7 +39,7 @@
 
 #define BALANCE_NUNCHUK_DEBOUNCE_COUNT  (10)
 
-#define BALL_DETECTION_DEBOUNCE_COUNT   (100)
+#define BALL_DETECTION_DEBOUNCE_COUNT   (50)
 
 
 // ******************************************************************
@@ -120,8 +120,6 @@ static balance_target_t balance_targets[] = {
     { .x = 0x4E8, .y = 0x470, .led_target_pin = LED_TARGET_BOTTOM_LEFT_PIN },
     { .x = 0xB30, .y = 0x468, .led_target_pin = LED_TARGET_BOTTOM_RIGHT_PIN }
 };
-
-static q15_t balance_target_circle_degrees = 0;
 
 
 // ******************************************************************
