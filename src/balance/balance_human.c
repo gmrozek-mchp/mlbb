@@ -15,6 +15,14 @@
 // Section: Macro Declarations
 // ******************************************************************
 
+// Full joystick range
+#define JOYSTICK_LINEAR_RANGE   (25)    // Range around the center where the joystick is linear with minimum gain
+#define JOYSTICK_FULL_RANGE     (100)   // Full joystick range
+
+// Scaling factor for softened joystick
+#define JOYSTICK_GAIN_MIN       (20)
+#define JOYSTICK_GAIN_MAX       (75)
+
 
 // ******************************************************************
 // Section: Data Type Definitions
@@ -25,16 +33,12 @@
 // Section: Private Variables
 // ******************************************************************
 
-static q15_t human_target_x;
-static q15_t human_target_y;
-
-static q15_t human_platform_command_x;
-static q15_t human_platform_command_y;
-
 
 // ******************************************************************
 // Section: Private Function Declarations
 // ******************************************************************
+
+static q15_t SoftenJoystickValue(int16_t raw_value);
 
 
 // ******************************************************************
@@ -59,13 +63,10 @@ void BALANCE_HUMAN_Run( q15_t target_x, q15_t target_y, bool ball_detected, q15_
 {
     nunchuk_data_t nunchukData = NUNCHUK_Data_Get();
 
-    human_target_x = target_x;
-    human_target_y = target_y;
-    
-    human_platform_command_x = (q15_t)nunchukData.joystick_x * 75;
-    human_platform_command_y = (q15_t)nunchukData.joystick_y * 75;
+    q15_t platform_command_x = SoftenJoystickValue(nunchukData.joystick_x);
+    q15_t platform_command_y = SoftenJoystickValue(nunchukData.joystick_y);
 
-    PLATFORM_Position_XY_Set( human_platform_command_x, human_platform_command_y );
+    PLATFORM_Position_XY_Set( platform_command_x, platform_command_y );
 }
 
 void BALANCE_HUMAN_DataVisualizer( q15_t target_x, q15_t target_y, bool ball_detected, q15_t ball_x, q15_t ball_y )
@@ -112,6 +113,39 @@ void BALANCE_HUMAN_DataVisualizer( q15_t target_x, q15_t target_y, bool ball_det
 // ******************************************************************
 // Section: Private Functions
 // ******************************************************************
+
+/**
+ * @brief Softens joystick input around the center by applying non-linear mapping
+ * @param raw_value Raw joystick value (-128 to 127)
+ * @return Softened joystick value scaled for platform control
+ */
+static q15_t SoftenJoystickValue(int16_t raw_value)
+{
+    int16_t abs_value;
+    int16_t sign;
+    int16_t gain;
+    
+    // Handle sign and get absolute value
+    if (raw_value < 0)
+    {
+        sign = -1;
+        abs_value = -raw_value;
+    }
+    else
+    {
+        sign = 1;
+        abs_value = raw_value;
+    }
+    
+    gain = JOYSTICK_GAIN_MIN;
+    if( abs_value > JOYSTICK_LINEAR_RANGE )
+    {
+        gain += (abs_value - JOYSTICK_LINEAR_RANGE) * (JOYSTICK_GAIN_MAX - JOYSTICK_GAIN_MIN) / (JOYSTICK_FULL_RANGE - JOYSTICK_LINEAR_RANGE);
+    }
+
+    // Apply sign and gain for platform
+    return (q15_t)(sign * abs_value * gain);
+}
 
 
 // ******************************************************************
