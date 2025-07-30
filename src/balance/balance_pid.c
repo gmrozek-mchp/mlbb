@@ -94,8 +94,8 @@ void BALANCE_PID_Initialize( void )
     CMD_RegisterCommand( "kp", BALANCE_PID_CMD_Set_Kp );
     CMD_RegisterCommand( "ki", BALANCE_PID_CMD_Set_Ki );
     CMD_RegisterCommand( "kd", BALANCE_PID_CMD_Set_Kd );
-    CMD_RegisterCommand( "ofs", BALANCE_PID_CMD_Set_OutputScaleFactor );
-    CMD_RegisterCommand( "df", BALANCE_PID_CMD_Set_DeltaFilterSize );
+    CMD_RegisterCommand( "osf", BALANCE_PID_CMD_Set_OutputScaleFactor );
+    CMD_RegisterCommand( "dfs", BALANCE_PID_CMD_Set_DeltaFilterSize );
 }
 
 void BALANCE_PID_Reset( void )
@@ -275,9 +275,9 @@ static void BALANCE_PID_CMD_Print_Constants( void )
     CMD_PrintHex_U16( (uint16_t)pid_x.Ki, true );
     CMD_PrintString( " Kd: 0x", true );
     CMD_PrintHex_U16( (uint16_t)pid_x.Kd, true );
-    CMD_PrintString( " Output Scale Factor: 0x", true );
+    CMD_PrintString( " Output Scale: 0x", true );
     CMD_PrintHex_U16( (uint16_t)pid_x.output_scale_factor, true );
-    CMD_PrintString( " Delta Filter Size: 0x", true );
+    CMD_PrintString( " D Filter Size: 0x", true );
     CMD_PrintHex_U16( (uint16_t)pid_x.delta_filter_size, true );
     CMD_PrintString( "\r\n", true );
 }
