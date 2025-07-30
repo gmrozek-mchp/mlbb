@@ -39,7 +39,7 @@
 
 #define BALANCE_NUNCHUK_DEBOUNCE_COUNT  (10)
 
-#define BALL_DETECTION_DEBOUNCE_COUNT   (50)
+#define BALL_DETECTION_DEBOUNCE_COUNT   (100)
 
 
 // ******************************************************************
