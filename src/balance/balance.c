@@ -187,15 +187,15 @@ void BALANCE_MODE_Set( balance_mode_t mode )
 
 static void BALANCE_RTOS_Task( void * pvParameters )
 {
-    balance_mode_t active_balance_mode = BALANCE_MODE_INVALID;
-    balance_mode_t pending_balance_mode = BALANCE_MODE_INVALID;
-
-    uint32_t balance_target_timer = 0;
-
-    bool nunchuk_state_c = false;
-
     (void)pvParameters;
     
+    static balance_mode_t active_balance_mode = BALANCE_MODE_INVALID;
+    static balance_mode_t pending_balance_mode = BALANCE_MODE_INVALID;
+
+    static uint32_t balance_target_timer = 0;
+
+    static bool nunchuk_state_c = false;
+
     vTaskDelay( pdMS_TO_TICKS(BALANCE_POWER_UP_DELAY_mS) );
 
     balance_taskLastWakeTime = xTaskGetTickCount();
@@ -328,6 +328,7 @@ static nunchuk_data_t BALANCE_FilterNunchuk( void )
 
     nunchuk_data_t nunchuk = NUNCHUK_Data_Get();
 
+    // debounce the c button
     if( nunchuk.button_c != state_c )
     {
         debounce_c++;
@@ -341,7 +342,7 @@ static nunchuk_data_t BALANCE_FilterNunchuk( void )
         debounce_c = 0;
     }
 
-
+    // debounce the z button
     if( nunchuk.button_z != state_z )
     {
         debounce_z++;
@@ -355,6 +356,7 @@ static nunchuk_data_t BALANCE_FilterNunchuk( void )
         debounce_z = 0;
     }
     
+    // return the debounced values
     nunchuk.button_c = state_c;
     nunchuk.button_z = state_z;
 
@@ -364,7 +366,7 @@ static nunchuk_data_t BALANCE_FilterNunchuk( void )
 static ball_data_t BALANCE_FilterBallPosition( void )
 {
     static bool ball_detected_previous = false;
-    static uint16_t debounce_count = 0;
+    static uint16_t ball_debounce_count = 0;
 
     static q15_t ball_previous_x = 0;
     static q15_t ball_previous_y = 0;
@@ -376,12 +378,16 @@ static ball_data_t BALANCE_FilterBallPosition( void )
 
     if( ball.detected )
     {
+        // no debounce on ball detected
         ball_detected_previous = true;
-        debounce_count = 0;
+        ball_debounce_count = 0;
 
+        // calculate the delta between the current and previous ball position (velocity)
+        // this is used to approximate the ball position when the ball is not detected.
         ball_delta_x = ball.x - ball_previous_x;
         ball_delta_y = ball.y - ball_previous_y;
 
+        // update the previous ball position
         ball_previous_x = ball.x;
         ball_previous_y = ball.y;
     }
@@ -389,18 +395,24 @@ static ball_data_t BALANCE_FilterBallPosition( void )
     {
         if( ball_detected_previous )
         {
-            debounce_count++;
-            if( debounce_count < BALL_DETECTION_DEBOUNCE_COUNT )
+            // debounce the ball detection
+            ball_debounce_count++;
+            if( ball_debounce_count < BALL_DETECTION_DEBOUNCE_COUNT )
             {
+                // debounce counter has not expired, so continue to report the ball as detected
                 ball.detected = true;
+
+                // approximate the ball position based on the last known velocity
                 ball.x = ball_previous_x + ball_delta_x;
                 ball.y = ball_previous_y + ball_delta_y;
 
+                // update the previous ball position
                 ball_previous_x = ball.x;
                 ball_previous_y = ball.y;
             }
             else
             {
+                // debounce counter has expired, so the ball is not detected
                 ball_detected_previous = false;
 
                 ball.detected = false;
@@ -410,6 +422,7 @@ static ball_data_t BALANCE_FilterBallPosition( void )
         }
         else
         {
+            // ball is not detected
             ball.detected = false;
             ball.x = 0;
             ball.y = 0;
