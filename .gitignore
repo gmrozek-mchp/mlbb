@@ -2,3 +2,4 @@ cmake/**/CMake*
 cmake/**/.generated/*
 !cmake/**/user.cmake
 _build/
+training/scripts/venv/
