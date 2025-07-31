@@ -218,12 +218,12 @@ static void BALANCE_RTOS_Task( void * pvParameters )
                     }
                     case BALANCE_MODE_PID:
                     {
-                        machine_balance_mode = BALANCE_MODE_OFF;
+                        machine_balance_mode = BALANCE_MODE_NN;
                         break;
                     }
                     case BALANCE_MODE_NN:
                     {
-                        machine_balance_mode = BALANCE_MODE_PID;
+                        machine_balance_mode = BALANCE_MODE_OFF;
                         break;
                     }
                     default:
@@ -284,28 +284,6 @@ static void BALANCE_RTOS_Task( void * pvParameters )
         if( balance_dv_active && (balancers[active_balance_mode].dv != NULL) )
         {
             balancers[active_balance_mode].dv( balance_target.x, balance_target.y, ball.detected, ball.x, ball.y );
-        }
-
-        balance_target_timer++;
-        if( balance_target_timer >= BALANCE_TARGET_CYCLE_INTERVAL )
-        {
-            size_t new_index;
-
-            balance_target_timer = 0;
-
-            PORT_PinClear( balance_targets[balance_target_cycle_index].led_target_pin );
-
-            new_index = (size_t)rand() % sizeof(balance_targets)/sizeof(balance_target_t);
-            while( new_index == balance_target_cycle_index )
-            {
-                new_index = (size_t)rand() % sizeof(balance_targets)/sizeof(balance_target_t);
-            }
-            balance_target_cycle_index = new_index;
-
-            balance_target.x = balance_targets[balance_target_cycle_index].x;
-            balance_target.y = balance_targets[balance_target_cycle_index].y;
-
-            PORT_PinSet( balance_targets[balance_target_cycle_index].led_target_pin );
         }
 
         vTaskDelayUntil( &balance_taskLastWakeTime, configTICK_RATE_HZ / BALANCE_TASK_RATE_HZ );    
