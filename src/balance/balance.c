@@ -22,6 +22,7 @@
 #include "balance/balance_human.h"
 #include "balance/balance_nn.h"
 #include "balance/balance_pid.h"
+#include "balance/balance_fuzzy.h"
 
 
 // ******************************************************************
@@ -104,12 +105,20 @@ static const balance_interface_t balancer_nn = {
     .dv = BALANCE_NN_DataVisualizer,
     .led_mode_pin = LED_MODE_NEURAL_NETWORK_PIN
 };
+static const balance_interface_t balancer_fuzzy = {
+    .init = BALANCE_FUZZY_Initialize,
+    .reset = BALANCE_FUZZY_Reset,
+    .run = BALANCE_FUZZY_Run,
+    .dv = BALANCE_FUZZY_DataVisualizer,
+    .led_mode_pin = LED_MODE_NEURAL_NETWORK_PIN  // Reuse NN LED for now
+};
 
 static balance_interface_t balancers[] = {
     balancer_off,
     balancer_human,
     balancer_pid,
-    balancer_nn
+    balancer_nn,
+    balancer_fuzzy
 };
 
 static balance_target_t balance_targets[] = {
@@ -222,6 +231,11 @@ static void BALANCE_RTOS_Task( void * pvParameters )
                         break;
                     }
                     case BALANCE_MODE_NN:
+                    {
+                        machine_balance_mode = BALANCE_MODE_FUZZY;
+                        break;
+                    }
+                    case BALANCE_MODE_FUZZY:
                     {
                         machine_balance_mode = BALANCE_MODE_OFF;
                         break;

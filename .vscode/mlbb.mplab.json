@@ -54,6 +54,8 @@
                 "src/main.c",
                 "src/balance/balance.h",
                 "src/balance/balance.c",
+                "src/balance/balance_fuzzy.h",
+                "src/balance/balance_fuzzy.c",
                 "src/balance/balance_human.h",
                 "src/balance/balance_human.c",
                 "src/balance/balance_nn.c",
