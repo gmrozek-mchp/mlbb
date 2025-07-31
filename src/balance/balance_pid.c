@@ -19,7 +19,7 @@
 // ******************************************************************
 
 #define BALANCE_PID_CONSTANT_Kp_DEFAULT (600)
-#define BALANCE_PID_CONSTANT_Ki_DEFAULT (0)
+#define BALANCE_PID_CONSTANT_Ki_DEFAULT (20)
 #define BALANCE_PID_CONSTANT_Kd_DEFAULT (8000)
 
 #define BALANCE_PID_OUTPUT_SCALE_FACTOR_DEFAULT     (256)
@@ -27,6 +27,10 @@
 #define BALANCE_PID_DELTA_FILTER_SIZE_DEFAULT  (5)
 
 #define BALANCE_PID_HISTORY_DEPTH (10)
+
+// Integral anti-windup parameters
+#define BALANCE_PID_NEAR_TARGET_THRESHOLD (512)  // Q15 units - ball is "near" target
+#define BALANCE_PID_SLOW_MOVEMENT_THRESHOLD (5) // Q15 units - ball is moving "slow"
 
 
 // ******************************************************************
@@ -47,6 +51,11 @@ typedef struct
         size_t error_history_index;
 
         q31_t error_sum;
+        
+        // Integral anti-windup parameters
+        q15_t target;           /**< Current target position */
+        q15_t actual;           /**< Current actual position */
+        bool integral_enabled;   /**< Whether integral term should be updated */
 } pid_q15_t;
 
 
@@ -78,6 +87,7 @@ static void BALANCE_PID_CMD_Set_Ki( void );
 static void BALANCE_PID_CMD_Set_Kd( void );
 static void BALANCE_PID_CMD_Set_OutputScaleFactor( void );
 static void BALANCE_PID_CMD_Set_DeltaFilterSize( void );
+static void BALANCE_PID_CMD_Print_IntegralStatus( void );
 
 
 // ******************************************************************
@@ -96,6 +106,7 @@ void BALANCE_PID_Initialize( void )
     CMD_RegisterCommand( "kd", BALANCE_PID_CMD_Set_Kd );
     CMD_RegisterCommand( "osf", BALANCE_PID_CMD_Set_OutputScaleFactor );
     CMD_RegisterCommand( "dfs", BALANCE_PID_CMD_Set_DeltaFilterSize );
+    CMD_RegisterCommand( "pidi", BALANCE_PID_CMD_Print_IntegralStatus );
 }
 
 void BALANCE_PID_Reset( void )
@@ -108,6 +119,12 @@ void BALANCE_PID_Run( q15_t target_x, q15_t target_y, bool ball_detected, q15_t 
 {
     if( ball_detected )
     {
+        // Update target and actual positions for integral anti-windup logic
+        pid_x.target = target_x;
+        pid_x.actual = ball_x;
+        pid_y.target = target_y;
+        pid_y.actual = ball_y;
+        
         q15_t platform_x = BALANCE_PID_Run_Instance( &pid_x, target_x, ball_x );
         q15_t platform_y = BALANCE_PID_Run_Instance( &pid_y, target_y, ball_y );
 
@@ -181,6 +198,9 @@ static void BALANCE_PID_Reset_Instance( pid_q15_t *pid )
 {
     pid->error_history_index = 0;
     pid->error_sum = 0;
+    pid->target = 0;
+    pid->actual = 0;
+    pid->integral_enabled = false;
 
     for( size_t i = 0; i < BALANCE_PID_HISTORY_DEPTH; i++ )
     {
@@ -213,8 +233,16 @@ static q15_t BALANCE_PID_Run_Instance( pid_q15_t *pid, q15_t target, q15_t actua
     // calculate the proportional term
     p_term = error * pid->Kp;
 
-    // calculate the integral term
-    pid->error_sum += error;
+    // Integral anti-windup logic: only update integral when ball is near target and moving slow
+    bool near_target = (abs((int32_t)error) < BALANCE_PID_NEAR_TARGET_THRESHOLD);
+    bool moving_slow = (abs((int32_t)error_delta) < BALANCE_PID_SLOW_MOVEMENT_THRESHOLD);
+    pid->integral_enabled = near_target && moving_slow;
+    
+    // calculate the integral term (only update when conditions are met)
+    if( pid->integral_enabled )
+    {
+        pid->error_sum += error;
+    }
     i_term = pid->error_sum * pid->Ki;
 
     // calculate the derivative term
@@ -377,4 +405,23 @@ static void BALANCE_PID_CMD_Set_DeltaFilterSize( void )
     }
 
     BALANCE_PID_CMD_Print_Constants();
+}
+
+static void BALANCE_PID_CMD_Print_IntegralStatus( void )
+{
+    CMD_PrintString( "X - Target: ", true );
+    CMD_PrintHex_U16( (uint16_t)pid_x.target, true );
+    CMD_PrintString( " Actual: ", true );
+    CMD_PrintHex_U16( (uint16_t)pid_x.actual, true );
+    CMD_PrintString( " Integral: ", true );
+    CMD_PrintString( pid_x.integral_enabled ? "ON" : "OFF", true );
+    CMD_PrintString( "\r\n", true );
+    
+    CMD_PrintString( "Y - Target: ", true );
+    CMD_PrintHex_U16( (uint16_t)pid_y.target, true );
+    CMD_PrintString( " Actual: ", true );
+    CMD_PrintHex_U16( (uint16_t)pid_y.actual, true );
+    CMD_PrintString( " Integral: ", true );
+    CMD_PrintString( pid_y.integral_enabled ? "ON" : "OFF", true );
+    CMD_PrintString( "\r\n", true );
 }
