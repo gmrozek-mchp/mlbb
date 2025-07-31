@@ -11,6 +11,8 @@
 		"mplab.mplab-importer.ignorePatterns": [
 			"hal/sam_e51_cnano/hal-sam_e51_cnano.X/nbproject/configurations.xml"
 		],
-		"mplab.clangd.path": "/Applications/microchip/xc32/v4.60/bin/xc32-clangd"
+		"mplab.clangd.path": "/Applications/microchip/xc32/v4.60/bin/xc32-clangd",
+		"mplab.project.workspace.removeDeletedSourceFiles": "Never",
+		"mplab.project.workspace.addNewSourceFiles": "Never"
 	}
 }
