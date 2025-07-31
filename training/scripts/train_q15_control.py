@@ -30,33 +30,31 @@ def array_q15_to_float(array):
 
 def create_neural_network():
     """
-    Create a fully connected neural network for Q15 format control with:
-    - 6 input nodes (Q15 sensor inputs)
-    - 1 hidden layer with 24 nodes
-    - 3 output nodes (Q15 control signals)
-    Input and hidden layers use linear activation, output uses tanh for bounded control.
+    Create a neural network for ball balancing control:
+    - 6 inputs: error_x, error_y, integral_x, integral_y, derivative_x_4, derivative_y_4
+    - 2 hidden layers with 12 nodes each
+    - 3 outputs: platform_a, platform_b, platform_c
     """
     
-    # Create the model
     model = keras.Sequential([
-        # Input layer (6 nodes) - Q15 sensor inputs
-        layers.Dense(6, activation='linear', input_shape=(6,), name='sensor_input'),
+        # Input layer (6 nodes)
+        layers.Dense(6, activation='linear', input_shape=(6,), name='dense_input'),
         
-        # First hidden layer (12 nodes) - control logic
-        layers.Dense(12, activation='relu', name='control_logic_1'),
+        # First hidden layer (12 nodes)
+        layers.Dense(12, activation='relu', name='dense_hidden_1'),
         
-        # Second hidden layer (12 nodes) - control logic
-        layers.Dense(12, activation='relu', name='control_logic_2'),
+        # Second hidden layer (12 nodes)
+        layers.Dense(12, activation='relu', name='dense_hidden_2'),
 
-        # Output layer (3 nodes) - Q15 bounded control signals
-        layers.Dense(3, activation='tanh', name='control_output')  # Tanh for bounded outputs [-1, 1]
+        # Output layer (3 nodes) - platform control signals
+        layers.Dense(3, activation='linear', name='dense_output')
     ])
     
-    # Compile the model for Q15 control applications
+    # Compile the model
     model.compile(
         optimizer='adam',
-        loss='huber',  # Huber loss for robust control accuracy
-        metrics=['mae']  # Mean absolute error for monitoring
+        loss='mse',  # Mean squared error
+        metrics=['mae']  # Mean absolute error
     )
     
     return model
@@ -64,14 +62,6 @@ def create_neural_network():
 def load_and_preprocess_data(csv_files, input_cols, output_cols):
     """
     Load and preprocess CSV data for training
-    
-    Args:
-        csv_files: List of CSV file paths
-        input_cols: List of input column names
-        output_cols: List of output column names
-    
-    Returns:
-        X_train, X_val, y_train, y_val: Training and validation data
     """
     print("Loading and preprocessing data...")
     
@@ -115,14 +105,11 @@ def load_and_preprocess_data(csv_files, input_cols, output_cols):
     X_combined = np.vstack([X for X, y in all_data])
     y_combined = np.vstack([y for X, y in all_data])
 
-    X_combined = np.multiply(X_combined, [8,8,0.1,0.1,8,8])
-    y_combined = np.multiply(y_combined, [4,4,4])
-
     print(f"Total samples loaded: {len(X_combined)}")
     print(f"Input shape: {X_combined.shape}")
     print(f"Output shape: {y_combined.shape}")
     
-    # CSV data is already in Q15 format, just clamp to ensure valid range
+    # Normalize data to Q15 format range
     X_combined = np.clip(X_combined, Q15_MIN, Q15_MAX)
     y_combined = np.clip(y_combined, Q15_MIN, Q15_MAX)
         
@@ -142,7 +129,7 @@ def load_and_preprocess_data(csv_files, input_cols, output_cols):
     return X_train, X_val, y_train, y_val
 
 def train_model(model, X_train, y_train, X_val, y_val, epochs=50):
-    """Train the model with Q15 data"""
+    """Train the model"""
     print("\n" + "=" * 60)
     print("TRAINING THE MODEL")
     print("=" * 60)
@@ -218,28 +205,15 @@ def test_model(model, X_val, y_val, input_cols, output_cols):
         print(f"  Actual (Q15): {y_val_q15[i]}")
         print(f"  Actual (float): {y_val[i]}")
         print()
-    
-    # Q15 output statistics and bounds verification
-    print("Q15 Output Statistics:")
-    print(f"Q15 Min output value: {np.min(predictions_q15)}")
-    print(f"Q15 Max output value: {np.max(predictions_q15)}")
-    print(f"Q15 Mean output value: {np.mean(predictions_q15):.0f}")
-    print(f"Q15 Std output value: {np.std(predictions_q15):.0f}")
-    print(f"Float Min output value: {np.min(predictions_float):.3f}")
-    print(f"Float Max output value: {np.max(predictions_float):.3f}")
-    print(f"Float Mean output value: {np.mean(predictions_float):.3f}")
-    print(f"Float Std output value: {np.std(predictions_float):.3f}")
-    print(f"All float outputs bounded [-1, 1]: {np.all((predictions_float >= -1) & (predictions_float <= 1))}")
-    print(f"All Q15 outputs in range: {np.all((predictions_q15 >= Q15_MIN) & (predictions_q15 <= Q15_MAX))}")
 
 def main():
-    """Main function to train the neural network on CSV data"""
+    """Main function to train the neural network"""
     
     # Define input and output columns
-    input_cols = ['error_x', 'error_y', 'integral_x', 'integral_y', 'derivative_x_2', 'derivative_y_2']
+    input_cols = ['error_x', 'error_y', 'integral_x', 'integral_y', 'derivative_x_4', 'derivative_y_4']
     output_cols = ['platform_a', 'platform_b', 'platform_c']
     
-    print("Q15 Neural Network Training on CSV Data")
+    print("Neural Network Training for Ball Balancing Control")
     print("=" * 60)
     print(f"Input columns: {input_cols}")
     print(f"Output columns: {output_cols}")
@@ -268,7 +242,7 @@ def main():
     model.summary()
     
     # Train the model
-    history = train_model(model, X_train, y_train, X_val, y_val, epochs=30)
+    history = train_model(model, X_train, y_train, X_val, y_val, epochs=50)
     
     # Plot training history
     plot_training_history(history)
@@ -276,8 +250,8 @@ def main():
     # Test the model
     test_model(model, X_val, y_val, input_cols, output_cols)
     
-    # Save the model in native Keras format
-    model_path = "q15_control_model_trained.keras"
+    # Save the model
+    model_path = "ball_balance_control_model.keras"
     model.save(model_path)
     print(f"\nModel saved to: {model_path}")
     
