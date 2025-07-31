@@ -443,6 +443,33 @@ void CMD_PrintDecimal_U32( uint32_t value, bool zero_blank, uint8_t width, bool 
 }
 
 
+void CMD_PrintDecimal_S32( int32_t value, bool zero_blank, uint8_t width, bool block )
+{
+#if (CMD_ENABLE_PASSWORD == 1)
+	if( s_current_state <= CMD_STATE_LOCKED )
+	{
+		return;
+	}
+#endif
+
+	// Handle negative numbers
+	bool is_negative = (value < 0);
+	if( is_negative )
+	{
+		value = -value;  // Make positive for processing
+	}
+
+	// Print minus sign if negative
+	if( is_negative )
+	{
+		(void)CMD_PrintString( "-", block );
+	}
+
+	// Call the unsigned version to print the absolute value
+	CMD_PrintDecimal_U32( (uint32_t)value, zero_blank, width, block );
+}
+
+
 void CMD_PrintFixedPoint_U32( uint32_t value, uint8_t fractional_bits,
 							  bool zero_blank, uint8_t width, uint8_t precision, bool block )
 {
@@ -471,6 +498,77 @@ void CMD_PrintFixedPoint_U32( uint32_t value, uint8_t fractional_bits,
 
 		(void)CMD_PrintString( ".", block );
 		CMD_PrintDecimal_U32( (uint32_t)fraction, false, precision, block );
+	}
+}
+
+
+void CMD_PrintFixedPoint_S32( int32_t value, uint8_t fractional_bits,
+                              bool zero_blank, uint8_t width, uint8_t precision, bool block )
+{
+#if (CMD_ENABLE_PASSWORD == 1)
+    if( s_current_state <= CMD_STATE_LOCKED )
+    {
+        return;
+    }
+#endif
+
+    // Handle negative numbers
+    bool is_negative = (value < 0);
+    if( is_negative )
+    {
+        value = -value;  // Make positive for processing
+    }
+
+    // Print minus sign if negative
+    if( is_negative )
+    {
+        (void)CMD_PrintString( "-", block );
+    }
+
+    // Call the unsigned version to print the absolute value
+    CMD_PrintFixedPoint_U32( (uint32_t)value, fractional_bits, zero_blank, width, precision, block );
+}
+
+
+void CMD_PrintFloat( float value, uint8_t precision, bool block )
+{
+#if (CMD_ENABLE_PASSWORD == 1)
+	if( s_current_state <= CMD_STATE_LOCKED )
+	{
+		return;
+	}
+#endif
+
+	char floatString[32];
+	
+	// Handle negative numbers
+	if (value < 0.0f) {
+		CMD_PrintString("-", block);
+		value = -value;
+	}
+	
+	// Convert integer part
+	uint32_t intPart = (uint32_t)value;
+	CMD_PrintDecimal_U32(intPart, false, 0, block);
+	
+	// Add decimal point and fractional part
+	if (precision > 0) {
+		CMD_PrintString(".", block);
+		
+		// Extract fractional part
+		float fracPart = value - (float)intPart;
+		
+		// Convert to integer with desired precision
+		uint32_t fracInt = (uint32_t)(fracPart * 10000.0f); // Use 4 decimal places max
+		
+		// Print with leading zeros if needed
+		uint32_t divisor = 10000;
+		for (uint8_t i = 0; i < precision; i++) {
+			divisor /= 10;
+		}
+		
+		fracInt = (fracInt / divisor) * divisor;
+		CMD_PrintDecimal_U32(fracInt, false, precision, block);
 	}
 }
 

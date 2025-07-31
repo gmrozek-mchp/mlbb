@@ -174,8 +174,15 @@ void CMD_PrintHex_U32( uint32_t value, bool block );
 
 void CMD_PrintDecimal_U32( uint32_t value, bool zero_blank, uint8_t width, bool block );
 
+void CMD_PrintDecimal_S32( int32_t value, bool zero_blank, uint8_t width, bool block );
+
 void CMD_PrintFixedPoint_U32( uint32_t value, uint8_t fractional_bits,
 							  bool zero_blank, uint8_t width, uint8_t precision, bool block );
+
+void CMD_PrintFixedPoint_S32( int32_t value, uint8_t fractional_bits,
+							  bool zero_blank, uint8_t width,uint8_t precision, bool block );
+
+void CMD_PrintFloat( float value, uint8_t precision, bool block );
 
 
 /**
