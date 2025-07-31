@@ -3,9 +3,11 @@
     "configurations": [
         {
             "name": "sam_e51_cnano",
-            "id": "conf1",
+            "id": "",
             "device": "ATSAME51J20A",
+            "imageType": "application",
             "imagePath": "./out/mlbb/mlbb-sam_e51_cnano.elf",
+            "toolProperties": "sam_e51_cnano-tool-base",
             "tool": "PKOB nano",
             "packs": [
                 {
@@ -45,6 +47,11 @@
                 ],
                 "linker.remove-unused-sections": true
             }
+        },
+        {
+            "name": "sam_e51_cnano-tool-base",
+            "type": "tool",
+            "properties": {}
         }
     ],
     "fileSets": [
