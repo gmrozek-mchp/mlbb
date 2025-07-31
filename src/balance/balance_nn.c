@@ -28,28 +28,24 @@
 // Neural network input/output indices
 #define NN_INPUT_ERROR_X 0
 #define NN_INPUT_ERROR_Y 1
-#define NN_INPUT_INTEGRAL_X 2
-#define NN_INPUT_INTEGRAL_Y 3
-#define NN_INPUT_DERIVATIVE_X_4 4
-#define NN_INPUT_DERIVATIVE_Y_4 5
+#define NN_INPUT_ERROR_X_PREV2 2
+#define NN_INPUT_ERROR_Y_PREV2 3
+#define NN_INPUT_ERROR_X_PREV4 4
+#define NN_INPUT_ERROR_Y_PREV4 5
 
 #define NN_OUTPUT_PLATFORM_A 0
 #define NN_OUTPUT_PLATFORM_B 1
 #define NN_OUTPUT_PLATFORM_C 2
 
-// Integral update conditions (float values)
-#define INTEGRAL_ERROR_THRESHOLD 0.015625f  // 512 / 32767.0f
-#define INTEGRAL_DERIVATIVE_THRESHOLD 0.0001526f  // 5 / 32767.0f
+// Note: Integral thresholds removed as they are no longer used
 
 // ******************************************************************
 // Section: Data Type Definitions
 // ******************************************************************
 
 typedef struct {
-    float error_x_prev[10];  // Previous error values for derivative calculation
+    float error_x_prev[10];  // Previous error values for historical inputs
     float error_y_prev[10];
-    float integral_x;
-    float integral_y;
     uint8_t error_index;
     bool initialized;
 } balance_nn_state_t;
@@ -86,10 +82,6 @@ void BALANCE_NN_Initialize( void )
     memset(&nn_state, 0, sizeof(nn_state));
     nn_state.initialized = true;
     
-    // Initialize integral terms
-    nn_state.integral_x = 0;
-    nn_state.integral_y = 0;
-    
     // Initialize error history
     nn_state.error_index = 0;
     for (int i = 0; i < 10; i++) {
@@ -105,10 +97,6 @@ void BALANCE_NN_Reset( void )
     // Reset neural network state
     memset(&nn_state, 0, sizeof(nn_state));
     nn_state.initialized = true;
-    
-    // Reset integral terms
-    nn_state.integral_x = 0;
-    nn_state.integral_y = 0;
     
     // Reset error history
     nn_state.error_index = 0;
@@ -152,10 +140,7 @@ void BALANCE_NN_DataVisualizer( q15_t target_x, q15_t target_y, bool ball_detect
     float error_x = q15_to_float(target_x) - q15_to_float(ball_x);
     float error_y = q15_to_float(target_y) - q15_to_float(ball_y);
     
-    // Update integral terms with conditions
-    nn_update_integral(error_x, error_y);
-    
-    // Update error history for derivative calculation
+    // Update error history for neural network inputs
     nn_state.error_x_prev[nn_state.error_index] = error_x;
     nn_state.error_y_prev[nn_state.error_index] = error_y;
     nn_state.error_index = (nn_state.error_index + 1) % 10;
@@ -168,42 +153,8 @@ void BALANCE_NN_DataVisualizer( q15_t target_x, q15_t target_y, bool ball_detect
 // Section: Private Functions
 // ******************************************************************
 
-static void nn_calculate_derivative_4(float* derivative_x, float* derivative_y)
-{
-    // Calculate 4-sample derivative
-    int idx_4 = (nn_state.error_index - 4 + 10) % 10;
-    int idx_current = (nn_state.error_index - 1 + 10) % 10;
-    
-    if (idx_4 >= 0 && idx_current >= 0) {
-        *derivative_x = nn_state.error_x_prev[idx_current] - nn_state.error_x_prev[idx_4];
-        *derivative_y = nn_state.error_y_prev[idx_current] - nn_state.error_y_prev[idx_4];
-    } else {
-        *derivative_x = 0;
-        *derivative_y = 0;
-    }
-}
-
-static void nn_update_integral(float error_x, float error_y)
-{
-    // Calculate 4-sample derivative for integral conditions
-    float derivative_x_4, derivative_y_4;
-    nn_calculate_derivative_4(&derivative_x_4, &derivative_y_4);
-    
-    // Update integral only under specified conditions
-    if (fabsf(error_x) < INTEGRAL_ERROR_THRESHOLD && fabsf(derivative_x_4) < INTEGRAL_DERIVATIVE_THRESHOLD) {
-        nn_state.integral_x += error_x;
-        // Clamp integral to prevent overflow (float range -1.0 to 1.0)
-        if (nn_state.integral_x > 1.0f) nn_state.integral_x = 1.0f;
-        if (nn_state.integral_x < -1.0f) nn_state.integral_x = -1.0f;
-    }
-    
-    if (fabsf(error_y) < INTEGRAL_ERROR_THRESHOLD && fabsf(derivative_y_4) < INTEGRAL_DERIVATIVE_THRESHOLD) {
-        nn_state.integral_y += error_y;
-        // Clamp integral to prevent overflow (float range -1.0 to 1.0)
-        if (nn_state.integral_y > 1.0f) nn_state.integral_y = 1.0f;
-        if (nn_state.integral_y < -1.0f) nn_state.integral_y = -1.0f;
-    }
-}
+// Note: Integral and derivative functions removed as they are no longer used
+// The neural network now uses historical error values directly
 
 static void nn_prepare_inputs(q15_t target_x, q15_t target_y, q15_t ball_x, q15_t ball_y, float* inputs)
 {
@@ -211,20 +162,22 @@ static void nn_prepare_inputs(q15_t target_x, q15_t target_y, q15_t ball_x, q15_
     float error_x = q15_to_float(target_x) - q15_to_float(ball_x);
     float error_y = q15_to_float(target_y) - q15_to_float(ball_y);
     
-    // Update integral terms with conditions
-    nn_update_integral(error_x, error_y);
+    // Get historical error values
+    int idx_prev2 = (nn_state.error_index - 2 + 10) % 10;
+    int idx_prev4 = (nn_state.error_index - 4 + 10) % 10;
     
-    // Calculate 4-sample derivative
-    float derivative_x_4, derivative_y_4;
-    nn_calculate_derivative_4(&derivative_x_4, &derivative_y_4);
+    float error_x_prev2 = (idx_prev2 >= 0) ? nn_state.error_x_prev[idx_prev2] : 0.0f;
+    float error_y_prev2 = (idx_prev2 >= 0) ? nn_state.error_y_prev[idx_prev2] : 0.0f;
+    float error_x_prev4 = (idx_prev4 >= 0) ? nn_state.error_x_prev[idx_prev4] : 0.0f;
+    float error_y_prev4 = (idx_prev4 >= 0) ? nn_state.error_y_prev[idx_prev4] : 0.0f;
     
     // Prepare neural network inputs (all in float)
     inputs[NN_INPUT_ERROR_X] = error_x;
     inputs[NN_INPUT_ERROR_Y] = error_y;
-    inputs[NN_INPUT_INTEGRAL_X] = nn_state.integral_x;
-    inputs[NN_INPUT_INTEGRAL_Y] = nn_state.integral_y;
-    inputs[NN_INPUT_DERIVATIVE_X_4] = derivative_x_4;
-    inputs[NN_INPUT_DERIVATIVE_Y_4] = derivative_y_4;
+    inputs[NN_INPUT_ERROR_X_PREV2] = error_x_prev2;
+    inputs[NN_INPUT_ERROR_Y_PREV2] = error_y_prev2;
+    inputs[NN_INPUT_ERROR_X_PREV4] = error_x_prev4;
+    inputs[NN_INPUT_ERROR_Y_PREV4] = error_y_prev4;
 }
 
 static q15_t float_to_q15(float value)
@@ -266,12 +219,9 @@ static void nn_matmul_float(const float* weights, const float* input, float* out
 
 void nn_forward(const float* input, float* output) {
     float input_processed[NN_INPUT_SIZE];
-    float hidden1[NN_HIDDEN1_SIZE];
-    float hidden2[NN_HIDDEN2_SIZE];
-    float temp_output[NN_HIDDEN1_SIZE];
+    float hidden[NN_HIDDEN_SIZE];
 
     // Layer 0: Input processing (dense_input layer) - 6x6
-    // Note: Keras uses transposed weights, so we need to transpose the matrix multiplication
     for (int i = 0; i < NN_INPUT_SIZE; i++) {
         float sum = 0.0f;
         for (int j = 0; j < NN_INPUT_SIZE; j++) {
@@ -280,29 +230,20 @@ void nn_forward(const float* input, float* output) {
         input_processed[i] = sum + INPUT_BIAS[i];
     }
 
-    // Layer 1: Processed Input to Hidden1 (6x12)
-    for (int i = 0; i < NN_HIDDEN1_SIZE; i++) {
+    // Layer 1: Processed Input to Hidden (6x12)
+    for (int i = 0; i < NN_HIDDEN_SIZE; i++) {
         float sum = 0.0f;
         for (int j = 0; j < NN_INPUT_SIZE; j++) {
-            sum += HIDDEN_1_WEIGHTS[j * NN_HIDDEN1_SIZE + i] * input_processed[j];  // Transposed weights
+            sum += HIDDEN_WEIGHTS[j * NN_HIDDEN_SIZE + i] * input_processed[j];  // Transposed weights
         }
-        hidden1[i] = nn_relu(sum + HIDDEN_1_BIAS[i]);
+        hidden[i] = nn_relu(sum + HIDDEN_BIAS[i]);
     }
 
-    // Layer 2: Hidden1 to Hidden2 (12x12)
-    for (int i = 0; i < NN_HIDDEN2_SIZE; i++) {
-        float sum = 0.0f;
-        for (int j = 0; j < NN_HIDDEN1_SIZE; j++) {
-            sum += HIDDEN_2_WEIGHTS[j * NN_HIDDEN2_SIZE + i] * hidden1[j];  // Transposed weights
-        }
-        hidden2[i] = nn_relu(sum + HIDDEN_2_BIAS[i]);
-    }
-
-    // Layer 3: Hidden2 to Output (12x3)
+    // Layer 2: Hidden to Output (12x3)
     for (int i = 0; i < NN_OUTPUT_SIZE; i++) {
         float sum = 0.0f;
-        for (int j = 0; j < NN_HIDDEN2_SIZE; j++) {
-            sum += OUTPUT_WEIGHTS[j * NN_OUTPUT_SIZE + i] * hidden2[j];  // Transposed weights
+        for (int j = 0; j < NN_HIDDEN_SIZE; j++) {
+            sum += OUTPUT_WEIGHTS[j * NN_OUTPUT_SIZE + i] * hidden[j];  // Transposed weights
         }
         output[i] = sum + OUTPUT_BIAS[i];
     }
@@ -317,14 +258,14 @@ static void BALANCE_NN_TestCommand(void)
     // Test neural network with known inputs
     CMD_PrintString("=== Neural Network Test ===\r\n", true);
     
-    // Test case 1: Small error, no integral, small derivative
+    // Test case 1: Small errors with historical values
     float test_inputs_1[NN_INPUT_SIZE] = {
         0.01f,   // error_x
         0.02f,   // error_y
-        0.0f,    // integral_x
-        0.0f,    // integral_y
-        0.001f,  // derivative_x_4
-        0.002f   // derivative_y_4
+        0.008f,  // error_x_prev2
+        0.015f,  // error_y_prev2
+        0.005f,  // error_x_prev4
+        0.012f   // error_y_prev4
     };
     
     float test_outputs_1[NN_OUTPUT_SIZE];
@@ -361,14 +302,14 @@ static void BALANCE_NN_TestCommand(void)
     CMD_PrintDecimal_S32(float_to_q15(test_outputs_1[2]), false, 0, true);
     CMD_PrintString("]\r\n", true);
     
-    // Test case 2: Large error, some integral, large derivative
+    // Test case 2: Large errors with historical values
     float test_inputs_2[NN_INPUT_SIZE] = {
         0.5f,    // error_x
         -0.3f,   // error_y
-        0.2f,    // integral_x
-        -0.1f,   // integral_y
-        0.1f,    // derivative_x_4
-        -0.05f   // derivative_y_4
+        0.4f,    // error_x_prev2
+        -0.25f,  // error_y_prev2
+        0.3f,    // error_x_prev4
+        -0.2f    // error_y_prev4
     };
     
     float test_outputs_2[NN_OUTPUT_SIZE];
@@ -433,10 +374,10 @@ static void BALANCE_NN_TestCommand(void)
     float test_inputs_4[NN_INPUT_SIZE] = {
         1.0f,    // error_x
         1.0f,    // error_y
-        1.0f,    // integral_x
-        1.0f,    // integral_y
-        1.0f,    // derivative_x_4
-        1.0f     // derivative_y_4
+        0.8f,    // error_x_prev2
+        0.9f,    // error_y_prev2
+        0.6f,    // error_x_prev4
+        0.7f     // error_y_prev4
     };
     
     float test_outputs_4[NN_OUTPUT_SIZE];

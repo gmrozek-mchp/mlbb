@@ -77,9 +77,8 @@ def generate_c_header(output_file, layer_info):
         # Network architecture
         f.write("// Network Architecture\n")
         f.write(f"#define NN_INPUT_SIZE {layer_info[0]['input_size']}\n")
-        f.write(f"#define NN_HIDDEN1_SIZE {layer_info[1]['input_size']}\n")
-        f.write(f"#define NN_HIDDEN2_SIZE {layer_info[2]['input_size']}\n")
-        f.write(f"#define NN_OUTPUT_SIZE {layer_info[3]['output_size']}\n\n")
+        f.write(f"#define NN_HIDDEN_SIZE {layer_info[1]['input_size']}\n")
+        f.write(f"#define NN_OUTPUT_SIZE {layer_info[2]['output_size']}\n\n")
         
         # Generate weights and biases for each layer
         for i, layer in enumerate(layer_info):
@@ -148,26 +147,19 @@ def generate_c_implementation(output_file):
         f.write("}\n\n")
         
         f.write("void nn_forward(const float* input, float* output) {\n")
-        f.write("    float hidden1[NN_HIDDEN1_SIZE];\n")
-        f.write("    float hidden2[NN_HIDDEN2_SIZE];\n")
-        f.write("    float temp_output[NN_HIDDEN1_SIZE];\n\n")
+        f.write("    float hidden[NN_HIDDEN_SIZE];\n")
+        f.write("    float temp_output[NN_HIDDEN_SIZE];\n\n")
         
-        f.write("    // Layer 1: Input to Hidden1\n")
-        f.write("    nn_matmul_float(INPUT_WEIGHTS, input, temp_output, NN_HIDDEN1_SIZE, NN_INPUT_SIZE);\n")
-        f.write("    for (int i = 0; i < NN_HIDDEN1_SIZE; i++) {\n")
-        f.write("        hidden1[i] = nn_relu(temp_output[i] + INPUT_BIAS[i]);\n")
+        f.write("    // Layer 1: Input to Hidden\n")
+        f.write("    nn_matmul_float(INPUT_WEIGHTS, input, temp_output, NN_HIDDEN_SIZE, NN_INPUT_SIZE);\n")
+        f.write("    for (int i = 0; i < NN_HIDDEN_SIZE; i++) {\n")
+        f.write("        hidden[i] = nn_relu(temp_output[i] + INPUT_BIAS[i]);\n")
         f.write("    }\n\n")
         
-        f.write("    // Layer 2: Hidden1 to Hidden2\n")
-        f.write("    nn_matmul_float(HIDDEN_1_WEIGHTS, hidden1, temp_output, NN_HIDDEN2_SIZE, NN_HIDDEN1_SIZE);\n")
-        f.write("    for (int i = 0; i < NN_HIDDEN2_SIZE; i++) {\n")
-        f.write("        hidden2[i] = nn_relu(temp_output[i] + HIDDEN_1_BIAS[i]);\n")
-        f.write("    }\n\n")
-        
-        f.write("    // Layer 3: Hidden2 to Output\n")
-        f.write("    nn_matmul_float(HIDDEN_2_WEIGHTS, hidden2, output, NN_OUTPUT_SIZE, NN_HIDDEN2_SIZE);\n")
+        f.write("    // Layer 2: Hidden to Output\n")
+        f.write("    nn_matmul_float(HIDDEN_WEIGHTS, hidden, output, NN_OUTPUT_SIZE, NN_HIDDEN_SIZE);\n")
         f.write("    for (int i = 0; i < NN_OUTPUT_SIZE; i++) {\n")
-        f.write("        output[i] = output[i] + HIDDEN_2_BIAS[i];\n")
+        f.write("        output[i] = output[i] + HIDDEN_BIAS[i];\n")
         f.write("    }\n")
         f.write("}\n")
 

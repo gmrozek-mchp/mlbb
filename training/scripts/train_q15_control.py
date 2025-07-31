@@ -31,8 +31,8 @@ def array_q15_to_float(array):
 def create_neural_network():
     """
     Create a neural network for ball balancing control:
-    - 6 inputs: error_x, error_y, integral_x, integral_y, derivative_x_4, derivative_y_4
-    - 2 hidden layers with 12 nodes each
+    - 6 inputs: error_x, error_y, error_x_prev2, error_y_prev2, error_x_prev4, error_y_prev4
+    - 1 hidden layer with 12 nodes
     - 3 outputs: platform_a, platform_b, platform_c
     """
     
@@ -40,11 +40,8 @@ def create_neural_network():
         # Input layer (6 nodes)
         layers.Dense(6, activation='linear', input_shape=(6,), name='dense_input'),
         
-        # First hidden layer (12 nodes)
-        layers.Dense(12, activation='relu', name='dense_hidden_1'),
-        
-        # Second hidden layer (12 nodes)
-        layers.Dense(12, activation='relu', name='dense_hidden_2'),
+        # Hidden layer (12 nodes)
+        layers.Dense(12, activation='relu', name='dense_hidden'),
 
         # Output layer (3 nodes) - platform control signals
         layers.Dense(3, activation='linear', name='dense_output')
@@ -53,7 +50,7 @@ def create_neural_network():
     # Compile the model
     model.compile(
         optimizer='adam',
-        loss='mse',  # Mean squared error
+        loss='huber',  # Huber loss - robust to outliers
         metrics=['mae']  # Mean absolute error
     )
     
@@ -210,7 +207,7 @@ def main():
     """Main function to train the neural network"""
     
     # Define input and output columns
-    input_cols = ['error_x', 'error_y', 'integral_x', 'integral_y', 'derivative_x_4', 'derivative_y_4']
+    input_cols = ['error_x', 'error_y', 'error_x_prev2', 'error_y_prev2', 'error_x_prev4', 'error_y_prev4']
     output_cols = ['platform_a', 'platform_b', 'platform_c']
     
     print("Neural Network Training for Ball Balancing Control")
