@@ -80,9 +80,21 @@ def parse_human01_csv(input_file, output_file):
                 target_y = int(row['target_y'])
                 error_y = target_y - ball_y
                 
-                # Calculate running integrals
-                integral_x += error_x
-                integral_y += error_y
+                # Calculate running integrals with conditions
+                # Only update integral when abs(error) < 512 and derivative_4 < 5
+                derivative_4_x = 0
+                derivative_4_y = 0
+                
+                # Calculate derivative_4 if we have enough previous values
+                if len(prev_error_x) >= 4:
+                    derivative_4_x = error_x - prev_error_x[-4]
+                    derivative_4_y = error_y - prev_error_y[-4]
+                
+                # Update integrals only under specified conditions
+                if abs(error_x) < 512 and abs(derivative_4_x) < 5:
+                    integral_x += error_x
+                if abs(error_y) < 512 and abs(derivative_4_y) < 5:
+                    integral_y += error_y
                 
                 # Calculate multiple derivative terms as sum of n consecutive differences (n=1 to 10)
                 derivative_terms_x = []
