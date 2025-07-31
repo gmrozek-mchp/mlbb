@@ -27,10 +27,10 @@
 #define FUZZY_SETS_COUNT           (5)
 #define FUZZY_RULES_COUNT          (25)
 
-// Default scaling factors
-#define FUZZY_ERROR_SCALE_DEFAULT      (256)
-#define FUZZY_ERROR_DOT_SCALE_DEFAULT  (128)
-#define FUZZY_OUTPUT_SCALE_DEFAULT     (256)
+// Default scaling factors - tuned for conservative control to eliminate overshoot
+#define FUZZY_ERROR_SCALE_DEFAULT      (1200)    // Conservative error scale to eliminate overshoot
+#define FUZZY_ERROR_DOT_SCALE_DEFAULT  (2500)   // Increased damping to stop oscillations
+#define FUZZY_OUTPUT_SCALE_DEFAULT     (170)    // Reduced to prevent aggressive response
 
 
 // ******************************************************************
@@ -118,6 +118,8 @@ static void BALANCE_FUZZY_CMD_Print_Scaling( void );
 static void BALANCE_FUZZY_CMD_Set_ErrorScale( void );
 static void BALANCE_FUZZY_CMD_Set_ErrorDotScale( void );
 static void BALANCE_FUZZY_CMD_Set_OutputScale( void );
+static void BALANCE_FUZZY_CMD_Reset( void );
+static void BALANCE_FUZZY_CMD_Print_Debug( void );
 
 
 // ******************************************************************
@@ -134,6 +136,8 @@ void BALANCE_FUZZY_Initialize( void )
     CMD_RegisterCommand( "fes", BALANCE_FUZZY_CMD_Set_ErrorScale );
     CMD_RegisterCommand( "feds", BALANCE_FUZZY_CMD_Set_ErrorDotScale );
     CMD_RegisterCommand( "fos", BALANCE_FUZZY_CMD_Set_OutputScale );
+    CMD_RegisterCommand( "fuzzyreset", BALANCE_FUZZY_CMD_Reset );
+    CMD_RegisterCommand( "fuzzydbg", BALANCE_FUZZY_CMD_Print_Debug );
 }
 
 void BALANCE_FUZZY_Reset( void )
@@ -233,20 +237,20 @@ static void BALANCE_FUZZY_Initialize_Membership_Functions( fuzzy_controller_t *f
     fuzzy->error_mf[FUZZY_NEGATIVE_LARGE].center_peak = -4096;
     fuzzy->error_mf[FUZZY_NEGATIVE_LARGE].right_peak = 0;
     
-    // NS: [-4096, -2048, 0]
-    fuzzy->error_mf[FUZZY_NEGATIVE_SMALL].left_peak = -4096;
+    // NS: [-3584, -2048, -512] - Adjusted for less overlap
+    fuzzy->error_mf[FUZZY_NEGATIVE_SMALL].left_peak = -3584;
     fuzzy->error_mf[FUZZY_NEGATIVE_SMALL].center_peak = -2048;
-    fuzzy->error_mf[FUZZY_NEGATIVE_SMALL].right_peak = 0;
+    fuzzy->error_mf[FUZZY_NEGATIVE_SMALL].right_peak = -512;
     
-    // ZE: [-2048, 0, 2048]
-    fuzzy->error_mf[FUZZY_ZERO].left_peak = -2048;
+    // ZE: [-1024, 0, 1024] - Reduced overlap for better precision
+    fuzzy->error_mf[FUZZY_ZERO].left_peak = -1024;
     fuzzy->error_mf[FUZZY_ZERO].center_peak = 0;
-    fuzzy->error_mf[FUZZY_ZERO].right_peak = 2048;
+    fuzzy->error_mf[FUZZY_ZERO].right_peak = 1024;
     
-    // PS: [0, 2048, 4096]
-    fuzzy->error_mf[FUZZY_POSITIVE_SMALL].left_peak = 0;
+    // PS: [512, 2048, 3584] - Adjusted for less overlap
+    fuzzy->error_mf[FUZZY_POSITIVE_SMALL].left_peak = 512;
     fuzzy->error_mf[FUZZY_POSITIVE_SMALL].center_peak = 2048;
-    fuzzy->error_mf[FUZZY_POSITIVE_SMALL].right_peak = 4096;
+    fuzzy->error_mf[FUZZY_POSITIVE_SMALL].right_peak = 3584;
     
     // PL: [0, 4096, 8192]
     fuzzy->error_mf[FUZZY_POSITIVE_LARGE].left_peak = 0;
@@ -264,10 +268,10 @@ static void BALANCE_FUZZY_Initialize_Membership_Functions( fuzzy_controller_t *f
     fuzzy->error_dot_mf[FUZZY_NEGATIVE_SMALL].center_peak = -1024;
     fuzzy->error_dot_mf[FUZZY_NEGATIVE_SMALL].right_peak = 0;
     
-    // ZE: [-1024, 0, 1024]
-    fuzzy->error_dot_mf[FUZZY_ZERO].left_peak = -1024;
+    // ZE: [-128, 0, 128] - Tight zero region for conservative damping
+    fuzzy->error_dot_mf[FUZZY_ZERO].left_peak = -128;
     fuzzy->error_dot_mf[FUZZY_ZERO].center_peak = 0;
-    fuzzy->error_dot_mf[FUZZY_ZERO].right_peak = 1024;
+    fuzzy->error_dot_mf[FUZZY_ZERO].right_peak = 128;
     
     // PS: [0, 1024, 2048]
     fuzzy->error_dot_mf[FUZZY_POSITIVE_SMALL].left_peak = 0;
@@ -311,36 +315,36 @@ static void BALANCE_FUZZY_Initialize_Rules( fuzzy_controller_t *fuzzy )
     // Initialize fuzzy rules table
     // Rule format: IF error IS X AND error_dot IS Y THEN output IS Z
     
-    // Row 1: error = NL
+    // Row 1: error = NL - Conservative control to eliminate oscillations
     fuzzy->rules[0] = (fuzzy_rule_t){FUZZY_NEGATIVE_LARGE, FUZZY_NEGATIVE_LARGE, FUZZY_NEGATIVE_LARGE};
     fuzzy->rules[1] = (fuzzy_rule_t){FUZZY_NEGATIVE_LARGE, FUZZY_NEGATIVE_SMALL, FUZZY_NEGATIVE_LARGE};
     fuzzy->rules[2] = (fuzzy_rule_t){FUZZY_NEGATIVE_LARGE, FUZZY_ZERO, FUZZY_NEGATIVE_SMALL};
     fuzzy->rules[3] = (fuzzy_rule_t){FUZZY_NEGATIVE_LARGE, FUZZY_POSITIVE_SMALL, FUZZY_ZERO};
-    fuzzy->rules[4] = (fuzzy_rule_t){FUZZY_NEGATIVE_LARGE, FUZZY_POSITIVE_LARGE, FUZZY_POSITIVE_SMALL};
+    fuzzy->rules[4] = (fuzzy_rule_t){FUZZY_NEGATIVE_LARGE, FUZZY_POSITIVE_LARGE, FUZZY_ZERO};
     
-    // Row 2: error = NS
-    fuzzy->rules[5] = (fuzzy_rule_t){FUZZY_NEGATIVE_SMALL, FUZZY_NEGATIVE_LARGE, FUZZY_NEGATIVE_LARGE};
+    // Row 2: error = NS - Conservative control to eliminate oscillations
+    fuzzy->rules[5] = (fuzzy_rule_t){FUZZY_NEGATIVE_SMALL, FUZZY_NEGATIVE_LARGE, FUZZY_NEGATIVE_SMALL};
     fuzzy->rules[6] = (fuzzy_rule_t){FUZZY_NEGATIVE_SMALL, FUZZY_NEGATIVE_SMALL, FUZZY_NEGATIVE_SMALL};
-    fuzzy->rules[7] = (fuzzy_rule_t){FUZZY_NEGATIVE_SMALL, FUZZY_ZERO, FUZZY_NEGATIVE_SMALL};
+    fuzzy->rules[7] = (fuzzy_rule_t){FUZZY_NEGATIVE_SMALL, FUZZY_ZERO, FUZZY_ZERO};
     fuzzy->rules[8] = (fuzzy_rule_t){FUZZY_NEGATIVE_SMALL, FUZZY_POSITIVE_SMALL, FUZZY_ZERO};
-    fuzzy->rules[9] = (fuzzy_rule_t){FUZZY_NEGATIVE_SMALL, FUZZY_POSITIVE_LARGE, FUZZY_POSITIVE_SMALL};
+    fuzzy->rules[9] = (fuzzy_rule_t){FUZZY_NEGATIVE_SMALL, FUZZY_POSITIVE_LARGE, FUZZY_ZERO};
     
-    // Row 3: error = ZE
+    // Row 3: error = ZE - Conservative control to eliminate oscillations
     fuzzy->rules[10] = (fuzzy_rule_t){FUZZY_ZERO, FUZZY_NEGATIVE_LARGE, FUZZY_NEGATIVE_SMALL};
-    fuzzy->rules[11] = (fuzzy_rule_t){FUZZY_ZERO, FUZZY_NEGATIVE_SMALL, FUZZY_NEGATIVE_SMALL};
+    fuzzy->rules[11] = (fuzzy_rule_t){FUZZY_ZERO, FUZZY_NEGATIVE_SMALL, FUZZY_ZERO};
     fuzzy->rules[12] = (fuzzy_rule_t){FUZZY_ZERO, FUZZY_ZERO, FUZZY_ZERO};
-    fuzzy->rules[13] = (fuzzy_rule_t){FUZZY_ZERO, FUZZY_POSITIVE_SMALL, FUZZY_POSITIVE_SMALL};
+    fuzzy->rules[13] = (fuzzy_rule_t){FUZZY_ZERO, FUZZY_POSITIVE_SMALL, FUZZY_ZERO};
     fuzzy->rules[14] = (fuzzy_rule_t){FUZZY_ZERO, FUZZY_POSITIVE_LARGE, FUZZY_POSITIVE_SMALL};
     
-    // Row 4: error = PS
-    fuzzy->rules[15] = (fuzzy_rule_t){FUZZY_POSITIVE_SMALL, FUZZY_NEGATIVE_LARGE, FUZZY_NEGATIVE_SMALL};
+    // Row 4: error = PS - Conservative control to eliminate oscillations
+    fuzzy->rules[15] = (fuzzy_rule_t){FUZZY_POSITIVE_SMALL, FUZZY_NEGATIVE_LARGE, FUZZY_ZERO};
     fuzzy->rules[16] = (fuzzy_rule_t){FUZZY_POSITIVE_SMALL, FUZZY_NEGATIVE_SMALL, FUZZY_ZERO};
     fuzzy->rules[17] = (fuzzy_rule_t){FUZZY_POSITIVE_SMALL, FUZZY_ZERO, FUZZY_POSITIVE_SMALL};
     fuzzy->rules[18] = (fuzzy_rule_t){FUZZY_POSITIVE_SMALL, FUZZY_POSITIVE_SMALL, FUZZY_POSITIVE_SMALL};
-    fuzzy->rules[19] = (fuzzy_rule_t){FUZZY_POSITIVE_SMALL, FUZZY_POSITIVE_LARGE, FUZZY_POSITIVE_LARGE};
+    fuzzy->rules[19] = (fuzzy_rule_t){FUZZY_POSITIVE_SMALL, FUZZY_POSITIVE_LARGE, FUZZY_POSITIVE_SMALL};
     
-    // Row 5: error = PL
-    fuzzy->rules[20] = (fuzzy_rule_t){FUZZY_POSITIVE_LARGE, FUZZY_NEGATIVE_LARGE, FUZZY_NEGATIVE_SMALL};
+    // Row 5: error = PL - Conservative control to eliminate oscillations
+    fuzzy->rules[20] = (fuzzy_rule_t){FUZZY_POSITIVE_LARGE, FUZZY_NEGATIVE_LARGE, FUZZY_ZERO};
     fuzzy->rules[21] = (fuzzy_rule_t){FUZZY_POSITIVE_LARGE, FUZZY_NEGATIVE_SMALL, FUZZY_ZERO};
     fuzzy->rules[22] = (fuzzy_rule_t){FUZZY_POSITIVE_LARGE, FUZZY_ZERO, FUZZY_POSITIVE_SMALL};
     fuzzy->rules[23] = (fuzzy_rule_t){FUZZY_POSITIVE_LARGE, FUZZY_POSITIVE_SMALL, FUZZY_POSITIVE_LARGE};
@@ -556,4 +560,54 @@ static void BALANCE_FUZZY_CMD_Set_OutputScale( void )
     }
 
     BALANCE_FUZZY_CMD_Print_Scaling();
+} 
+
+static void BALANCE_FUZZY_CMD_Reset( void )
+{
+    BALANCE_FUZZY_Reset();
+    CMD_PrintString( "Fuzzy controller reset\r\n", true );
+} 
+
+static void BALANCE_FUZZY_CMD_Print_Debug( void )
+{
+    // Calculate current error and error_dot for X axis
+    q15_t error_x = fuzzy_x.prev_error;
+    q15_t error_dot_x = 0;
+    for( size_t i = 0; i < 5; i++ )
+    {
+        error_dot_x += fuzzy_x.error_history[i];
+    }
+    error_dot_x = (q15_t)(error_dot_x / 5);
+    
+    // Calculate membership values for X axis
+    q15_t error_memberships[FUZZY_SETS_COUNT];
+    q15_t error_dot_memberships[FUZZY_SETS_COUNT];
+    
+    for( size_t i = 0; i < FUZZY_SETS_COUNT; i++ )
+    {
+        error_memberships[i] = BALANCE_FUZZY_Calculate_Membership( error_x, &fuzzy_x.error_mf[i] );
+        error_dot_memberships[i] = BALANCE_FUZZY_Calculate_Membership( error_dot_x, &fuzzy_x.error_dot_mf[i] );
+    }
+    
+    CMD_PrintString( "Error: ", true );
+    CMD_PrintHex_U16( (uint16_t)error_x, true );
+    CMD_PrintString( " Error_dot: ", true );
+    CMD_PrintHex_U16( (uint16_t)error_dot_x, true );
+    CMD_PrintString( "\r\n", true );
+    
+    CMD_PrintString( "Error memberships: ", true );
+    for( size_t i = 0; i < FUZZY_SETS_COUNT; i++ )
+    {
+        CMD_PrintHex_U16( (uint16_t)error_memberships[i], true );
+        CMD_PrintString( " ", true );
+    }
+    CMD_PrintString( "\r\n", true );
+    
+    CMD_PrintString( "Error_dot memberships: ", true );
+    for( size_t i = 0; i < FUZZY_SETS_COUNT; i++ )
+    {
+        CMD_PrintHex_U16( (uint16_t)error_dot_memberships[i], true );
+        CMD_PrintString( " ", true );
+    }
+    CMD_PrintString( "\r\n", true );
 } 
