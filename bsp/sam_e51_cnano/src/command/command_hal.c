@@ -136,6 +136,11 @@ uint8_t CMD_HAL_IO_Read(void)
 
 void CMD_HAL_IO_Write(uint8_t txData)
 {
+    while( CMD_HAL_IO_TxBufferFull() )
+    {
+        vTaskDelay(1);
+    }
+
     (void)SERCOM5_USART_Write( &txData, 1 );
 }
 
