@@ -7,9 +7,10 @@ A fully connected neural network using CMSIS-NN has been successfully implemente
 ## Key Features Implemented
 
 ### 1. Network Architecture
-- **Input Layer**: 8 neurons (ball_x, ball_y, target_x, target_y, error_x, error_y, integral_x, integral_y)
-- **Hidden Layer**: 16 neurons with ReLU activation
-- **Output Layer**: 2 neurons (platform_x, platform_y)
+- **Input Layer**: 6 neurons (x_error, y_error, x_integral, y_integral, x_derivative, y_derivative)
+- **Hidden Layer 1**: 12 neurons with ReLU activation
+- **Hidden Layer 2**: 12 neurons with ReLU activation
+- **Output Layer**: 3 neurons (platform_a, platform_b, platform_c)
 
 ### 2. CMSIS-NN Integration
 - Uses `arm_fully_connected_s16()` for optimized matrix multiplication
@@ -18,16 +19,17 @@ A fully connected neural network using CMSIS-NN has been successfully implemente
 - Proper quantization parameters for scaling
 
 ### 3. Real-time Control Features
-- Input data normalization and preprocessing
-- Error tracking and integral accumulation
+- Error-based input processing with PID-like components
+- Integral and derivative calculation with 5-iteration history
+- Integer math scaling (no floating point operations)
 - Output denormalization and platform control
 - Range clamping for safe operation (-1500 to 1500)
 
 ### 4. Memory Optimization
-- Static weight arrays (~256 bytes)
-- Working buffer for CMSIS-NN (256 bytes)
+- Static weight arrays (~432 bytes for 3 layers)
+- Working buffer for CMSIS-NN (512 bytes)
 - State tracking variables (~64 bytes)
-- Total RAM usage: ~576 bytes
+- Total RAM usage: ~1008 bytes
 
 ## Files Created/Modified
 
@@ -53,30 +55,78 @@ void BALANCE_NN_Initialize(void);
 void BALANCE_NN_Reset(void);
 
 // Main inference function
-void BALANCE_NN_Run(q15_t target_x, q15_t target_y);
+void BALANCE_NN_Run(q15_t target_x, q15_t target_y, bool ball_detected, q15_t ball_x, q15_t ball_y);
 
 // Debug/visualization (placeholder)
-void BALANCE_NN_DataVisualizer(void);
+void BALANCE_NN_DataVisualizer(q15_t target_x, q15_t target_y, bool ball_detected, q15_t ball_x, q15_t ball_y);
+```
+
+## Test Commands
+
+The neural network implementation includes comprehensive test commands for debugging and validation:
+
+### Command Portal Functions
+```c
+// Print network state information
+static void BALANCE_NN_CMD_Print_State(void);
+
+// Print current input values
+static void BALANCE_NN_CMD_Print_Inputs(void);
+
+// Print current output values
+static void BALANCE_NN_CMD_Print_Outputs(void);
+
+// Test network with custom inputs
+static void BALANCE_NN_CMD_Test_Network(void);
+
+// Reset network state
+static void BALANCE_NN_CMD_Reset_Network(void);
+```
+
+### Available Commands
+- **`nn`**: Display network state (initialization, error index, integral values)
+- **`nni`**: Show current input data (6 error-based inputs)
+- **`nno`**: Show current output data (3 ABC platform outputs)
+- **`nnt`**: Test network inference with custom inputs
+- **`nnr`**: Reset network state and error tracking
+
+### Test Command Usage
+```bash
+# Test with default values
+nnt
+
+# Test with custom inputs
+nnt 100 -50 200 -100 10 -5
+
+# Check network state
+nn
+
+# View current inputs/outputs
+nni
+nno
+
+# Reset network
+nnr
 ```
 
 ## Technical Specifications
 
 ### Quantization
-- **Input Scale**: 0.001 (normalization factor)
-- **Output Scale**: 100.0 (denormalization factor)
+- **Input Scale**: Integer right shift by 10 bits (1/1024 scaling)
+- **Output Scale**: Integer left shift by 7 bits (128x scaling)
 - **Weight Format**: 8-bit signed integers
 - **Bias Format**: 64-bit signed integers
 
 ### Performance
 - **Inference Time**: < 1ms on ARM Cortex-M4/M7
-- **MAC Operations**: ~160 per inference
+- **MAC Operations**: ~432 per inference (6×12 + 12×12 + 12×3)
 - **Update Rate**: 100Hz+ recommended
 
 ### Memory Usage
-- **Static Weights**: 256 bytes
-- **Working Buffer**: 256 bytes
+- **Static Weights**: 432 bytes (6×12 + 12×12 + 12×3 weights)
+- **Working Buffer**: 512 bytes
 - **State Variables**: 64 bytes
-- **Total**: 576 bytes
+- **Total**: 1008 bytes
 
 ## Integration Points
 
@@ -87,24 +137,25 @@ void BALANCE_NN_DataVisualizer(void);
 
 ### Data Flow
 1. Get ball position from sensor
-2. Calculate error and update integral
-3. Normalize input data
-4. Run neural network inference
-5. Denormalize output
-6. Apply platform control
+2. Calculate error, integral, and derivative terms
+3. Normalize input data using integer scaling
+4. Run neural network inference through 3 layers
+5. Denormalize output using integer scaling
+6. Apply platform control using ABC coordinates
 
 ## Testing Status
 
 ### Unit Tests
-- ✅ Input data preparation
-- ✅ Neural network inference
-- ✅ Output denormalization
-- ✅ Platform control limits
+- ✅ Input data preparation with error-based inputs
+- ✅ Neural network inference with 3-layer architecture
+- ✅ Output denormalization with integer math
+- ✅ Platform control limits for ABC coordinates
 
 ### Integration Tests
 - ✅ End-to-end control loop simulation
 - ✅ Memory usage validation
 - ✅ Performance profiling
+- ✅ Command portal testing and validation
 
 ## Current Limitations
 
@@ -114,12 +165,12 @@ void BALANCE_NN_DataVisualizer(void);
 - **Impact**: Control performance will be suboptimal
 
 ### Architecture
-- **Status**: Fixed 8-16-2 structure
+- **Status**: Fixed 6-12-12-3 structure
 - **Action Required**: Optimize based on training results
 - **Impact**: May not capture all control dynamics
 
 ### Quantization
-- **Status**: Manual scaling
+- **Status**: Integer scaling with fixed shifts
 - **Action Required**: Implement automatic quantization
 - **Impact**: May lose precision in extreme cases
 
@@ -147,6 +198,7 @@ void BALANCE_NN_DataVisualizer(void);
 - ✅ Integration with existing codebase
 - ✅ Real-time performance requirements met
 - ✅ Memory usage within constraints
+- ✅ Comprehensive test commands implemented
 
 ### Performance
 - ⏳ Control accuracy (requires trained weights)
@@ -159,10 +211,10 @@ void BALANCE_NN_DataVisualizer(void);
 The neural network implementation is **functionally complete** and ready for integration. The core architecture, CMSIS-NN integration, and real-time control features are all implemented. The main remaining task is to train the network with real data to replace the placeholder weights.
 
 The implementation follows best practices for embedded neural networks:
-- Fixed-point arithmetic for efficiency
+- Integer arithmetic for efficiency (no floating point)
 - Optimized memory usage
 - Real-time capable processing
-- Robust error handling
+- Robust error handling with PID-like inputs
 - Comprehensive documentation
 
-This provides a solid foundation for the ball balancing control system using machine learning techniques. 
+This provides a solid foundation for the ball balancing control system using machine learning techniques with error-based inputs and direct ABC coordinate control. 
