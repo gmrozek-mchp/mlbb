@@ -68,6 +68,7 @@
                 "src/balance/balance_nn.h",
                 "src/balance/balance_nn.c",
                 "src/balance/balance_nn_weights.h",
+                "src/balance/balance_nn_weights.c",
                 "src/balance/balance_pid.h",
                 "src/balance/balance_pid.c",
                 "src/command/command.h",

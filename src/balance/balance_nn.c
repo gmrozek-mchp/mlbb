@@ -4,12 +4,10 @@
 
 #include "balance_nn.h"
 
-#include <stdlib.h>
-#include <string.h>
 #include <math.h>
-#include <stdio.h>
+#include <string.h>
 
-#include "ball/ball.h"
+#include "arm_math_types.h"
 #include "platform/platform.h"
 #include "command/command.h"
 
@@ -20,35 +18,34 @@
 // Section: Macro Declarations
 // ******************************************************************
 
-// Q15 format constants
-#define Q15_SCALE 32767.0f
-#define Q15_MAX 32767
-#define Q15_MIN -32768
-
-// Neural network input/output indices
+// Neural network input/output indices for ball balancing control
 #define NN_INPUT_ERROR_X 0
-#define NN_INPUT_ERROR_Y 1
-#define NN_INPUT_ERROR_X_PREV2 2
-#define NN_INPUT_ERROR_Y_PREV2 3
-#define NN_INPUT_ERROR_X_PREV4 4
-#define NN_INPUT_ERROR_Y_PREV4 5
+#define NN_INPUT_ERROR_SUM_X 1
+#define NN_INPUT_ERROR_DELTA_X 2
 
-#define NN_OUTPUT_PLATFORM_A 0
-#define NN_OUTPUT_PLATFORM_B 1
-#define NN_OUTPUT_PLATFORM_C 2
+#define NN_OUTPUT_PLATFORM_X 0
 
-// Note: Integral thresholds removed as they are no longer used
+// Error history parameters
+#define NN_ERROR_HISTORY_SIZE (10)
+#define NN_ERROR_DELTA_FILTER_SIZE  (5)
+
+// Integral anti-windup parameters
+#define NN_NEAR_TARGET_THRESHOLD (512)  // Q15 units - ball is "near" target
+#define NN_SLOW_MOVEMENT_THRESHOLD (5) // Q15 units - ball is moving "slow"
+
 
 // ******************************************************************
 // Section: Data Type Definitions
 // ******************************************************************
 
 typedef struct {
-    float error_x_prev[10];  // Previous error values for historical inputs
-    float error_y_prev[10];
-    uint8_t error_index;
-    bool initialized;
+    float error_history_x[NN_ERROR_HISTORY_SIZE];  // Previous error values for historical inputs
+    float error_history_y[NN_ERROR_HISTORY_SIZE];
+    float error_sum_x;
+    float error_sum_y;
+    uint8_t error_history_index;
 } balance_nn_state_t;
+
 
 // ******************************************************************
 // Section: Private Variables
@@ -60,11 +57,8 @@ static balance_nn_state_t nn_state;
 // Section: Private Function Declarations
 // ******************************************************************
 
-static void nn_calculate_derivative_4(float* derivative_x, float* derivative_y);
-static void nn_update_integral(float error_x, float error_y);
 static void nn_prepare_inputs(q15_t target_x, q15_t target_y, q15_t ball_x, q15_t ball_y, float* inputs);
-static q15_t float_to_q15(float value);
-static float q15_to_float(q15_t value);
+
 
 // ******************************************************************
 // Section: Command Portal Function Declarations
@@ -72,22 +66,14 @@ static float q15_to_float(q15_t value);
 
 static void BALANCE_NN_TestCommand(void);
 
+
 // ******************************************************************
 // Section: Public Functions
 // ******************************************************************
 
 void BALANCE_NN_Initialize( void )
 {
-    // Initialize neural network state
-    memset(&nn_state, 0, sizeof(nn_state));
-    nn_state.initialized = true;
-    
-    // Initialize error history
-    nn_state.error_index = 0;
-    for (int i = 0; i < 10; i++) {
-        nn_state.error_x_prev[i] = 0;
-        nn_state.error_y_prev[i] = 0;
-    }
+    BALANCE_NN_Reset();
 
     CMD_RegisterCommand("nntest", BALANCE_NN_TestCommand);
 }
@@ -96,21 +82,20 @@ void BALANCE_NN_Reset( void )
 {
     // Reset neural network state
     memset(&nn_state, 0, sizeof(nn_state));
-    nn_state.initialized = true;
     
     // Reset error history
-    nn_state.error_index = 0;
-    for (int i = 0; i < 10; i++) {
-        nn_state.error_x_prev[i] = 0;
-        nn_state.error_y_prev[i] = 0;
+    nn_state.error_history_index = 0;
+    for (int i = 0; i < NN_ERROR_HISTORY_SIZE; i++) {
+        nn_state.error_history_x[i] = 0;
+        nn_state.error_history_y[i] = 0;
     }
 }
 
 void BALANCE_NN_Run( q15_t target_x, q15_t target_y, bool ball_detected, q15_t ball_x, q15_t ball_y )
 {
-    if (!ball_detected || !nn_state.initialized) {
-        // No ball detected or not initialized, set platforms to neutral
-        PLATFORM_Position_ABC_Set(0, 0, 0);
+    if ( !ball_detected ) {
+        // No ball detected, set platforms to neutral
+        PLATFORM_Position_XY_Set(0, 0 );
         return;
     }
     
@@ -122,132 +107,74 @@ void BALANCE_NN_Run( q15_t target_x, q15_t target_y, bool ball_detected, q15_t b
     float nn_outputs[NN_OUTPUT_SIZE];
     nn_forward(nn_inputs, nn_outputs);
     
-    // Convert outputs back to Q15 and apply to platforms
-    q15_t platform_a = float_to_q15(nn_outputs[NN_OUTPUT_PLATFORM_A]);
-    q15_t platform_b = float_to_q15(nn_outputs[NN_OUTPUT_PLATFORM_B]);
-    q15_t platform_c = float_to_q15(nn_outputs[NN_OUTPUT_PLATFORM_C]);
-    
-    PLATFORM_Position_ABC_Set(platform_a, platform_b, platform_c);
+    // Apply output to platform X control
+    float platform_x = nn_outputs[NN_OUTPUT_PLATFORM_X];
+
+    if( platform_x > Q15_MAX )
+    {
+        platform_x = Q15_MAX;
+    }
+    else if( platform_x < Q15_MIN )
+    {
+        platform_x = Q15_MIN;
+    }
+
+    PLATFORM_Position_XY_Set( (q15_t)platform_x, 0 );
 }
 
 void BALANCE_NN_DataVisualizer( q15_t target_x, q15_t target_y, bool ball_detected, q15_t ball_x, q15_t ball_y )
 {
-    if (!ball_detected) {
-        return;
-    }
-    
-    // Calculate current errors (convert to float)
-    float error_x = q15_to_float(target_x) - q15_to_float(ball_x);
-    float error_y = q15_to_float(target_y) - q15_to_float(ball_y);
-    
-    // Update error history for neural network inputs
-    nn_state.error_x_prev[nn_state.error_index] = error_x;
-    nn_state.error_y_prev[nn_state.error_index] = error_y;
-    nn_state.error_index = (nn_state.error_index + 1) % 10;
-    
-    // Note: Data visualization removed for now - can be implemented later
-    // with proper command interface functions
+    // TODO: Implement data visualization
 }
 
 // ******************************************************************
 // Section: Private Functions
 // ******************************************************************
 
-// Note: Integral and derivative functions removed as they are no longer used
-// The neural network now uses historical error values directly
-
 static void nn_prepare_inputs(q15_t target_x, q15_t target_y, q15_t ball_x, q15_t ball_y, float* inputs)
 {
-    // Calculate current errors (convert from Q15 to float)
-    float error_x = q15_to_float(target_x) - q15_to_float(ball_x);
-    float error_y = q15_to_float(target_y) - q15_to_float(ball_y);
+    // Calculate current error
+    float error_x = (float)target_x - (float)ball_x;
+    float error_y = (float)target_y - (float)ball_y;
     
-    // Get historical error values
-    int idx_prev2 = (nn_state.error_index - 2 + 10) % 10;
-    int idx_prev4 = (nn_state.error_index - 4 + 10) % 10;
+    // Calculate error delta (derivative-like term)
+    int idx_prev = (nn_state.error_history_index - NN_ERROR_DELTA_FILTER_SIZE + NN_ERROR_HISTORY_SIZE) % NN_ERROR_HISTORY_SIZE;
+    float error_prev_x = nn_state.error_history_x[idx_prev];
+    float error_prev_y = nn_state.error_history_y[idx_prev];
+
+    float error_delta_x = error_x - error_prev_x;
+    float error_delta_y = error_y - error_prev_y;
+
+    // Integral anti-windup logic: only update integral when ball is near target and moving slow
+    bool near_target = (fabs(error_x) < NN_NEAR_TARGET_THRESHOLD) && (fabs(error_y) < NN_NEAR_TARGET_THRESHOLD);
+    bool moving_slow = (fabs(error_delta_x) < NN_SLOW_MOVEMENT_THRESHOLD) && (fabs(error_delta_y) < NN_SLOW_MOVEMENT_THRESHOLD);
+    bool integral_enabled = near_target && moving_slow;
     
-    float error_x_prev2 = (idx_prev2 >= 0) ? nn_state.error_x_prev[idx_prev2] : 0.0f;
-    float error_y_prev2 = (idx_prev2 >= 0) ? nn_state.error_y_prev[idx_prev2] : 0.0f;
-    float error_x_prev4 = (idx_prev4 >= 0) ? nn_state.error_x_prev[idx_prev4] : 0.0f;
-    float error_y_prev4 = (idx_prev4 >= 0) ? nn_state.error_y_prev[idx_prev4] : 0.0f;
+    // calculate the integral term (only update when conditions are met)
+    if( integral_enabled )
+    {
+        nn_state.error_sum_x += error_x;
+        nn_state.error_sum_y += error_y;
+    }
     
-    // Prepare neural network inputs (all in float)
+    nn_state.error_history_x[nn_state.error_history_index] = error_x;
+    nn_state.error_history_y[nn_state.error_history_index] = error_y;
+    nn_state.error_history_index = (nn_state.error_history_index + 1) % NN_ERROR_HISTORY_SIZE;
+    
+    // Prepare neural network inputs for ball balancing control
     inputs[NN_INPUT_ERROR_X] = error_x;
-    inputs[NN_INPUT_ERROR_Y] = error_y;
-    inputs[NN_INPUT_ERROR_X_PREV2] = error_x_prev2;
-    inputs[NN_INPUT_ERROR_Y_PREV2] = error_y_prev2;
-    inputs[NN_INPUT_ERROR_X_PREV4] = error_x_prev4;
-    inputs[NN_INPUT_ERROR_Y_PREV4] = error_y_prev4;
+    inputs[NN_INPUT_ERROR_SUM_X] = nn_state.error_sum_x;
+    inputs[NN_INPUT_ERROR_DELTA_X] = error_delta_x;
 }
 
-static q15_t float_to_q15(float value)
-{
-    // Convert float to Q15 format with clamping
-    int32_t q15_value = (int32_t)(value * Q15_SCALE);
-    
-    // Clamp to Q15 range
-    if (q15_value > Q15_MAX) q15_value = Q15_MAX;
-    if (q15_value < Q15_MIN) q15_value = Q15_MIN;
-    
-    return (q15_t)q15_value;
-}
-
-static float q15_to_float(q15_t value)
-{
-    // Convert Q15 format to float
-    return (float)value / Q15_SCALE;
-}
 
 // ******************************************************************
 // Section: Neural Network Implementation
 // ******************************************************************
 
-float nn_relu(float x) {
-    return (x > 0.0f) ? x : 0.0f;
-}
+// Neural network implementation is now in balance_nn_weights.c
+// This includes nn_forward() and nn_relu() functions
 
-// Matrix-vector multiplication with floating point arithmetic
-static void nn_matmul_float(const float* weights, const float* input, float* output, uint32_t rows, uint32_t cols) {
-    for (uint32_t i = 0; i < rows; i++) {
-        float sum = 0.0f;
-        for (uint32_t j = 0; j < cols; j++) {
-            sum += weights[i * cols + j] * input[j];
-        }
-        output[i] = sum;
-    }
-}
-
-void nn_forward(const float* input, float* output) {
-    float input_processed[NN_INPUT_SIZE];
-    float hidden[NN_HIDDEN_SIZE];
-
-    // Layer 0: Input processing (dense_input layer) - 6x6
-    for (int i = 0; i < NN_INPUT_SIZE; i++) {
-        float sum = 0.0f;
-        for (int j = 0; j < NN_INPUT_SIZE; j++) {
-            sum += INPUT_WEIGHTS[j * NN_INPUT_SIZE + i] * input[j];  // Transposed weights
-        }
-        input_processed[i] = sum + INPUT_BIAS[i];
-    }
-
-    // Layer 1: Processed Input to Hidden (6x24)
-    for (int i = 0; i < NN_HIDDEN_SIZE; i++) {
-        float sum = 0.0f;
-        for (int j = 0; j < NN_INPUT_SIZE; j++) {
-            sum += HIDDEN_WEIGHTS[j * NN_HIDDEN_SIZE + i] * input_processed[j];  // Transposed weights
-        }
-        hidden[i] = sum + HIDDEN_BIAS[i];  // Linear activation (no ReLU)
-    }
-
-    // Layer 2: Hidden to Output (24x3)
-    for (int i = 0; i < NN_OUTPUT_SIZE; i++) {
-        float sum = 0.0f;
-        for (int j = 0; j < NN_HIDDEN_SIZE; j++) {
-            sum += OUTPUT_WEIGHTS[j * NN_OUTPUT_SIZE + i] * hidden[j];  // Transposed weights
-        }
-        output[i] = sum + OUTPUT_BIAS[i];
-    }
-}
 
 // ******************************************************************
 // Section: Command Portal Functions
@@ -260,12 +187,9 @@ static void BALANCE_NN_TestCommand(void)
     
     // Test case 1: Small errors with historical values
     float test_inputs_1[NN_INPUT_SIZE] = {
-        0.01f,   // error_x
-        0.02f,   // error_y
-        0.008f,  // error_x_prev2
-        0.015f,  // error_y_prev2
-        0.005f,  // error_x_prev4
-        0.012f   // error_y_prev4
+        10.0f,   // error_x
+        100.0f,   // error_sum_x
+        0.0f,  // error_delta_x
     };
     
     float test_outputs_1[NN_OUTPUT_SIZE];
@@ -278,38 +202,21 @@ static void BALANCE_NN_TestCommand(void)
     CMD_PrintFloat(test_inputs_1[1], 4, true);
     CMD_PrintString(", ", true);
     CMD_PrintFloat(test_inputs_1[2], 4, true);
-    CMD_PrintString(", ", true);
-    CMD_PrintFloat(test_inputs_1[3], 4, true);
-    CMD_PrintString(", ", true);
-    CMD_PrintFloat(test_inputs_1[4], 4, true);
-    CMD_PrintString(", ", true);
-    CMD_PrintFloat(test_inputs_1[5], 4, true);
     CMD_PrintString("]\r\n", true);
     
     CMD_PrintString("  Output (float): [", true);
     CMD_PrintFloat(test_outputs_1[0], 4, true);
-    CMD_PrintString(", ", true);
-    CMD_PrintFloat(test_outputs_1[1], 4, true);
-    CMD_PrintString(", ", true);
-    CMD_PrintFloat(test_outputs_1[2], 4, true);
     CMD_PrintString("]\r\n", true);
     
     CMD_PrintString("  Output (Q15): [", true);
-    CMD_PrintDecimal_S32(float_to_q15(test_outputs_1[0]), false, 0, true);
-    CMD_PrintString(", ", true);
-    CMD_PrintDecimal_S32(float_to_q15(test_outputs_1[1]), false, 0, true);
-    CMD_PrintString(", ", true);
-    CMD_PrintDecimal_S32(float_to_q15(test_outputs_1[2]), false, 0, true);
+    CMD_PrintFloat(test_outputs_1[0], 4, true);
     CMD_PrintString("]\r\n", true);
     
     // Test case 2: Large errors with historical values
     float test_inputs_2[NN_INPUT_SIZE] = {
-        0.5f,    // error_x
-        -0.3f,   // error_y
-        0.4f,    // error_x_prev2
-        -0.25f,  // error_y_prev2
-        0.3f,    // error_x_prev4
-        -0.2f    // error_y_prev4
+        1000.0f,    // error_x
+        0.0f,   // error_sum_x
+        50.0f,    // error_delta_x
     };
     
     float test_outputs_2[NN_OUTPUT_SIZE];
@@ -322,96 +229,57 @@ static void BALANCE_NN_TestCommand(void)
     CMD_PrintFloat(test_inputs_2[1], 4, true);
     CMD_PrintString(", ", true);
     CMD_PrintFloat(test_inputs_2[2], 4, true);
-    CMD_PrintString(", ", true);
-    CMD_PrintFloat(test_inputs_2[3], 4, true);
-    CMD_PrintString(", ", true);
-    CMD_PrintFloat(test_inputs_2[4], 4, true);
-    CMD_PrintString(", ", true);
-    CMD_PrintFloat(test_inputs_2[5], 4, true);
     CMD_PrintString("]\r\n", true);
     
     CMD_PrintString("  Output (float): [", true);
     CMD_PrintFloat(test_outputs_2[0], 4, true);
-    CMD_PrintString(", ", true);
-    CMD_PrintFloat(test_outputs_2[1], 4, true);
-    CMD_PrintString(", ", true);
-    CMD_PrintFloat(test_outputs_2[2], 4, true);
     CMD_PrintString("]\r\n", true);
     
     CMD_PrintString("  Output (Q15): [", true);
-    CMD_PrintDecimal_S32(float_to_q15(test_outputs_2[0]), false, 0, true);
-    CMD_PrintString(", ", true);
-    CMD_PrintDecimal_S32(float_to_q15(test_outputs_2[1]), false, 0, true);
-    CMD_PrintString(", ", true);
-    CMD_PrintDecimal_S32(float_to_q15(test_outputs_2[2]), false, 0, true);
+    CMD_PrintFloat(test_outputs_2[0], 4, true);
     CMD_PrintString("]\r\n", true);
     
     // Test case 3: Zero inputs
-    float test_inputs_3[NN_INPUT_SIZE] = {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f};
+    float test_inputs_3[NN_INPUT_SIZE] = {0.0f, 0.0f, 0.0f};
     float test_outputs_3[NN_OUTPUT_SIZE];
     nn_forward(test_inputs_3, test_outputs_3);
     
     CMD_PrintString("Test 3 - Zero inputs:\r\n", true);
-    CMD_PrintString("  Input (float): [0.0000, 0.0000, 0.0000, 0.0000, 0.0000, 0.0000]\r\n", true);
+    CMD_PrintString("  Input (float): [0.0000, 0.0000, 0.0000]\r\n", true);
     
     CMD_PrintString("  Output (float): [", true);
     CMD_PrintFloat(test_outputs_3[0], 4, true);
-    CMD_PrintString(", ", true);
-    CMD_PrintFloat(test_outputs_3[1], 4, true);
-    CMD_PrintString(", ", true);
-    CMD_PrintFloat(test_outputs_3[2], 4, true);
     CMD_PrintString("]\r\n", true);
     
     CMD_PrintString("  Output (Q15): [", true);
-    CMD_PrintDecimal_S32(float_to_q15(test_outputs_3[0]), false, 0, true);
-    CMD_PrintString(", ", true);
-    CMD_PrintDecimal_S32(float_to_q15(test_outputs_3[1]), false, 0, true);
-    CMD_PrintString(", ", true);
-    CMD_PrintDecimal_S32(float_to_q15(test_outputs_3[2]), false, 0, true);
+    CMD_PrintFloat(test_outputs_3[0], 4, true);
     CMD_PrintString("]\r\n", true);
     
     // Test case 4: Maximum values
     float test_inputs_4[NN_INPUT_SIZE] = {
-        1.0f,    // error_x
-        1.0f,    // error_y
-        0.8f,    // error_x_prev2
-        0.9f,    // error_y_prev2
-        0.6f,    // error_x_prev4
-        0.7f     // error_y_prev4
+        -1000.0f,    // error_x
+        -1000.0f,   // error_sum_x
+        -30.0f,    // error_delta_x
     };
     
     float test_outputs_4[NN_OUTPUT_SIZE];
     nn_forward(test_inputs_4, test_outputs_4);
     
-    CMD_PrintString("Test 4 - Maximum values:\r\n", true);
+    CMD_PrintString("Test 4 - Negative values:\r\n", true);
     CMD_PrintString("  Input (float): [", true);
     CMD_PrintFloat(test_inputs_4[0], 4, true);
     CMD_PrintString(", ", true);
     CMD_PrintFloat(test_inputs_4[1], 4, true);
     CMD_PrintString(", ", true);
     CMD_PrintFloat(test_inputs_4[2], 4, true);
-    CMD_PrintString(", ", true);
-    CMD_PrintFloat(test_inputs_4[3], 4, true);
-    CMD_PrintString(", ", true);
-    CMD_PrintFloat(test_inputs_4[4], 4, true);
-    CMD_PrintString(", ", true);
-    CMD_PrintFloat(test_inputs_4[5], 4, true);
     CMD_PrintString("]\r\n", true);
     
     CMD_PrintString("  Output (float): [", true);
     CMD_PrintFloat(test_outputs_4[0], 4, true);
-    CMD_PrintString(", ", true);
-    CMD_PrintFloat(test_outputs_4[1], 4, true);
-    CMD_PrintString(", ", true);
-    CMD_PrintFloat(test_outputs_4[2], 4, true);
     CMD_PrintString("]\r\n", true);
     
     CMD_PrintString("  Output (Q15): [", true);
-    CMD_PrintDecimal_S32(float_to_q15(test_outputs_4[0]), false, 0, true);
-    CMD_PrintString(", ", true);
-    CMD_PrintDecimal_S32(float_to_q15(test_outputs_4[1]), false, 0, true);
-    CMD_PrintString(", ", true);
-    CMD_PrintDecimal_S32(float_to_q15(test_outputs_4[2]), false, 0, true);
+    CMD_PrintFloat(test_outputs_4[0], 4, true);
     CMD_PrintString("]\r\n", true);
     
     CMD_PrintString("=== Test Complete ===\r\n", true);
