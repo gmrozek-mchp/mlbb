@@ -80,6 +80,14 @@ def parse_human01_csv(input_file, output_file):
                 target_y = int(row['target_y'])
                 error_y = target_y - ball_y
                 
+                # Filter out problematic data points:
+                # Skip rows where absolute error is high (>500) but platform control is low (<1000)
+                platform_x = abs(int(row['platform_x']))
+                platform_y = abs(int(row['platform_y']))
+                
+                if (abs(error_x) > 500 and platform_x < 1000) or (abs(error_y) > 500 and platform_y < 1000):
+                    continue
+                
                 # Calculate running integrals with conditions
                 # Only update integral when abs(error) < 512 and derivative_4 < 5
                 derivative_4_x = 0
