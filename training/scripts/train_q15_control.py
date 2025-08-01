@@ -190,7 +190,7 @@ def main():
     """Main function to train the neural network"""
     
     # Define input and output columns
-    input_cols = ['error_x', 'error_x_prev2', 'error_x_prev4']
+    input_cols = ['error_x', 'error_sum_x', 'error_delta_x']
     output_cols = ['platform_x']
     
     print("Neural Network Training for Ball Balancing Control")
@@ -199,7 +199,7 @@ def main():
     print(f"Output columns: {output_cols}")
     
     # Find all CSV files in the processed directory
-    csv_files = glob.glob("../processed/human??_with_error.csv")
+    csv_files = glob.glob("../rawdata/pid??.csv")
     print(f"\nFound {len(csv_files)} CSV files:")
     for file in csv_files:
         print(f"  {os.path.basename(file)}")
