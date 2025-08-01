@@ -1,6 +1,6 @@
 // ******************************************************************
 // Neural Network Implementation
-// Generated from trained Keras model for Ball Balancing Control
+// Generated from trained Keras model
 // ******************************************************************
 
 #include "balance_nn_weights.h"

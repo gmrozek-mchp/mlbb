@@ -77,7 +77,7 @@ def generate_c_header(output_file, layer_info):
         # Network architecture - handle the actual model structure
         f.write("// Network Architecture\n")
         f.write(f"#define NN_INPUT_SIZE {layer_info[0]['input_size']}\n")
-        f.write(f"#define NN_INPUT_OUTPUT_SIZE {layer_info[0]['output_size']}\n")  # First layer is 3->3
+        f.write(f"#define NN_INPUT_OUTPUT_SIZE {layer_info[0]['output_size']}\n")  # First layer is 6->6
         f.write(f"#define NN_HIDDEN1_SIZE {layer_info[1]['output_size']}\n")
         f.write(f"#define NN_HIDDEN2_SIZE {layer_info[2]['output_size']}\n")
         f.write(f"#define NN_HIDDEN3_SIZE {layer_info[3]['output_size']}\n")
@@ -139,11 +139,12 @@ def generate_c_implementation(output_file):
         f.write("}\n\n")
         
         f.write("// Matrix-vector multiplication with floating point arithmetic\n")
+        f.write("// Keras uses: output = input @ weights + bias\n")
         f.write("static void nn_matmul_float(const float* weights, const float* input, float* output, uint32_t rows, uint32_t cols) {\n")
         f.write("    for (uint32_t i = 0; i < rows; i++) {\n")
         f.write("        float sum = 0.0f;\n")
         f.write("        for (uint32_t j = 0; j < cols; j++) {\n")
-        f.write("            sum += weights[i * cols + j] * input[j];\n")
+        f.write("            sum += input[j] * weights[j * rows + i];  // Transposed weights for input @ weights\n")
         f.write("        }\n")
         f.write("        output[i] = sum;\n")
         f.write("    }\n")
