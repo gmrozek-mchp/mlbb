@@ -457,12 +457,20 @@ void CMD_PrintDecimal_S32( int32_t value, bool zero_blank, uint8_t width, bool b
 	if( is_negative )
 	{
 		value = -value;  // Make positive for processing
+        if( width > 0 )
+        {
+            width--;
+        }
 	}
 
 	// Print minus sign if negative
 	if( is_negative )
 	{
 		(void)CMD_PrintString( "-", block );
+        if( width > 0 )
+        {
+            width--;
+        }
 	}
 
 	// Call the unsigned version to print the absolute value
