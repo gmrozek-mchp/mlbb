@@ -41,7 +41,7 @@ def create_neural_network():
         layers.Dense(6, activation='linear', input_shape=(6,), name='dense_input'),
         
         # Hidden layer (24 nodes)
-        layers.Dense(24, activation='relu', name='dense_hidden'),
+        layers.Dense(24, activation='linear', name='dense_hidden'),
 
         # Output layer (3 nodes) - platform control signals
         layers.Dense(3, activation='linear', name='dense_output')

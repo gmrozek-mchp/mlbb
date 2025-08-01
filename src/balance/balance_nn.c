@@ -230,16 +230,16 @@ void nn_forward(const float* input, float* output) {
         input_processed[i] = sum + INPUT_BIAS[i];
     }
 
-    // Layer 1: Processed Input to Hidden (6x12)
+    // Layer 1: Processed Input to Hidden (6x24)
     for (int i = 0; i < NN_HIDDEN_SIZE; i++) {
         float sum = 0.0f;
         for (int j = 0; j < NN_INPUT_SIZE; j++) {
             sum += HIDDEN_WEIGHTS[j * NN_HIDDEN_SIZE + i] * input_processed[j];  // Transposed weights
         }
-        hidden[i] = nn_relu(sum + HIDDEN_BIAS[i]);
+        hidden[i] = sum + HIDDEN_BIAS[i];  // Linear activation (no ReLU)
     }
 
-    // Layer 2: Hidden to Output (12x3)
+    // Layer 2: Hidden to Output (24x3)
     for (int i = 0; i < NN_OUTPUT_SIZE; i++) {
         float sum = 0.0f;
         for (int j = 0; j < NN_HIDDEN_SIZE; j++) {
