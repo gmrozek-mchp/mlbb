@@ -164,7 +164,6 @@ void BALANCE_PID_DataVisualizer( q15_t target_x, q15_t target_y, bool ball_detec
 {
     static uint8_t dv_data[42];
 
-    platform_xy_t platform_xy = PLATFORM_Position_XY_Get();
     platform_abc_t platform_abc = PLATFORM_Position_ABC_Get();
 
     dv_data[0] = 0x03;
@@ -202,14 +201,14 @@ void BALANCE_PID_DataVisualizer( q15_t target_x, q15_t target_y, bool ball_detec
     dv_data[25] = (uint8_t)pid_y.error_delta;
     dv_data[26] = (uint8_t)(pid_y.error_delta >> 8);
 
-    dv_data[27] = (uint8_t)platform_xy.x;
-    dv_data[28] = (uint8_t)(platform_xy.x >> 8);
-    dv_data[29] = (uint8_t)(platform_xy.x >> 16);
-    dv_data[30] = (uint8_t)(platform_xy.x >> 24);
-    dv_data[31] = (uint8_t)platform_xy.y;
-    dv_data[32] = (uint8_t)(platform_xy.y >> 8);
-    dv_data[33] = (uint8_t)(platform_xy.y >> 16);
-    dv_data[34] = (uint8_t)(platform_xy.y >> 24);
+    dv_data[27] = (uint8_t)pid_x.output;
+    dv_data[28] = (uint8_t)(pid_x.output >> 8);
+    dv_data[29] = (uint8_t)(pid_x.output >> 16);
+    dv_data[30] = (uint8_t)(pid_x.output >> 24);
+    dv_data[31] = (uint8_t)pid_y.output;
+    dv_data[32] = (uint8_t)(pid_y.output >> 8);
+    dv_data[33] = (uint8_t)(pid_y.output >> 16);
+    dv_data[34] = (uint8_t)(pid_y.output >> 24);
 
     dv_data[35] = (uint8_t)platform_abc.a;
     dv_data[36] = (uint8_t)(platform_abc.a >> 8);
