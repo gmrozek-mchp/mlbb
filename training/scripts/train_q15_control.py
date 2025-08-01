@@ -10,13 +10,13 @@ import os
 def create_neural_network():
     """
     Create a neural network for ball balancing control:
-    - 6 inputs: error_x, error_sum_x, error_delta_x, error_y, error_sum_y, error_delta_y
-    - 3 outputs: platform_a, platform_b, platform_c
+    - 4 inputs: error_x, error_delta_x, error_y, error_delta_y
+    - 2 outputs: platform_x, platform_y
     """
     
     model = keras.Sequential([
-        # Input layer (6 nodes)
-        layers.Dense(6, activation='linear', input_shape=(6,), name='dense_input'),
+        # Input layer (4 nodes)
+        layers.Dense(4, activation='linear', input_shape=(4,), name='dense_input'),
         
         # First hidden layer (24 nodes)
         layers.Dense(24, activation='relu', name='dense_hidden1'),
@@ -27,8 +27,8 @@ def create_neural_network():
         # Third hidden layer (8 nodes)
         layers.Dense(8, activation='relu', name='dense_hidden3'),
 
-        # Output layer (3 nodes) - platform control signals
-        layers.Dense(3, activation='linear', name='dense_output')
+        # Output layer (2 nodes) - platform control signals
+        layers.Dense(2, activation='linear', name='dense_output')
     ])
     
     # Compile the model
@@ -189,8 +189,8 @@ def main():
     """Main function to train the neural network"""
     
     # Define input and output columns
-    input_cols = ['error_x', 'error_sum_x', 'error_delta_x', 'error_y', 'error_sum_y', 'error_delta_y']
-    output_cols = ['platform_a', 'platform_b', 'platform_c']
+    input_cols = ['error_x', 'error_delta_x', 'error_y', 'error_delta_y']
+    output_cols = ['platform_x', 'platform_y']
     
     print("Neural Network Training for Ball Balancing Control")
     print("=" * 60)
@@ -198,7 +198,7 @@ def main():
     print(f"Output columns: {output_cols}")
     
     # Find all CSV files in the processed directory
-    csv_files = glob.glob("../rawdata/pid??.csv")
+    csv_files = glob.glob("../rawdata/human*.csv")
     print(f"\nFound {len(csv_files)} CSV files:")
     for file in csv_files:
         print(f"  {os.path.basename(file)}")

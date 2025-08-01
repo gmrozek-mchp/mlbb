@@ -20,15 +20,12 @@
 
 // Neural network input/output indices for ball balancing control
 #define NN_INPUT_ERROR_X 0
-#define NN_INPUT_ERROR_SUM_X 1
-#define NN_INPUT_ERROR_DELTA_X 2
-#define NN_INPUT_ERROR_Y 3
-#define NN_INPUT_ERROR_SUM_Y 4
-#define NN_INPUT_ERROR_DELTA_Y 5
+#define NN_INPUT_ERROR_DELTA_X 1
+#define NN_INPUT_ERROR_Y 2
+#define NN_INPUT_ERROR_DELTA_Y 3
 
-#define NN_OUTPUT_PLATFORM_A 0
-#define NN_OUTPUT_PLATFORM_B 1
-#define NN_OUTPUT_PLATFORM_C 2
+#define NN_OUTPUT_PLATFORM_X 0
+#define NN_OUTPUT_PLATFORM_Y 1
 
 // Error history parameters
 #define NN_ERROR_HISTORY_SIZE (10)
@@ -113,38 +110,28 @@ void BALANCE_NN_Run( q15_t target_x, q15_t target_y, bool ball_detected, q15_t b
     nn_forward(nn_inputs, nn_outputs);
     
     // Apply output to platform X control
-    float platform_a = nn_outputs[NN_OUTPUT_PLATFORM_A];
-    float platform_b = nn_outputs[NN_OUTPUT_PLATFORM_B];
-    float platform_c = nn_outputs[NN_OUTPUT_PLATFORM_C];
+    float platform_x = nn_outputs[NN_OUTPUT_PLATFORM_X];
+    float platform_y = nn_outputs[NN_OUTPUT_PLATFORM_Y];
 
-    if( platform_a > Q15_MAX )
+    if( platform_x > Q15_MAX )
     {
-        platform_a = Q15_MAX;
+        platform_x = Q15_MAX;
     }
-    else if( platform_a < Q15_MIN )
+    else if( platform_x < Q15_MIN )
     {
-        platform_a = Q15_MIN;
-    }
-
-    if( platform_b > Q15_MAX )
-    {
-        platform_b = Q15_MAX;
-    }
-    else if( platform_b < Q15_MIN )
-    {
-        platform_b = Q15_MIN;
+        platform_x = Q15_MIN;
     }
 
-    if( platform_c > Q15_MAX )
+    if( platform_y > Q15_MAX )
     {
-        platform_c = Q15_MAX;
+        platform_y = Q15_MAX;
     }
-    else if( platform_c < Q15_MIN )
+    else if( platform_y < Q15_MIN )
     {
-        platform_c = Q15_MIN;
+        platform_y = Q15_MIN;
     }
-
-    PLATFORM_Position_ABC_Set( (q15_t)platform_a, (q15_t)platform_b, (q15_t)platform_c );
+    
+    PLATFORM_Position_XY_Set( (q15_t)platform_x, (q15_t)platform_y );
 }
 
 void BALANCE_NN_DataVisualizer( q15_t target_x, q15_t target_y, bool ball_detected, q15_t ball_x, q15_t ball_y )
@@ -188,10 +175,8 @@ static void nn_prepare_inputs(q15_t target_x, q15_t target_y, q15_t ball_x, q15_
     
     // Prepare neural network inputs for ball balancing control
     inputs[NN_INPUT_ERROR_X] = error_x;
-    inputs[NN_INPUT_ERROR_SUM_X] = nn_state.error_sum_x;
     inputs[NN_INPUT_ERROR_DELTA_X] = error_delta_x;
     inputs[NN_INPUT_ERROR_Y] = error_y;
-    inputs[NN_INPUT_ERROR_SUM_Y] = nn_state.error_sum_y;
     inputs[NN_INPUT_ERROR_DELTA_Y] = error_delta_y;
 }
 
