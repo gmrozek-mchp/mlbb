@@ -39,23 +39,32 @@
 
 typedef struct
 {
-        uint16_t Kp;            /**< The proportional gain. */
-        uint16_t Ki;            /**< The integral gain. */
-        uint16_t Kd;            /**< The derivative gain. */
+    uint16_t Kp;            /**< The proportional gain. */
+    uint16_t Ki;            /**< The integral gain. */
+    uint16_t Kd;            /**< The derivative gain. */
 
-        uint16_t output_scale_factor;
-        
-        size_t delta_filter_size;
+    uint16_t output_scale_factor;
+    
+    size_t delta_filter_size;
 
-        q31_t error_history[BALANCE_PID_HISTORY_DEPTH];
-        size_t error_history_index;
+    q31_t error_history[BALANCE_PID_HISTORY_DEPTH];
+    size_t error_history_index;
 
-        q31_t error_sum;
-        
-        // Integral anti-windup parameters
-        q15_t target;           /**< Current target position */
-        q15_t actual;           /**< Current actual position */
-        bool integral_enabled;   /**< Whether integral term should be updated */
+    // Integral anti-windup parameters
+    q15_t target;           /**< Current target position */
+    q15_t actual;           /**< Current actual position */
+
+    bool integral_enabled;   /**< Whether integral term should be updated */
+
+    q31_t error;
+    q31_t error_sum;
+    q31_t error_delta;
+
+    q31_t p_term;
+    q31_t i_term;
+    q31_t d_term;
+
+    q31_t output;
 } pid_q15_t;
 
 
@@ -139,7 +148,7 @@ void BALANCE_PID_Run( q15_t target_x, q15_t target_y, bool ball_detected, q15_t 
 
 void BALANCE_PID_DataVisualizer( q15_t target_x, q15_t target_y, bool ball_detected, q15_t ball_x, q15_t ball_y )
 {
-    static uint8_t dv_data[22];
+    static uint8_t dv_data[38];
 
     platform_xy_t platform_xy = PLATFORM_Position_XY_Get();
     platform_abc_t platform_abc = PLATFORM_Position_ABC_Get();
@@ -160,19 +169,38 @@ void BALANCE_PID_DataVisualizer( q15_t target_x, q15_t target_y, bool ball_detec
     dv_data[9] = (uint8_t)ball_y;
     dv_data[10] = (uint8_t)(ball_y >> 8);
 
-    dv_data[11] = (uint8_t)platform_xy.x;
-    dv_data[12] = (uint8_t)(platform_xy.x >> 8);
-    dv_data[13] = (uint8_t)platform_xy.y;
-    dv_data[14] = (uint8_t)(platform_xy.y >> 8);
+    dv_data[11] = (uint8_t)pid_x.error;
+    dv_data[12] = (uint8_t)(pid_x.error >> 8);
+    dv_data[13] = (uint8_t)pid_y.error;
+    dv_data[14] = (uint8_t)(pid_y.error >> 8);
 
-    dv_data[15] = (uint8_t)platform_abc.a;
-    dv_data[16] = (uint8_t)(platform_abc.a >> 8);
-    dv_data[17] = (uint8_t)platform_abc.b;
-    dv_data[18] = (uint8_t)(platform_abc.b >> 8);
-    dv_data[19] = (uint8_t)platform_abc.c;
-    dv_data[20] = (uint8_t)(platform_abc.c >> 8);
+    dv_data[15] = (uint8_t)pid_x.error_sum;
+    dv_data[16] = (uint8_t)(pid_x.error_sum >> 8);
+    dv_data[17] = (uint8_t)(pid_x.error_sum >> 16);
+    dv_data[18] = (uint8_t)(pid_x.error_sum >> 24);
+    dv_data[19] = (uint8_t)pid_y.error_sum;
+    dv_data[20] = (uint8_t)(pid_y.error_sum >> 8);
+    dv_data[21] = (uint8_t)(pid_y.error_sum >> 16);
+    dv_data[22] = (uint8_t)(pid_y.error_sum >> 24);
 
-    dv_data[21] = ~0x03;
+    dv_data[23] = (uint8_t)pid_x.error_delta;
+    dv_data[24] = (uint8_t)(pid_x.error_delta >> 8);
+    dv_data[25] = (uint8_t)pid_y.error_delta;
+    dv_data[26] = (uint8_t)(pid_y.error_delta >> 8);
+
+    dv_data[27] = (uint8_t)platform_xy.x;
+    dv_data[28] = (uint8_t)(platform_xy.x >> 8);
+    dv_data[29] = (uint8_t)platform_xy.y;
+    dv_data[30] = (uint8_t)(platform_xy.y >> 8);
+
+    dv_data[31] = (uint8_t)platform_abc.a;
+    dv_data[32] = (uint8_t)(platform_abc.a >> 8);
+    dv_data[33] = (uint8_t)platform_abc.b;
+    dv_data[34] = (uint8_t)(platform_abc.b >> 8);
+    dv_data[35] = (uint8_t)platform_abc.c;
+    dv_data[36] = (uint8_t)(platform_abc.c >> 8);
+
+    dv_data[37] = ~0x03;
 
     CMD_PrintByteArray( dv_data, sizeof(dv_data), false );
 }
@@ -210,15 +238,10 @@ static void BALANCE_PID_Reset_Instance( pid_q15_t *pid )
 
 static q15_t BALANCE_PID_Run_Instance( pid_q15_t *pid, q15_t target, q15_t actual )
 {
-    q31_t error;
     int16_t error_delta_index;
-    q31_t error_delta;
-    q31_t p_term;
-    q31_t i_term;
-    q31_t d_term;
 
     // calculate the error
-    error = ((q31_t)target - actual);
+    pid->error = ((q31_t)target - actual);
 
     // calculate the index to use for error delta calculation
     error_delta_index = pid->error_history_index - pid->delta_filter_size;
@@ -228,28 +251,28 @@ static q15_t BALANCE_PID_Run_Instance( pid_q15_t *pid, q15_t target, q15_t actua
     }
 
     // calculate the error delta
-    error_delta = error - pid->error_history[error_delta_index];
+    pid->error_delta = pid->error - pid->error_history[error_delta_index];
 
     // calculate the proportional term
-    p_term = error * pid->Kp;
+    pid->p_term = pid->error * pid->Kp;
 
     // Integral anti-windup logic: only update integral when ball is near target and moving slow
-    bool near_target = (abs((int32_t)error) < BALANCE_PID_NEAR_TARGET_THRESHOLD);
-    bool moving_slow = (abs((int32_t)error_delta) < BALANCE_PID_SLOW_MOVEMENT_THRESHOLD);
+    bool near_target = (abs((int32_t)pid->error) < BALANCE_PID_NEAR_TARGET_THRESHOLD);
+    bool moving_slow = (abs((int32_t)pid->error_delta) < BALANCE_PID_SLOW_MOVEMENT_THRESHOLD);
     pid->integral_enabled = near_target && moving_slow;
     
     // calculate the integral term (only update when conditions are met)
     if( pid->integral_enabled )
     {
-        pid->error_sum += error;
+        pid->error_sum += pid->error;
     }
-    i_term = pid->error_sum * pid->Ki;
+    pid->i_term = pid->error_sum * pid->Ki;
 
     // calculate the derivative term
-    d_term = error_delta * pid->Kd;
+    pid->d_term = pid->error_delta * pid->Kd;
 
     // update the error history
-    pid->error_history[pid->error_history_index] = error;
+    pid->error_history[pid->error_history_index] = pid->error;
     pid->error_history_index++;
 
     // wrap the error history index
@@ -259,7 +282,7 @@ static q15_t BALANCE_PID_Run_Instance( pid_q15_t *pid, q15_t target, q15_t actua
     }
 
     // calculate the output
-    q31_t output = (p_term + i_term + d_term) / pid->output_scale_factor;
+    q31_t output = (pid->p_term + pid->i_term + pid->d_term) / pid->output_scale_factor;
 
     if( output > INT16_MAX )
     {
