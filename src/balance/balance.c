@@ -4,6 +4,7 @@
 
 #include "balance.h"
 
+#include <stdbool.h>
 #include <stdlib.h>
 
 #include "arm_math_types.h"
@@ -40,6 +41,8 @@
 #define BALANCE_NUNCHUK_DEBOUNCE_COUNT  (10)
 
 #define BALL_DETECTION_DEBOUNCE_COUNT   (100)
+
+#define BALL_FILTER_HISTORY_DEPTH (3)
 
 
 // ******************************************************************
@@ -397,7 +400,12 @@ static ball_data_t BALANCE_FilterBallPosition( void )
     static q15_t ball_delta_x = 0;
     static q15_t ball_delta_y = 0;
 
+    static q15_t ball_x_history[BALL_FILTER_HISTORY_DEPTH];
+    static q15_t ball_y_history[BALL_FILTER_HISTORY_DEPTH];
+    static uint8_t ball_history_index = 0;
+
     ball_data_t ball = BALL_Position_Get();
+    ball_data_t filtered_ball;
 
     if( ball.detected )
     {
@@ -405,14 +413,7 @@ static ball_data_t BALANCE_FilterBallPosition( void )
         ball_detected_previous = true;
         ball_debounce_count = 0;
 
-        // calculate the delta between the current and previous ball position (velocity)
-        // this is used to approximate the ball position when the ball is not detected.
-        ball_delta_x = ball.x - ball_previous_x;
-        ball_delta_y = ball.y - ball_previous_y;
-
-        // update the previous ball position
-        ball_previous_x = ball.x;
-        ball_previous_y = ball.y;
+        // CMD_PrintString( "T ", true );
     }
     else
     {
@@ -425,13 +426,7 @@ static ball_data_t BALANCE_FilterBallPosition( void )
                 // debounce counter has not expired, so continue to report the ball as detected
                 ball.detected = true;
 
-                // approximate the ball position based on the last known velocity
-                ball.x = ball_previous_x + ball_delta_x;
-                ball.y = ball_previous_y + ball_delta_y;
-
-                // update the previous ball position
-                ball_previous_x = ball.x;
-                ball_previous_y = ball.y;
+                // CMD_PrintString( "D ", true );
             }
             else
             {
@@ -441,6 +436,8 @@ static ball_data_t BALANCE_FilterBallPosition( void )
                 ball.detected = false;
                 ball.x = 0;
                 ball.y = 0;
+
+                // CMD_PrintString( "E ", true );
             }
         }
         else
@@ -449,10 +446,58 @@ static ball_data_t BALANCE_FilterBallPosition( void )
             ball.detected = false;
             ball.x = 0;
             ball.y = 0;
+
+            // CMD_PrintString( "N ", true );
         }
     }
 
-    return ball;
+    // CMD_PrintString( " X:", true );
+    // CMD_PrintDecimal_S32( (uint32_t)ball.x, true, 5, true );
+    // CMD_PrintString( " Y:", true );
+    // CMD_PrintDecimal_S32( (uint32_t)ball.y, true, 5, true );
+
+    if( ball.detected )
+    {
+        if( ball_debounce_count == 0 )
+        {
+            // calculate the delta between the current and previous ball position (velocity)
+            // this is used to approximate the ball position when the ball is not detected.
+            ball_delta_x = ball.x - ball_x_history[ball_history_index];
+            ball_delta_y = ball.y - ball_y_history[ball_history_index];
+        }
+        else
+        {
+            // approximate the ball position based on the last known velocity
+            ball.x = ball_x_history[ball_history_index] + ball_delta_x;
+            ball.y = ball_y_history[ball_history_index] + ball_delta_y;
+        }
+    }
+
+    // filter the reported ball position with a moving average
+    filtered_ball.detected = ball.detected;
+    filtered_ball.x = (ball.x + ball_x_history[ball_history_index]) / 2;
+    filtered_ball.y = (ball.y + ball_y_history[ball_history_index]) / 2;
+
+    // update the history
+    ball_x_history[ball_history_index] = ball.x;
+    ball_y_history[ball_history_index] = ball.y;
+    ball_history_index++;
+    if( ball_history_index >= BALL_FILTER_HISTORY_DEPTH)
+    {
+        ball_history_index = 0;
+    }
+
+    // CMD_PrintString( " dX:", true );
+    // CMD_PrintDecimal_S32( (uint32_t)ball_delta_x, true, 5, true );
+    // CMD_PrintString( " dY:", true );
+    // CMD_PrintDecimal_S32( (uint32_t)ball_delta_y, true, 5, true );
+    // CMD_PrintString( " fX:", true );
+    // CMD_PrintDecimal_S32( (uint32_t)filtered_ball.x, true, 5, true );
+    // CMD_PrintString( " fY:", true );
+    // CMD_PrintDecimal_S32( (uint32_t)filtered_ball.y, true, 5, true );
+    // CMD_PrintString( "\r\n", true );
+
+    return filtered_ball;
 }
 
 
