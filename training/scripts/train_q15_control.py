@@ -7,27 +7,6 @@ import matplotlib.pyplot as plt
 import glob
 import os
 
-# Q15 format constants
-Q15_SCALE = 2**15  # 2^15 for Q15 format
-Q15_MAX = 2**15 - 1  # Maximum positive value (32767)
-Q15_MIN = -2**15    # Minimum negative value (-32768)
-
-def float_to_q15(value):
-    """Convert float value to Q15 format"""
-    return np.clip(int(value * Q15_SCALE), Q15_MIN, Q15_MAX)
-
-def q15_to_float(q15_value):
-    """Convert Q15 value to float"""
-    return q15_value / Q15_SCALE
-
-def array_float_to_q15(array):
-    """Convert float array to Q15 array with clamping"""
-    return np.clip((array * Q15_SCALE).astype(np.int16), Q15_MIN, Q15_MAX)
-
-def array_q15_to_float(array):
-    """Convert Q15 array to float array"""
-    return array.astype(np.float32) / Q15_SCALE
-
 def create_neural_network():
     """
     Create a neural network for ball balancing control:
@@ -38,19 +17,25 @@ def create_neural_network():
     
     model = keras.Sequential([
         # Input layer (6 nodes)
-        layers.Dense(6, activation='linear', input_shape=(6,), name='dense_input'),
+        layers.Dense(3, activation='linear', input_shape=(3,), name='dense_input'),
         
-        # Hidden layer (24 nodes)
-        layers.Dense(24, activation='linear', name='dense_hidden'),
+        # First hidden layer (24 nodes)
+        layers.Dense(24, activation='relu', name='dense_hidden1'),
+        
+        # Second hidden layer (12 nodes)
+        layers.Dense(12, activation='relu', name='dense_hidden2'),
+        
+        # Third hidden layer (8 nodes)
+        layers.Dense(8, activation='relu', name='dense_hidden3'),
 
         # Output layer (3 nodes) - platform control signals
-        layers.Dense(3, activation='linear', name='dense_output')
+        layers.Dense(1, activation='linear', name='dense_output')
     ])
     
     # Compile the model
     model.compile(
-        optimizer='adam',
-        loss='huber',  # Huber loss - robust to outliers
+        optimizer=tf.keras.optimizers.Adam(learning_rate=0.005),  # Moderate learning rate
+        loss='mae',  # Mean absolute error - best performing loss function
         metrics=['mae']  # Mean absolute error
     )
     
@@ -77,8 +62,8 @@ def load_and_preprocess_data(csv_files, input_cols, output_cols):
                 continue
             
             # Extract input and output data
-            X = df[input_cols].values
-            y = df[output_cols].values
+            X = df[input_cols].values.astype(np.float32)
+            y = df[output_cols].values.astype(np.float32)
             
             # Remove rows with NaN values
             valid_mask = ~(np.isnan(X).any(axis=1) | np.isnan(y).any(axis=1))
@@ -106,38 +91,42 @@ def load_and_preprocess_data(csv_files, input_cols, output_cols):
     print(f"Input shape: {X_combined.shape}")
     print(f"Output shape: {y_combined.shape}")
     
-    # Normalize data to Q15 format range
-    X_combined = np.clip(X_combined, Q15_MIN, Q15_MAX)
-    y_combined = np.clip(y_combined, Q15_MIN, Q15_MAX)
+    # Print data statistics
+    print(f"Input data range: [{X_combined.min():.3f}, {X_combined.max():.3f}]")
+    print(f"Output data range: [{y_combined.min():.3f}, {y_combined.max():.3f}]")
         
     # Split into train and validation
     split_idx = int(0.8 * len(X_combined))
-    X_train_q15 = X_combined[:split_idx]
-    y_train_q15 = y_combined[:split_idx]
-    X_val_q15 = X_combined[split_idx:]
-    y_val_q15 = y_combined[split_idx:]
-    
-    # Convert Q15 data to float for training
-    X_train = array_q15_to_float(X_train_q15)
-    y_train = array_q15_to_float(y_train_q15)
-    X_val = array_q15_to_float(X_val_q15)
-    y_val = array_q15_to_float(y_val_q15)
+    X_train = X_combined[:split_idx]
+    y_train = y_combined[:split_idx]
+    X_val = X_combined[split_idx:]
+    y_val = y_combined[split_idx:]
     
     return X_train, X_val, y_train, y_val
 
-def train_model(model, X_train, y_train, X_val, y_val, epochs=50):
+def train_model(model, X_train, y_train, X_val, y_val, epochs=100):
     """Train the model"""
     print("\n" + "=" * 60)
     print("TRAINING THE MODEL")
     print("=" * 60)
+    
+    # Create learning rate scheduler
+    initial_lr = 0.01
+    decay_factor = 0.95
+    min_lr = 0.0001
+    
+    def lr_schedule(epoch):
+        lr = initial_lr * (decay_factor ** epoch)
+        return max(lr, min_lr)
     
     # Train the model
     history = model.fit(
         X_train, y_train,
         validation_data=(X_val, y_val),
         epochs=epochs,
-        batch_size=32,
-        verbose=1
+        batch_size=16,  # Smaller batch size for better gradient updates
+        verbose=1,
+        callbacks=[tf.keras.callbacks.LearningRateScheduler(lr_schedule)]
     )
     
     return history
@@ -174,15 +163,11 @@ def test_model(model, X_val, y_val, input_cols, output_cols):
     print("=" * 60)
     
     # Make predictions
-    predictions_float = model.predict(X_val)
-    
-    # Convert to Q15 format
-    predictions_q15 = array_float_to_q15(predictions_float)
-    y_val_q15 = array_float_to_q15(y_val)
+    predictions = model.predict(X_val)
     
     # Calculate metrics
-    mse = np.mean((predictions_float - y_val) ** 2)
-    mae = np.mean(np.abs(predictions_float - y_val))
+    mse = np.mean((predictions - y_val) ** 2)
+    mae = np.mean(np.abs(predictions - y_val))
     
     print(f"Test MSE: {mse:.6f}")
     print(f"Test MAE: {mae:.6f}")
@@ -194,21 +179,19 @@ def test_model(model, X_val, y_val, input_cols, output_cols):
     print()
     
     for i in range(5):
-        print(f"Sample {i+1}:")
-        print(f"  Input (Q15): {array_float_to_q15(X_val[i])}")
-        print(f"  Input (float): {X_val[i]}")
-        print(f"  Predicted (Q15): {predictions_q15[i]}")
-        print(f"  Predicted (float): {predictions_float[i]}")
-        print(f"  Actual (Q15): {y_val_q15[i]}")
-        print(f"  Actual (float): {y_val[i]}")
+        j=i*500
+        print(f"Sample {j+1}:")
+        print(f"  Input: {X_val[j]}")
+        print(f"  Predicted: {predictions[j]}")
+        print(f"  Actual: {y_val[j]}")
         print()
 
 def main():
     """Main function to train the neural network"""
     
     # Define input and output columns
-    input_cols = ['error_x', 'error_y', 'error_x_prev2', 'error_y_prev2', 'error_x_prev4', 'error_y_prev4']
-    output_cols = ['platform_a', 'platform_b', 'platform_c']
+    input_cols = ['error_x', 'error_x_prev2', 'error_x_prev4']
+    output_cols = ['platform_x']
     
     print("Neural Network Training for Ball Balancing Control")
     print("=" * 60)
@@ -239,7 +222,7 @@ def main():
     model.summary()
     
     # Train the model
-    history = train_model(model, X_train, y_train, X_val, y_val, epochs=50)
+    history = train_model(model, X_train, y_train, X_val, y_val, epochs=100)
     
     # Plot training history
     plot_training_history(history)
