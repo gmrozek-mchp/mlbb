@@ -82,7 +82,7 @@ static pid_q15_t pid_y;
 
 static void BALANCE_PID_Initialize_Instance( pid_q15_t *pid );
 static void BALANCE_PID_Reset_Instance( pid_q15_t *pid );
-static q15_t BALANCE_PID_Run_Instance( pid_q15_t *pid, q15_t target, q15_t actual );
+static void BALANCE_PID_Run_Instance( pid_q15_t *pid, q15_t target, q15_t actual );
 
 
 // ******************************************************************
@@ -128,22 +128,15 @@ void BALANCE_PID_Run( q15_t target_x, q15_t target_y, bool ball_detected, q15_t 
 {
     if( ball_detected )
     {
-        // Update target and actual positions for integral anti-windup logic
-        pid_x.target = target_x;
-        pid_x.actual = ball_x;
-        pid_y.target = target_y;
-        pid_y.actual = ball_y;
-        
-        q15_t platform_x = BALANCE_PID_Run_Instance( &pid_x, target_x, ball_x );
-        q15_t platform_y = BALANCE_PID_Run_Instance( &pid_y, target_y, ball_y );
-
-        PLATFORM_Position_XY_Set( platform_x, platform_y );
+        BALANCE_PID_Run_Instance( &pid_x, target_x, ball_x );
+        BALANCE_PID_Run_Instance( &pid_y, target_y, ball_y );
     }
     else
     {
         BALANCE_PID_Reset();
-        PLATFORM_Position_XY_Set( 0, 0 );
     }   
+
+    PLATFORM_Position_XY_Set( pid_x.output, pid_y.output );
 }
 
 void BALANCE_PID_DataVisualizer( q15_t target_x, q15_t target_y, bool ball_detected, q15_t ball_x, q15_t ball_y )
@@ -229,6 +222,7 @@ static void BALANCE_PID_Reset_Instance( pid_q15_t *pid )
     pid->target = 0;
     pid->actual = 0;
     pid->integral_enabled = false;
+    pid->output = 0;
 
     for( size_t i = 0; i < BALANCE_PID_HISTORY_DEPTH; i++ )
     {
@@ -236,12 +230,16 @@ static void BALANCE_PID_Reset_Instance( pid_q15_t *pid )
     }
 }
 
-static q15_t BALANCE_PID_Run_Instance( pid_q15_t *pid, q15_t target, q15_t actual )
+static void BALANCE_PID_Run_Instance( pid_q15_t *pid, q15_t target, q15_t actual )
 {
     int16_t error_delta_index;
 
+    // Update target and actual positions for integral anti-windup logic
+    pid->target = target;
+    pid->actual = actual;
+
     // calculate the error
-    pid->error = ((q31_t)target - actual);
+    pid->error = ((q31_t)pid->target - pid->actual);
 
     // calculate the index to use for error delta calculation
     error_delta_index = pid->error_history_index - pid->delta_filter_size;
@@ -293,7 +291,7 @@ static q15_t BALANCE_PID_Run_Instance( pid_q15_t *pid, q15_t target, q15_t actua
         output = INT16_MIN;
     }
 
-    return (q15_t)output;
+    pid->output = (q15_t)output;
 }
 
 
