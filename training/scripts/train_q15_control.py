@@ -93,6 +93,14 @@ def load_and_preprocess_data(csv_files, input_cols, output_cols):
     # Print data statistics
     print(f"Input data range: [{X_combined.min():.3f}, {X_combined.max():.3f}]")
     print(f"Output data range: [{y_combined.min():.3f}, {y_combined.max():.3f}]")
+    
+    # Randomize the data order to improve training
+    print("Randomizing data order...")
+    indices = np.arange(len(X_combined))
+    np.random.shuffle(indices)
+    X_combined = X_combined[indices]
+    y_combined = y_combined[indices]
+    print("Data randomization completed.")
         
     # Split into train and validation
     split_idx = int(0.8 * len(X_combined))
