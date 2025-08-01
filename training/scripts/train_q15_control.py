@@ -33,7 +33,7 @@ def create_neural_network():
     
     # Compile the model
     model.compile(
-        optimizer=tf.keras.optimizers.Adam(learning_rate=0.005),  # Moderate learning rate
+        optimizer=tf.keras.optimizers.Nadam(learning_rate=0.005),  # Nadam optimizer - best performer
         loss='mae',  # Mean absolute error - best performing loss function
         metrics=['mae']  # Mean absolute error
     )
@@ -118,7 +118,7 @@ def train_model(model, X_train, y_train, X_val, y_val, epochs=100):
     print("=" * 60)
     
     # Create learning rate scheduler
-    initial_lr = 0.01
+    initial_lr = 0.01  # Moderate initial LR for stable training
     decay_factor = 0.95
     min_lr = 0.0001
     
