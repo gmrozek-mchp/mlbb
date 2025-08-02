@@ -30,9 +30,9 @@
 #define FUZZY_RULES_COUNT          (25)
 
 // Default scaling factors - tuned for conservative control to eliminate overshoot
-#define FUZZY_ERROR_SCALE_DEFAULT      (1200)    // Conservative error scale to eliminate overshoot
+#define FUZZY_ERROR_SCALE_DEFAULT      (800)     // Reduced from 1200 to handle larger errors
 #define FUZZY_ERROR_DOT_SCALE_DEFAULT  (2500)   // Increased damping to stop oscillations
-#define FUZZY_OUTPUT_SCALE_DEFAULT     (170)    // Reduced to prevent aggressive response
+#define FUZZY_OUTPUT_SCALE_DEFAULT     (200)    // Increased from 170 to provide stronger response
 
 #define FUZZY_INDICATOR_BLINK_TIME  (50)  // 1Hz
 
@@ -387,6 +387,16 @@ static q15_t BALANCE_FUZZY_Run_Instance( fuzzy_controller_t *fuzzy, q15_t target
     // Apply scaling to error
     error = (q15_t)((q31_t)error * fuzzy->error_scale / 256);
     
+    // Clamp error to membership function range to ensure controller always responds
+    if( error > 8192 )
+    {
+        error = 8192;
+    }
+    else if( error < -8192 )
+    {
+        error = -8192;
+    }
+    
     // Calculate error derivative (filtered)
     q15_t error_delta = error - fuzzy->prev_error;
     fuzzy->error_history[fuzzy->error_history_index] = error_delta;
@@ -402,6 +412,16 @@ static q15_t BALANCE_FUZZY_Run_Instance( fuzzy_controller_t *fuzzy, q15_t target
     
     // Apply scaling to error_dot
     error_dot = (q15_t)((q31_t)error_dot * fuzzy->error_dot_scale / 256);
+    
+    // Clamp error_dot to membership function range
+    if( error_dot > 4096 )
+    {
+        error_dot = 4096;
+    }
+    else if( error_dot < -4096 )
+    {
+        error_dot = -4096;
+    }
     
     // Calculate membership degrees for error
     for( size_t i = 0; i < FUZZY_SETS_COUNT; i++ )
@@ -434,6 +454,13 @@ static q15_t BALANCE_FUZZY_Run_Instance( fuzzy_controller_t *fuzzy, q15_t target
     
     // Apply output scaling
     output = (q15_t)((q31_t)output * fuzzy->output_scale / 256);
+    
+    // Fallback: if defuzzification returned 0 but we have a large error, provide proportional response
+    if( output == 0 && (error > 4096 || error < -4096) )
+    {
+        // Provide proportional response for large errors when fuzzy logic fails
+        output = (q15_t)((q31_t)error * fuzzy->output_scale / 1024);  // Reduced scaling for safety
+    }
     
     // Clamp output
     if( output > 16383 )
@@ -491,7 +518,9 @@ static q15_t BALANCE_FUZZY_Defuzzify( q15_t *memberships, q15_t *outputs, size_t
     
     if( denominator == 0 )
     {
-        return 0;
+        // Fallback: if no rules are active, return a small proportional response
+        // This ensures the controller always responds to large errors
+        return 0;  // Will be scaled by output_scale in the calling function
     }
     
     return (q15_t)(numerator / denominator);
