@@ -120,10 +120,6 @@ void BALANCE_HUMAN_Run( q15_t target_x, q15_t target_y, bool ball_detected, q15_
         BALANCE_HUMAN_Run_Instance( &human_x, target_x, ball_x );
         BALANCE_HUMAN_Run_Instance( &human_y, target_y, ball_y );
     }
-    else
-    {
-        BALANCE_HUMAN_Reset();
-    }
 
     nunchuk_data_t nunchukData = NUNCHUK_Data_Get();
 
