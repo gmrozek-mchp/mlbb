@@ -29,10 +29,10 @@
 #define FUZZY_SETS_COUNT           (5)
 #define FUZZY_RULES_COUNT          (25)
 
-// Default scaling factors - tuned for conservative control to eliminate overshoot
-#define FUZZY_ERROR_SCALE_DEFAULT      (600)     // Moderate error scale for better responsiveness
-#define FUZZY_ERROR_DOT_SCALE_DEFAULT  (3500)   // Good damping to stop oscillations
-#define FUZZY_OUTPUT_SCALE_DEFAULT     (120)    // Moderate output for better responsiveness
+// Default scaling factors - tuned for aggressive control with smart anti-overshoot
+#define FUZZY_ERROR_SCALE_DEFAULT      (800)     // More aggressive error scale
+#define FUZZY_ERROR_DOT_SCALE_DEFAULT  (3000)   // Moderate damping
+#define FUZZY_OUTPUT_SCALE_DEFAULT     (160)    // More aggressive output
 
 #define FUZZY_INDICATOR_BLINK_TIME  (50)  // 1Hz
 
@@ -459,19 +459,20 @@ static q15_t BALANCE_FUZZY_Run_Instance( fuzzy_controller_t *fuzzy, q15_t target
     q15_t adaptive_scale = fuzzy->output_scale;
     q15_t error_abs = (error < 0) ? -error : error;
     
-    // Moderately reduce output scaling for large errors to prevent overshoot
-    if( error_abs > 6144 )  // Large error
+    // Smart adaptive scaling - reduce for large errors and when approaching target
+    if( error_abs > 7168 )  // Very large error only
     {
         adaptive_scale = (q15_t)((q31_t)adaptive_scale * 2 / 3);  // 33% reduction
     }
-    else if( error_abs > 4096 )  // Medium error
+    else if( error_abs > 5120 )  // Large error
     {
         adaptive_scale = (q15_t)((q31_t)adaptive_scale * 5 / 6);  // 17% reduction
     }
-    else if( error_abs > 2048 )  // Small error
+    else if( error_abs > 2048 )  // Medium error - add some reduction to prevent overshoot
     {
         adaptive_scale = (q15_t)((q31_t)adaptive_scale * 7 / 8);  // 12.5% reduction
     }
+    // No reduction for small errors - allow aggressive response
     
     output = (q15_t)((q31_t)output * adaptive_scale / 256);
     
@@ -479,7 +480,7 @@ static q15_t BALANCE_FUZZY_Run_Instance( fuzzy_controller_t *fuzzy, q15_t target
     if( output == 0 && (error > 4096 || error < -4096) )
     {
         // Provide moderate proportional response for large errors when fuzzy logic fails
-        output = (q15_t)((q31_t)error * fuzzy->output_scale / 2048);  // Moderate conservative scaling
+        output = (q15_t)((q31_t)error * fuzzy->output_scale / 1536);  // Moderate scaling to reduce overshoot
     }
     
     // Clamp output
@@ -492,28 +493,43 @@ static q15_t BALANCE_FUZZY_Run_Instance( fuzzy_controller_t *fuzzy, q15_t target
         output = -16384;
     }
     
-    // Rate limiting to prevent sudden large changes (anti-overshoot)
+    // Smart rate limiting - only limit when approaching target to prevent overshoot
     static q15_t prev_output = 0;
     q15_t output_delta = output - prev_output;
-    q15_t max_delta = 1536;  // Moderate maximum change per cycle for better responsiveness
+    q15_t max_delta = 1536;  // Moderate rate limit to reduce overshoot
     
-    if( output_delta > max_delta )
+    // Only apply rate limiting when error is small (approaching target)
+    if( error_abs < 1536 )  // More restrictive - only when very close to target
     {
-        output = prev_output + max_delta;
-    }
-    else if( output_delta < -max_delta )
-    {
-        output = prev_output - max_delta;
+        if( output_delta > max_delta )
+        {
+            output = prev_output + max_delta;
+        }
+        else if( output_delta < -max_delta )
+        {
+            output = prev_output - max_delta;
+        }
     }
     
     prev_output = output;
     
-    // Anti-overshoot: if error is decreasing (approaching target), reduce output
+    // Smart anti-overshoot: reduce when approaching target, more aggressive for smaller errors
     q15_t error_change = error - fuzzy->prev_error;
     if( (error > 0 && error_change < 0) || (error < 0 && error_change > 0) )
     {
-        // Error is decreasing (approaching target), reduce output to prevent overshoot
-        output = (q15_t)((q31_t)output * 5 / 6);  // 17% reduction when approaching target
+        // Reduce output when approaching target to prevent overshoot
+        if( error_abs < 2048 )  // Very close to target
+        {
+            output = (q15_t)((q31_t)output * 2 / 3);  // 33% reduction when very close
+        }
+        else if( error_abs < 4096 )  // Close to target
+        {
+            output = (q15_t)((q31_t)output * 3 / 4);  // 25% reduction when close
+        }
+        else
+        {
+            output = (q15_t)((q31_t)output * 7 / 8);  // 12.5% reduction when far from target
+        }
     }
     
     fuzzy->prev_error = error;
