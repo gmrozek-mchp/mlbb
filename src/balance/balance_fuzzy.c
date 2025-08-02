@@ -10,6 +10,8 @@
 
 #include "arm_math_types.h"
 
+#include "peripheral/port/plib_port.h"
+
 #include "command/command.h"
 #include "platform/platform.h"
 
@@ -31,6 +33,8 @@
 #define FUZZY_ERROR_SCALE_DEFAULT      (1200)    // Conservative error scale to eliminate overshoot
 #define FUZZY_ERROR_DOT_SCALE_DEFAULT  (2500)   // Increased damping to stop oscillations
 #define FUZZY_OUTPUT_SCALE_DEFAULT     (170)    // Reduced to prevent aggressive response
+
+#define FUZZY_INDICATOR_BLINK_TIME  (50)  // 1Hz
 
 
 // ******************************************************************
@@ -95,6 +99,8 @@ typedef struct {
 static fuzzy_controller_t fuzzy_x;
 static fuzzy_controller_t fuzzy_y;
 
+static uint16_t fuzzy_indicator_blink_timer;
+
 
 // ******************************************************************
 // Section: Private Function Declarations
@@ -128,6 +134,8 @@ static void BALANCE_FUZZY_CMD_Print_Debug( void );
 
 void BALANCE_FUZZY_Initialize( void )
 {
+    fuzzy_indicator_blink_timer = 0;
+
     BALANCE_FUZZY_Initialize_Instance( &fuzzy_x );
     BALANCE_FUZZY_Initialize_Instance( &fuzzy_y );
 
@@ -159,7 +167,21 @@ void BALANCE_FUZZY_Run( q15_t target_x, q15_t target_y, bool ball_detected, q15_
     {
         BALANCE_FUZZY_Reset();
         PLATFORM_Position_XY_Set( 0, 0 );
-    }   
+    }
+
+    fuzzy_indicator_blink_timer++;
+    if( fuzzy_indicator_blink_timer == FUZZY_INDICATOR_BLINK_TIME )
+    {
+        LED_MODE_NEURAL_NETWORK_Clear();
+        LED_MODE_PID_Set();
+    }
+    else if( fuzzy_indicator_blink_timer >= FUZZY_INDICATOR_BLINK_TIME * 2 )
+    {
+        LED_MODE_PID_Clear();
+        LED_MODE_NEURAL_NETWORK_Set();
+
+        fuzzy_indicator_blink_timer = 0;
+    }
 }
 
 void BALANCE_FUZZY_DataVisualizer( q15_t target_x, q15_t target_y, bool ball_detected, q15_t ball_x, q15_t ball_y )
