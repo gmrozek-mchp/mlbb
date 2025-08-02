@@ -46,6 +46,8 @@ typedef struct {
     float error_sum_x;
     float error_sum_y;
     uint8_t error_history_index;
+    q15_t output_x;
+    q15_t output_y;
 } balance_nn_state_t;
 
 
@@ -84,13 +86,6 @@ void BALANCE_NN_Reset( void )
 {
     // Reset neural network state
     memset(&nn_state, 0, sizeof(nn_state));
-    
-    // Reset error history
-    nn_state.error_history_index = 0;
-    for (int i = 0; i < NN_ERROR_HISTORY_SIZE; i++) {
-        nn_state.error_history_x[i] = 0;
-        nn_state.error_history_y[i] = 0;
-    }
 }
 
 void BALANCE_NN_Run( q15_t target_x, q15_t target_y, bool ball_detected, q15_t ball_x, q15_t ball_y )
@@ -115,28 +110,70 @@ void BALANCE_NN_Run( q15_t target_x, q15_t target_y, bool ball_detected, q15_t b
 
     if( platform_x > Q15_MAX )
     {
-        platform_x = Q15_MAX;
+        nn_state.output_x = Q15_MAX;
     }
     else if( platform_x < Q15_MIN )
     {
-        platform_x = Q15_MIN;
+        nn_state.output_x = Q15_MIN;
+    }
+    else 
+    {
+        nn_state.output_x = (q15_t)platform_x;
     }
 
     if( platform_y > Q15_MAX )
     {
-        platform_y = Q15_MAX;
+        nn_state.output_y = Q15_MAX;
     }
     else if( platform_y < Q15_MIN )
     {
-        platform_y = Q15_MIN;
+        nn_state.output_y = Q15_MIN;
     }
-    
-    PLATFORM_Position_XY_Set( (q15_t)platform_x, (q15_t)platform_y );
+    else
+    {
+        nn_state.output_y = (q15_t)platform_y;
+    }
+
+    PLATFORM_Position_XY_Set( nn_state.output_x, nn_state.output_y );
 }
 
 void BALANCE_NN_DataVisualizer( q15_t target_x, q15_t target_y, bool ball_detected, q15_t ball_x, q15_t ball_y )
 {
-    // TODO: Implement data visualization
+    static uint8_t dv_data[22];
+
+    platform_abc_t platform_abc = PLATFORM_Position_ABC_Get();
+
+    dv_data[0] = 0x03;
+
+    dv_data[1] = (uint8_t)'N';
+
+    dv_data[2] = (uint8_t)ball_detected;
+
+    dv_data[3] = (uint8_t)target_x;
+    dv_data[4] = (uint8_t)(target_x >> 8);
+    dv_data[5] = (uint8_t)target_y;
+    dv_data[6] = (uint8_t)(target_y >> 8);
+
+    dv_data[7] = (uint8_t)ball_x;
+    dv_data[8] = (uint8_t)(ball_x >> 8);
+    dv_data[9] = (uint8_t)ball_y;
+    dv_data[10] = (uint8_t)(ball_y >> 8);
+
+    dv_data[11] = (uint8_t)nn_state.output_x;
+    dv_data[12] = (uint8_t)(nn_state.output_x >> 8);
+    dv_data[13] = (uint8_t)nn_state.output_y;
+    dv_data[14] = (uint8_t)(nn_state.output_y >> 8);
+
+    dv_data[15] = (uint8_t)platform_abc.a;
+    dv_data[16] = (uint8_t)(platform_abc.a >> 8);
+    dv_data[17] = (uint8_t)platform_abc.b;
+    dv_data[18] = (uint8_t)(platform_abc.b >> 8);
+    dv_data[19] = (uint8_t)platform_abc.c;
+    dv_data[20] = (uint8_t)(platform_abc.c >> 8);
+
+    dv_data[21] = ~0x03;
+
+    CMD_PrintByteArray( dv_data, sizeof(dv_data), false );
 }
 
 // ******************************************************************
