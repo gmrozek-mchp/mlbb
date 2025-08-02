@@ -9,23 +9,21 @@ import os
 
 def create_neural_network():
     """
-    Create a neural network for ball balancing control:
+    Create a simplified neural network for ball balancing control:
     - 4 inputs: error_x, error_delta_x, error_y, error_delta_y
     - 2 outputs: platform_x, platform_y
+    - 2 hidden layers: 12 nodes, then 6 nodes
     """
     
     model = keras.Sequential([
         # Input layer (4 nodes)
         layers.Dense(4, activation='linear', input_shape=(4,), name='dense_input'),
         
-        # First hidden layer (24 nodes)
-        layers.Dense(24, activation='relu', name='dense_hidden1'),
+        # First hidden layer (12 nodes)
+        layers.Dense(12, activation='relu', name='dense_hidden1'),
         
-        # Second hidden layer (12 nodes)
-        layers.Dense(12, activation='relu', name='dense_hidden2'),
-        
-        # Third hidden layer (8 nodes)
-        layers.Dense(8, activation='relu', name='dense_hidden3'),
+        # Second hidden layer (6 nodes)
+        layers.Dense(6, activation='relu', name='dense_hidden2'),
 
         # Output layer (2 nodes) - platform control signals
         layers.Dense(2, activation='linear', name='dense_output')

@@ -77,11 +77,20 @@ def generate_c_header(output_file, layer_info):
         # Network architecture - handle the actual model structure
         f.write("// Network Architecture\n")
         f.write(f"#define NN_INPUT_SIZE {layer_info[0]['input_size']}\n")
-        f.write(f"#define NN_INPUT_OUTPUT_SIZE {layer_info[0]['output_size']}\n")  # First layer is 6->6
-        f.write(f"#define NN_HIDDEN1_SIZE {layer_info[1]['output_size']}\n")
-        f.write(f"#define NN_HIDDEN2_SIZE {layer_info[2]['output_size']}\n")
-        f.write(f"#define NN_HIDDEN3_SIZE {layer_info[3]['output_size']}\n")
-        f.write(f"#define NN_OUTPUT_SIZE {layer_info[4]['output_size']}\n\n")
+        # Handle different model architectures
+        if len(layer_info) == 5:  # 3-layer model (4->4->24->12->8->2)
+            f.write(f"#define NN_INPUT_OUTPUT_SIZE {layer_info[0]['output_size']}\n")
+            f.write(f"#define NN_HIDDEN1_SIZE {layer_info[1]['output_size']}\n")
+            f.write(f"#define NN_HIDDEN2_SIZE {layer_info[2]['output_size']}\n")
+            f.write(f"#define NN_HIDDEN3_SIZE {layer_info[3]['output_size']}\n")
+            f.write(f"#define NN_OUTPUT_SIZE {layer_info[4]['output_size']}\n\n")
+        elif len(layer_info) == 4:  # 2-layer model (4->4->12->6->2)
+            f.write(f"#define NN_INPUT_OUTPUT_SIZE {layer_info[0]['output_size']}\n")
+            f.write(f"#define NN_HIDDEN1_SIZE {layer_info[1]['output_size']}\n")
+            f.write(f"#define NN_HIDDEN2_SIZE {layer_info[2]['output_size']}\n")
+            f.write(f"#define NN_OUTPUT_SIZE {layer_info[3]['output_size']}\n\n")
+        else:
+            raise ValueError(f"Unsupported model architecture with {len(layer_info)} layers")
         
         # Generate weights and biases for each layer
         for i, layer in enumerate(layer_info):
@@ -154,7 +163,6 @@ def generate_c_implementation(output_file):
         f.write("    float input_output[NN_INPUT_OUTPUT_SIZE];\n")
         f.write("    float hidden1[NN_HIDDEN1_SIZE];\n")
         f.write("    float hidden2[NN_HIDDEN2_SIZE];\n")
-        f.write("    float hidden3[NN_HIDDEN3_SIZE];\n")
         f.write("    float temp_output[NN_HIDDEN1_SIZE];\n\n")
         
         f.write("    // Layer 1: Input to Input_Output (linear activation)\n")
@@ -175,14 +183,8 @@ def generate_c_implementation(output_file):
         f.write("        hidden2[i] = nn_relu(temp_output[i] + HIDDEN2_BIAS[i]);\n")
         f.write("    }\n\n")
         
-        f.write("    // Layer 4: Hidden2 to Hidden3 (relu activation)\n")
-        f.write("    nn_matmul_float(HIDDEN3_WEIGHTS, hidden2, temp_output, NN_HIDDEN3_SIZE, NN_HIDDEN2_SIZE);\n")
-        f.write("    for (int i = 0; i < NN_HIDDEN3_SIZE; i++) {\n")
-        f.write("        hidden3[i] = nn_relu(temp_output[i] + HIDDEN3_BIAS[i]);\n")
-        f.write("    }\n\n")
-        
-        f.write("    // Layer 5: Hidden3 to Output (linear activation)\n")
-        f.write("    nn_matmul_float(OUTPUT_WEIGHTS, hidden3, output, NN_OUTPUT_SIZE, NN_HIDDEN3_SIZE);\n")
+        f.write("    // Layer 4: Hidden2 to Output (linear activation)\n")
+        f.write("    nn_matmul_float(OUTPUT_WEIGHTS, hidden2, output, NN_OUTPUT_SIZE, NN_HIDDEN2_SIZE);\n")
         f.write("    for (int i = 0; i < NN_OUTPUT_SIZE; i++) {\n")
         f.write("        output[i] = output[i] + OUTPUT_BIAS[i];\n")
         f.write("    }\n")
