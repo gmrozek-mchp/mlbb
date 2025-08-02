@@ -29,10 +29,10 @@
 #define FUZZY_SETS_COUNT           (5)
 #define FUZZY_RULES_COUNT          (25)
 
-// Default scaling factors - tuned for aggressive control with smart anti-overshoot
-#define FUZZY_ERROR_SCALE_DEFAULT      (800)     // More aggressive error scale
-#define FUZZY_ERROR_DOT_SCALE_DEFAULT  (3000)   // Moderate damping
-#define FUZZY_OUTPUT_SCALE_DEFAULT     (160)    // More aggressive output
+// Default scaling factors - tuned for conservative control to eliminate overshoot
+#define FUZZY_ERROR_SCALE_DEFAULT      (600)     // Moderate error scale for better responsiveness
+#define FUZZY_ERROR_DOT_SCALE_DEFAULT  (3500)   // Good damping to stop oscillations
+#define FUZZY_OUTPUT_SCALE_DEFAULT     (120)    // Moderate output for better responsiveness
 
 #define FUZZY_INDICATOR_BLINK_TIME  (50)  // 1Hz
 
@@ -459,28 +459,19 @@ static q15_t BALANCE_FUZZY_Run_Instance( fuzzy_controller_t *fuzzy, q15_t target
     q15_t adaptive_scale = fuzzy->output_scale;
     q15_t error_abs = (error < 0) ? -error : error;
     
-    // Progressive adaptive scaling - start reducing output when further away from target
-    if( error_abs > 7168 )  // Very large error
+    // Moderately reduce output scaling for large errors to prevent overshoot
+    if( error_abs > 6144 )  // Large error
     {
         adaptive_scale = (q15_t)((q31_t)adaptive_scale * 2 / 3);  // 33% reduction
     }
-    else if( error_abs > 5120 )  // Large error
+    else if( error_abs > 4096 )  // Medium error
     {
         adaptive_scale = (q15_t)((q31_t)adaptive_scale * 5 / 6);  // 17% reduction
     }
-    else if( error_abs > 4096 )  // Medium-large error
+    else if( error_abs > 2048 )  // Small error
     {
         adaptive_scale = (q15_t)((q31_t)adaptive_scale * 7 / 8);  // 12.5% reduction
     }
-    else if( error_abs > 2048 )  // Medium error
-    {
-        adaptive_scale = (q15_t)((q31_t)adaptive_scale * 15 / 16);  // 6.25% reduction
-    }
-    else if( error_abs > 1024 )  // Small error
-    {
-        adaptive_scale = (q15_t)((q31_t)adaptive_scale * 31 / 32);  // 3.125% reduction
-    }
-    // No reduction for very small errors - allow precise control
     
     output = (q15_t)((q31_t)output * adaptive_scale / 256);
     
@@ -488,7 +479,7 @@ static q15_t BALANCE_FUZZY_Run_Instance( fuzzy_controller_t *fuzzy, q15_t target
     if( output == 0 && (error > 4096 || error < -4096) )
     {
         // Provide moderate proportional response for large errors when fuzzy logic fails
-        output = (q15_t)((q31_t)error * fuzzy->output_scale / 1536);  // Moderate scaling to reduce overshoot
+        output = (q15_t)((q31_t)error * fuzzy->output_scale / 2048);  // Moderate conservative scaling
     }
     
     // Clamp output
@@ -501,42 +492,11 @@ static q15_t BALANCE_FUZZY_Run_Instance( fuzzy_controller_t *fuzzy, q15_t target
         output = -16384;
     }
     
-    // Stable progressive rate limiting - gentle near target, tight for larger errors
+    // Rate limiting to prevent sudden large changes (anti-overshoot)
     static q15_t prev_output = 0;
     q15_t output_delta = output - prev_output;
-    q15_t max_delta;
+    q15_t max_delta = 1536;  // Moderate maximum change per cycle for better responsiveness
     
-    // Progressive rate limiting - gentle near target, tight for larger errors
-    if( error_abs < 128 )  // Very close to target - gentle for stability
-    {
-        max_delta = 1024;  // Gentle control for stability
-    }
-    else if( error_abs < 256 )  // Close to target
-    {
-        max_delta = 768;   // Moderate control
-    }
-    else if( error_abs < 512 )  // Medium distance
-    {
-        max_delta = 512;   // Tight control
-    }
-    else if( error_abs < 1024 )  // Far from target
-    {
-        max_delta = 1024;  // Moderate control
-    }
-    else if( error_abs < 2048 )  // Very far from target
-    {
-        max_delta = 1280;  // Loose control
-    }
-    else if( error_abs < 4096 )  // Extremely far from target
-    {
-        max_delta = 1536;  // Very loose control
-    }
-    else  // Maximum distance from target
-    {
-        max_delta = 2048;  // Maximum loose control - allow aggressive response
-    }
-    
-    // Apply rate limiting based on distance
     if( output_delta > max_delta )
     {
         output = prev_output + max_delta;
@@ -548,180 +508,13 @@ static q15_t BALANCE_FUZZY_Run_Instance( fuzzy_controller_t *fuzzy, q15_t target
     
     prev_output = output;
     
-    // Early predictive braking: apply brakes sooner and more aggressively
+    // Anti-overshoot: if error is decreasing (approaching target), reduce output
     q15_t error_change = error - fuzzy->prev_error;
-    q15_t error_velocity = error_change;  // Rate of approach to target
-    
-    // Apply braking when approaching target (error and error_velocity have opposite signs)
-    if( (error > 0 && error_velocity < 0) || (error < 0 && error_velocity > 0) )
+    if( (error > 0 && error_change < 0) || (error < 0 && error_change > 0) )
     {
-        // Calculate braking force based on distance and velocity - start braking sooner
-        q15_t braking_force = 0;
-        
-        if( error_abs < 512 )  // Very close to target
-        {
-            // Maximum braking when very close
-            braking_force = (q15_t)((q31_t)error_velocity * 7 / 8);  // 87.5% of velocity as braking
-        }
-        else if( error_abs < 1024 )  // Close to target
-        {
-            // Strong braking when close
-            braking_force = (q15_t)((q31_t)error_velocity * 3 / 4);  // 75% of velocity as braking
-        }
-        else if( error_abs < 2048 )  // Medium distance
-        {
-            // Moderate braking when medium distance
-            braking_force = (q15_t)((q31_t)error_velocity * 1 / 2);  // 50% of velocity as braking
-        }
-        else if( error_abs < 4096 )  // Far from target
-        {
-            // Light braking when far
-            braking_force = (q15_t)((q31_t)error_velocity * 1 / 4);  // 25% of velocity as braking
-        }
-        else if( error_abs < 6144 )  // Very far from target
-        {
-            // Very light braking when very far
-            braking_force = (q15_t)((q31_t)error_velocity * 1 / 8);  // 12.5% of velocity as braking
-        }
-        else  // Extremely far from target
-        {
-            // Minimal braking when extremely far
-            braking_force = (q15_t)((q31_t)error_velocity * 1 / 16);  // 6.25% of velocity as braking
-        }
-        
-        // Apply braking force - allow reversal for proper braking
-        if( output > 0 )
-        {
-            output = output - braking_force;
-            // Allow reversal for proper braking - don't clamp to 0
-        }
-        else if( output < 0 )
-        {
-            output = output + braking_force;
-            // Allow reversal for proper braking - don't clamp to 0
-        }
+        // Error is decreasing (approaching target), reduce output to prevent overshoot
+        output = (q15_t)((q31_t)output * 5 / 6);  // 17% reduction when approaching target
     }
-    
-    // Stable aggressive early predictive reverse control - strong brakes early, gentle near target
-    // Apply reverse control when moving toward target (error and velocity have same sign)
-    if( (error > 0 && error_velocity > 0) || (error < 0 && error_velocity < 0) )
-    {
-        // Apply reverse control - strong early, gentle near target
-        q15_t reverse_control = 0;
-        
-        if( error_abs < 128 )  // Very close to target - gentle control for stability
-        {
-            // Gentle reverse control when very close for stability
-            reverse_control = (q15_t)((q31_t)error * 1 / 4);  // 25% of error as reverse control
-        }
-        else if( error_abs < 256 )  // Close to target - moderate control
-        {
-            // Moderate reverse control when close
-            reverse_control = (q15_t)((q31_t)error * 1 / 3);  // 33% of error as reverse control
-        }
-        else if( error_abs < 512 )  // Medium distance
-        {
-            // Strong reverse control when medium distance
-            reverse_control = (q15_t)((q31_t)error * 1 / 2);  // 50% of error as reverse control
-        }
-        else if( error_abs < 1024 )  // Far from target
-        {
-            // Very strong reverse control when far
-            reverse_control = (q15_t)((q31_t)error * 2 / 3);  // 67% of error as reverse control
-        }
-        else if( error_abs < 2048 )  // Very far from target
-        {
-            // Strong reverse control when very far
-            reverse_control = (q15_t)((q31_t)error * 1 / 2);  // 50% of error as reverse control
-        }
-        else if( error_abs < 4096 )  // Extremely far from target
-        {
-            // Moderate reverse control when extremely far
-            reverse_control = (q15_t)((q31_t)error * 1 / 3);  // 33% of error as reverse control
-        }
-        else if( error_abs < 6144 )  // Maximum distance from target
-        {
-            // Light reverse control when maximum distance
-            reverse_control = (q15_t)((q31_t)error * 1 / 4);  // 25% of error as reverse control
-        }
-        else  // Very maximum distance from target
-        {
-            // Minimal reverse control when very maximum distance
-            reverse_control = (q15_t)((q31_t)error * 1 / 8);  // 12.5% of error as reverse control
-        }
-        
-        // Apply reverse control in opposite direction of error
-        if( error > 0 )
-        {
-            output = output - reverse_control;  // Apply negative control for positive error
-        }
-        else
-        {
-            output = output + reverse_control;  // Apply positive control for negative error
-        }
-    }
-    
-    // Stable velocity-based reverse control - gentle near target, strong for fast approaches
-    q15_t error_velocity_abs = (error_change < 0) ? -error_change : error_change;
-    
-    // Apply reverse control when moving toward target - gentle near target
-    if( (error > 0 && error_change > 0) || (error < 0 && error_change < 0) )
-    {
-        q15_t velocity_reverse_control = 0;
-        
-        // Only apply velocity-based reverse control if not very close to target
-        if( error_abs > 128 )  // Not very close to target
-        {
-            if( error_velocity_abs > 512 )  // Fast approach
-            {
-                velocity_reverse_control = (q15_t)((q31_t)error_velocity_abs * 1 / 3);  // 33% of velocity as reverse control
-            }
-            else if( error_velocity_abs > 256 )  // Medium approach speed
-            {
-                velocity_reverse_control = (q15_t)((q31_t)error_velocity_abs * 1 / 6);  // 17% of velocity as reverse control
-            }
-            else if( error_velocity_abs > 128 )  // Slow approach speed
-            {
-                velocity_reverse_control = (q15_t)((q31_t)error_velocity_abs * 1 / 12);  // 8.3% of velocity as reverse control
-            }
-            else if( error_velocity_abs > 64 )  // Very slow approach speed
-            {
-                velocity_reverse_control = (q15_t)((q31_t)error_velocity_abs * 1 / 24);  // 4.2% of velocity as reverse control
-            }
-            
-            // Apply velocity-based reverse control in opposite direction of movement
-            if( error > 0 && error_change > 0 )  // Moving toward positive target
-            {
-                output = output - velocity_reverse_control;  // Apply negative control
-            }
-            else if( error < 0 && error_change < 0 )  // Moving toward negative target
-            {
-                output = output + velocity_reverse_control;  // Apply positive control
-            }
-        }
-    }
-    
-    // Stable velocity-based scaling - gentle near target, moderate for fast approaches
-    if( error_abs > 128 )  // Not very close to target
-    {
-        if( error_velocity_abs > 256 )  // Fast approach
-        {
-            output = (q15_t)((q31_t)output * 1 / 2);  // 50% reduction for fast approach
-        }
-        else if( error_velocity_abs > 128 )  // Medium approach speed
-        {
-            output = (q15_t)((q31_t)output * 2 / 3);  // 33% reduction for medium approach
-        }
-        else if( error_velocity_abs > 64 )  // Slow approach speed
-        {
-            output = (q15_t)((q31_t)output * 3 / 4);  // 25% reduction for slow approach
-        }
-        else if( error_velocity_abs > 32 )  // Very slow approach speed
-        {
-            output = (q15_t)((q31_t)output * 7 / 8);  // 12.5% reduction for very slow approach
-        }
-    }
-    // No scaling when very close to target for stability
     
     fuzzy->prev_error = error;
     
