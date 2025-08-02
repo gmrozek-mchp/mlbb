@@ -67,6 +67,28 @@ def load_and_preprocess_data(csv_files, input_cols, output_cols):
             X = X[valid_mask]
             y = y[valid_mask]
             
+            # Filter out rows where absolute error is high (>500) and platform control is low (<1000)
+            # This removes potentially problematic samples where large errors have small control responses
+            error_mask = np.ones(len(X), dtype=bool)
+            for i in range(len(X)):
+                error_x_abs = abs(X[i][0])  # error_x
+                error_y_abs = abs(X[i][2])  # error_y
+                platform_x_abs = abs(y[i][0])  # platform_x
+                platform_y_abs = abs(y[i][1])  # platform_y
+                
+                # Remove if either error is >500 and corresponding platform control is <1000
+                if ((error_x_abs > 500 and platform_x_abs < 1000) or 
+                    (error_y_abs > 500 and platform_y_abs < 1000)):
+                    error_mask[i] = False
+            
+            X = X[error_mask]
+            y = y[error_mask]
+            
+            if len(X) > 0:
+                print(f"  After filtering: {len(X)} samples (removed {len(valid_mask) - len(X)} problematic samples)")
+            else:
+                print(f"  Warning: All samples filtered out from {file_path}")
+            
             if len(X) > 0:
                 all_data.append((X, y))
                 print(f"  Loaded {len(X)} samples from {file_path}")
